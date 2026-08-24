@@ -1,24 +1,25 @@
-"""对基准测试页跑转录（多档位），产出待评分的转录结果。
+"""Run transcription on the benchmark pages (multi-tier), producing transcripts to grade.
 
-Responses API + detail=original（与生产配置一致）。
-零第三方依赖（urllib），与 providers.py 的"外部调用集中一处"哲学一致。
+Responses API + detail=original (matches the production config).
+Zero third-party dependencies (urllib), consistent with the providers.py
+philosophy of keeping all external calls in one place.
 
-前置：
-    export $(grep -v '^#' .env | xargs)        # OPENAI_API_KEY / OPENAI_VISION_MODEL / OPENAI_IMAGE_DETAIL
-    python3 bench/render_pages.py --tiers      # 先渲染多档位
+Prerequisites:
+    export $(grep -v '^#' .env | xargs)   # OPENAI_API_KEY / OPENAI_VISION_MODEL / OPENAI_IMAGE_DETAIL
+    python3 bench/render_pages.py --tiers      # render the tiers first
 
-用法：
-    python3 bench/run_bench.py --tiers                  # 全部页 × 全部档位（全量矩阵）
-    python3 bench/run_bench.py --tiers --only A3 D1     # 指定页
-    python3 bench/run_bench.py --tiers --cat pure_image # 指定类别
-    python3 bench/run_bench.py                          # 单档位（bench/out/，legacy）
+Usage:
+    python3 bench/run_bench.py --tiers                  # all pages x all tiers (full matrix)
+    python3 bench/run_bench.py --tiers --only A3 D1     # specific pages
+    python3 bench/run_bench.py --tiers --cat pure_image # specific category
+    python3 bench/run_bench.py                          # single tier (bench/out/, legacy)
 
-产物：
-    bench/out_tiers/<dpi>/<id>.transcript.md   各档位转录结果
-    bench/out_tiers/_usage.json                逐次 token 用量与耗时
-    （单档位模式产物在 bench/out/ 下，同名）
+Outputs:
+    bench/out_tiers/<dpi>/<id>.transcript.md   per-tier transcripts
+    bench/out_tiers/_usage.json                per-call token usage and timing
+    (single-tier mode writes the same filenames under bench/out/)
 
-评分：对照 bench/ground_truth.md 逐项核对，标准见 bench/pages.json 的 criteria。
+Grading: check each item against bench/ground_truth.md; criteria are in bench/pages.json.
 """
 
 import argparse
@@ -38,9 +39,10 @@ BENCH = ROOT / "bench"
 OUT = BENCH / "out"
 OUT_TIERS = BENCH / "out_tiers"
 
-PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M tokens，Sol 假设价（官方定价待核对）
+PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M tokens, assumed Sol pricing (official rates unverified)
 
-# ---- 转录 prompt v3（与 research/providers.py 逐字一致，那里是唯一真源） ----
+# ---- Transcription prompt v3 (verbatim from research/providers.py, the single source of truth;
+#      kept in Chinese because that is the exact production prompt under test) ----
 
 SYSTEM = """你是金融文档转录引擎。你的输出会成为券商研报检索系统中该页的唯一文本表示。
 
@@ -129,7 +131,7 @@ def run_one(spec, dpi, png_dir, model, detail):
         text, tin, tout = call_responses(model, detail, raw_text, png)
     except urllib.error.HTTPError as exc:
         return {"id": pid, "dpi": dpi, "error": f"HTTP {exc.code}: {exc.read().decode()[:200]}"}
-    except Exception as exc:  # 单次失败不中断整批
+    except Exception as exc:  # a single failure must not abort the batch
         return {"id": pid, "dpi": dpi, "error": str(exc)}
     (png_dir / f"{pid}.transcript.md").write_text(text, encoding="utf-8")
     m = re.search(r"HAS_VISUAL:\s*(true|false)", text, re.I)
@@ -142,19 +144,19 @@ def run_one(spec, dpi, png_dir, model, detail):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--only", nargs="*", help="只跑指定页 id，如 A3 D1")
-    ap.add_argument("--cat", help="只跑指定类别")
-    ap.add_argument("--tiers", action="store_true", help="跑 out_tiers/ 下的全部档位")
+    ap.add_argument("--only", nargs="*", help="run only these page ids, e.g. A3 D1")
+    ap.add_argument("--cat", help="run only this category")
+    ap.add_argument("--tiers", action="store_true", help="run every tier under out_tiers/")
     ap.add_argument("--model", default=os.environ.get("OPENAI_VISION_MODEL"))
     ap.add_argument("--detail", default=os.environ.get("OPENAI_IMAGE_DETAIL", "original"))
     ap.add_argument("--workers", type=int, default=4)
     args = ap.parse_args()
 
     if not os.environ.get("OPENAI_API_KEY"):
-        print("错误：未设置 OPENAI_API_KEY（export $(grep -v '^#' .env | xargs)）", file=sys.stderr)
+        print("Error: OPENAI_API_KEY not set (export $(grep -v '^#' .env | xargs))", file=sys.stderr)
         return 2
     if not args.model:
-        print("错误：未设置 OPENAI_VISION_MODEL（或用 --model 指定）", file=sys.stderr)
+        print("Error: OPENAI_VISION_MODEL not set (or pass --model)", file=sys.stderr)
         return 2
 
     pages = json.loads((BENCH / "pages.json").read_text(encoding="utf-8"))["pages"]
@@ -163,10 +165,10 @@ def main() -> int:
     if args.cat:
         pages = [p for p in pages if p["cat"] == args.cat]
     if not pages:
-        print("没有匹配的页面", file=sys.stderr)
+        print("No matching pages", file=sys.stderr)
         return 2
 
-    # 组装 (页, 档位, 图目录) 任务列表
+    # Build the (page, tier, image dir) task list
     tasks = []
     if args.tiers:
         for dpi_dir in sorted(OUT_TIERS.glob("[0-9]*")):
@@ -178,8 +180,8 @@ def main() -> int:
         tasks = [(spec, None, OUT) for spec in pages
                  if (OUT / f"{spec['id']}.png").exists()]
     if not tasks:
-        print("错误：找不到渲染图。先运行 python3 bench/render_pages.py" +
-              (" --tiers" if args.tiers else ""), file=sys.stderr)
+        print("Error: no rendered images found. Run python3 bench/render_pages.py" +
+              (" --tiers" if args.tiers else "") + " first", file=sys.stderr)
         return 2
 
     usage_log = []
@@ -198,7 +200,7 @@ def main() -> int:
 
     log_path = (OUT_TIERS if args.tiers else OUT) / "_usage.json"
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    # 按 (id, dpi) 合并进已有记录，部分重跑不清空整份日志
+    # Merge into existing records by (id, dpi) so a partial rerun doesn't wipe the whole log
     merged = {}
     if log_path.exists():
         for r in json.loads(log_path.read_text(encoding="utf-8")):
@@ -213,16 +215,16 @@ def main() -> int:
         tin = sum(r["input_tokens"] for r in done)
         tout = sum(r["output_tokens"] for r in done)
         cost = tin / 1e6 * PRICE_IN + tout / 1e6 * PRICE_OUT
-        print(f"\n{len(done)}/{len(tasks)} 次完成 | in={tin:,} out={tout:,} tokens | ~${cost:.2f}")
+        print(f"\n{len(done)}/{len(tasks)} calls done | in={tin:,} out={tout:,} tokens | ~${cost:.2f}")
         if args.tiers:
-            print("\n档位小结（in tokens 均值 / 页）：")
+            print("\nTier summary (mean input tokens / page):")
             by = {}
             for r in done:
                 by.setdefault((r["dpi"], r["cat"]), []).append(r["input_tokens"])
             for (dpi, cat), vals in sorted(by.items()):
                 print(f"  dpi={dpi:3d} {cat:14s} n={len(vals)} avg_in={sum(vals)//len(vals):6,d}")
-    print(f"\n转录结果 → {(OUT_TIERS if args.tiers else OUT)}/<dpi>/<id>.transcript.md")
-    print(f"下一步：对照 {BENCH}/ground_truth.md 评分（标准见 pages.json criteria）")
+    print(f"\nTranscripts → {(OUT_TIERS if args.tiers else OUT)}/<dpi>/<id>.transcript.md")
+    print(f"Next: grade against {BENCH}/ground_truth.md (criteria in pages.json)")
     return 0
 
 

@@ -1,29 +1,29 @@
 PY ?= .venv/bin/python
 
-venv:          ## 建本地虚拟环境（Python 3.13）
+venv:          ## Create local virtualenv (Python 3.13)
 	python3.13 -m venv .venv && .venv/bin/pip install -r requirements.txt
 
-up:            ## 起数据库与 web（Docker）
+up:            ## Start database and web (Docker)
 	docker compose up -d
 
-migrate:       ## 建表
+migrate:       ## Create tables
 	$(PY) manage.py migrate
 
-test:          ## 跑测试（纯函数测试无需 API key）
+test:          ## Run tests (pure-function tests need no API key)
 	$(PY) manage.py test research -v 2
 
-doctor:        ## 环境体检：一条命令确认整个栈就绪（零 API 成本）
+doctor:        ## Environment checkup: one command to confirm the whole stack is ready (zero API cost)
 	$(PY) manage.py doctor
 
-ingest:        ## 完整摄取（约 1 小时 / ~$$23.5，需 OPENAI_API_KEY）
+ingest:        ## Full ingest (~1 hour / ~$$23.5, requires OPENAI_API_KEY)
 	$(PY) manage.py ingest --resume
 
-render:        ## 只补渲页面 PNG（loaddata 之后用，零 API 调用）
+render:        ## Only re-render page PNGs (use after loaddata, zero API calls)
 	$(PY) manage.py ingest --render-only
 
-demo:          ## clone 后最短路径：数据库 + 迁移 + fixture + 重渲 PNG + 起服务
+demo:          ## Shortest path after clone: database + migrate + fixture + re-render PNGs + serve
 	@test -f fixtures/corpus.json.gz || \
-		(echo "fixture 随交付包提供（内含授权内容，不入公开仓库）——或用 make ingest 自建"; exit 1)
+		(echo "fixture ships with the delivery package (contains licensed content, kept out of the public repo) — or build your own with make ingest"; exit 1)
 	docker compose up -d db
 	$(PY) manage.py migrate
 	$(PY) manage.py loaddata fixtures/corpus.json.gz

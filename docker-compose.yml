@@ -20,7 +20,7 @@ services:
     command: uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --reload
     env_file:
       - path: .env
-        required: false   # 无 .env 时 db-only 路径（make demo 第一步）仍可用
+        required: false   # keeps the db-only path (first step of make demo) usable without a .env
     environment:
       DB_HOST: db
     ports:

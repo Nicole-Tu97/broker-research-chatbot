@@ -1,16 +1,17 @@
-"""渲染基准测试页为 PNG，并导出原生文本层。
+"""Render the benchmark pages to PNG and export the native text layer.
 
-用法：
-    python3 bench/render_pages.py [--dpi 150]   # 单档位 → bench/out/
-    python3 bench/render_pages.py --tiers       # 多档位矩阵 → bench/out_tiers/<dpi>/
+Usage:
+    python3 bench/render_pages.py [--dpi 150]   # single tier → bench/out/
+    python3 bench/render_pages.py --tiers       # multi-tier matrix → bench/out_tiers/<dpi>/
 
-多档位矩阵：keynote 类跑 4 档找质量下限；研报类跑 2 档验证 150 是否可降。
-文本层与 DPI 无关，只在 bench/out/ 存一份。
+Tier matrix: keynote pages run 4 tiers to find the quality floor; research-report
+pages run 2 tiers to check whether 150 can be lowered.
+The text layer is DPI-independent, so a single copy is kept in bench/out/.
 
-产物：
-    bench/out/<id>.png                单档位渲染图
-    bench/out/<id>.txt                PDF 原生文本层（可能为空，如 GTC keynote）
-    bench/out_tiers/<dpi>/<id>.png    多档位渲染图
+Outputs:
+    bench/out/<id>.png                single-tier render
+    bench/out/<id>.txt                native PDF text layer (may be empty, e.g. GTC keynote)
+    bench/out_tiers/<dpi>/<id>.png    multi-tier renders
 """
 
 import argparse
@@ -26,9 +27,11 @@ OUT = ROOT / "bench" / "out"
 OUT_TIERS = ROOT / "bench" / "out_tiers"
 CORPUS = ROOT / "case_study"
 
-# 多档位矩阵：类别 → DPI 列表
-# keynote(40×22.5″)：150 为已验证的质量上限档，52 对应"幻灯片按字高归一"的理论档
-# 研报(letter/A4)：150 为按 ~7pt 正文推导的生产档，100 测试可否再降
+# Tier matrix: category → list of DPIs
+# keynote (40×22.5″): 150 is the validated quality ceiling; 52 is the theoretical
+#   tier from normalizing slides by text height
+# reports (letter/A4): 150 is the production tier derived from ~7pt body text;
+#   100 tests whether it can go lower
 TIER_MATRIX = {
     "pure_image":    [150, 100, 72, 52],
     "vector_chart":  [150, 100],
@@ -42,7 +45,7 @@ def render_one(spec, dpi, out_dir, write_text=False):
     if not pdf_path.exists():
         raise FileNotFoundError(spec["file"])
     with pymupdf.open(pdf_path) as doc:
-        page = doc[spec["page"] - 1]  # manifest 用 1-indexed
+        page = doc[spec["page"] - 1]  # manifest is 1-indexed
         pix = page.get_pixmap(dpi=dpi)
         pix.save(out_dir / f"{spec['id']}.png")
         if write_text:
@@ -53,13 +56,13 @@ def render_one(spec, dpi, out_dir, write_text=False):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dpi", type=int, default=150)
-    ap.add_argument("--tiers", action="store_true", help="按 TIER_MATRIX 渲染全部档位")
+    ap.add_argument("--tiers", action="store_true", help="render every tier per TIER_MATRIX")
     args = ap.parse_args()
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     OUT.mkdir(parents=True, exist_ok=True)
 
-    # PyMuPDF 对损坏的 XObject 引用会写 stderr 噪声；语料中确实存在此类文件
+    # PyMuPDF writes stderr noise on broken XObject refs; the corpus does contain such files
     pymupdf.TOOLS.mupdf_display_errors(False)
 
     ok = failed = 0
@@ -69,17 +72,17 @@ def main() -> int:
             out_dir = (OUT_TIERS / str(dpi)) if args.tiers else OUT
             out_dir.mkdir(parents=True, exist_ok=True)
             try:
-                # 文本层只需一份（与 DPI 无关）
+                # Only one text layer is needed (DPI-independent)
                 w, h = render_one(spec, dpi, out_dir,
                                   write_text=not (OUT / f"{spec['id']}.txt").exists())
-            except Exception as exc:  # 单页失败不应中断整批 — 与摄取管线同一原则
+            except Exception as exc:  # one bad page must not abort the batch — same rule as ingestion
                 print(f"[FAIL] {spec['id']}@{dpi}: {exc}", file=sys.stderr)
                 failed += 1
                 continue
             print(f"[ OK ] {spec['id']:3s} {spec['cat']:14s} dpi={dpi:3d} {w:4d}x{h:<4d}")
             ok += 1
 
-    print(f"\n渲染 {ok} 张成功，{failed} 张失败")
+    print(f"\nRendered {ok} pages OK, {failed} failed")
     return 1 if failed else 0
 
 

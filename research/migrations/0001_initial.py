@@ -18,7 +18,8 @@ class Migration(migrations.Migration):
     dependencies = []
 
     operations = [
-        # pgvector 扩展（docker 镜像与本地 brew 安装均自带,此处确保幂等启用）
+        # pgvector extension (bundled with both the docker image and local brew
+        # installs; this ensures it is enabled idempotently)
         pgvector.django.VectorExtension(),
         migrations.CreateModel(
             name="Conversation",

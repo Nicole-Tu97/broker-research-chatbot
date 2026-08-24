@@ -15,7 +15,7 @@
   body { margin:0; font:15px/1.6 -apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;
          color:var(--fg); background:var(--bg); }
 
-  /* ---- header：白底 + Scotia 红顶线 ---- */
+  /* ---- header: white background + Scotia red top line ---- */
   header { background:var(--card); border-bottom:1px solid var(--line);
            border-top:4px solid var(--red); padding:16px 24px; }
   .brand { display:flex; align-items:baseline; gap:10px; max-width:920px; margin:0 auto; }
@@ -27,7 +27,7 @@
 
   main { max-width:920px; margin:0 auto; padding:24px 16px 150px; }
 
-  /* ---- 对话气泡 ---- */
+  /* ---- Chat bubbles ---- */
   .turn { margin:20px 0; }
   .q { display:flex; justify-content:flex-end; }
   .q > div { max-width:78%; background:var(--card); border:1px solid var(--line);
@@ -42,7 +42,7 @@
   .a th { background:#fafbfc; border-bottom:2px solid var(--red); font-weight:600; }
   .a tr:nth-child(even) td { background:#fcfcfd; }
 
-  /* ---- 欢迎卡 + 建议问题 ---- */
+  /* ---- Welcome card + suggested questions ---- */
   .welcome .a { border-left:3px solid var(--red); }
   .welcome .hello { font-size:16px; font-weight:700; margin:0 0 6px; }
   .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
@@ -52,14 +52,14 @@
   .chip:hover { border-color:var(--red); background:var(--red-tint); }
   .chip::before { content:"→ "; color:var(--red); font-weight:700; }
 
-  /* ---- 内嵌引用 ---- */
+  /* ---- Inline citations ---- */
   .cite-inline { color:var(--red-dark); text-decoration:none; font-size:.9em;
                  border-bottom:1px dotted var(--red); white-space:nowrap; }
   .cite-inline:hover { border-bottom-style:solid; background:var(--red-tint); }
   .src-label { margin-top:12px; font-size:11px; font-weight:700; letter-spacing:.06em;
                text-transform:uppercase; color:var(--muted); }
 
-  /* ---- 行内原页图（需求：surface the original asset）---- */
+  /* ---- Inline original-page image (requirement: surface the original asset) ---- */
   .fig { display:block; margin:12px 0; border:1px solid var(--line); border-radius:8px;
          overflow:hidden; max-width:560px; text-decoration:none; color:var(--muted);
          background:var(--card); box-shadow:var(--shadow); transition:border-color .15s; }
@@ -69,7 +69,7 @@
               border-top:1px solid var(--line); }
   .fig span::before { content:"◳ "; color:var(--red); }
 
-  /* ---- 引用芯片 ---- */
+  /* ---- Citation chips ---- */
   .cites { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
   .cite { display:flex; align-items:center; gap:7px; border:1px solid var(--line);
           border-radius:8px; padding:5px 9px; font-size:12.5px; background:var(--card);
@@ -86,7 +86,7 @@
   details.trace pre { white-space:pre-wrap; background:var(--bg); padding:10px;
                       border-radius:6px; max-height:280px; overflow:auto; }
 
-  /* ---- 输入区 ---- */
+  /* ---- Input area ---- */
   form { position:fixed; bottom:0; left:0; right:0; background:var(--card);
          border-top:1px solid var(--line); padding:14px 16px 16px;
          box-shadow:0 -4px 12px rgba(16,24,40,.04); }
@@ -109,15 +109,15 @@
   #file { display:none; }
   .hint { max-width:920px; margin:8px auto 0; color:var(--muted); font-size:11.5px; }
 
-  /* ---- 同源表格的折叠引用行 ---- */
+  /* ---- Collapsed source row for single-source tables ---- */
   .table-src { font-size:12px; color:var(--muted); margin:-4px 0 12px; }
 
-  /* ---- 流式进度状态行 ---- */
+  /* ---- Streaming progress status line ---- */
   .status { display:flex; align-items:center; gap:8px; margin-top:6px;
             color:var(--muted); font-size:13px; }
   .live:empty { display:none; }
 
-  /* ---- 加载动画 ---- */
+  /* ---- Loading animation ---- */
   .dots span { display:inline-block; width:6px; height:6px; margin-right:4px;
                border-radius:50%; background:var(--red); opacity:.35;
                animation:pulse 1.2s infinite ease-in-out; }
@@ -137,7 +137,7 @@
 </header>
 
 <main id="log">
-  <!-- 开场问候（不落库：纯前端引导，不进 Conversation.messages） -->
+  <!-- Opening greeting (not persisted: frontend-only onboarding, never enters Conversation.messages) -->
   <div class="turn welcome">
     <div class="a">
       <p class="hello">Hello — I'm your broker research assistant.</p>
@@ -177,7 +177,8 @@ const attachLabel = document.getElementById('attachlabel');
 const attach = document.getElementById('attach');
 const send = document.getElementById('send');
 
-// 极简 markdown 渲染：转义 → 表格/标题/粗体/水平线。表格是行为规则 #2 的主角。
+// Minimal markdown renderer: escape → tables/headings/bold/horizontal rules.
+// Tables are the centerpiece of behavior rule #2.
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function md(src){
   const lines = esc(src).split('\n'); const out = []; let tbl = [];
@@ -199,7 +200,8 @@ function md(src){
   flush(); return out.join('');
 }
 
-// 引用内嵌化：把答案文本里的 [Broker, date, p.N] 换成可点击的紧凑链接（✓/⚠ 随行）
+// Citation inlining: replace [Broker, date, p.N] in the answer text with compact
+// clickable links (✓/⚠ badge alongside)
 function splitCompound(text){
   return text.replace(/\[([^\[\]]+)\]/g,
     (m, inner) => inner.includes(';') ? inner.split(';').map(x => '[' + x.trim() + ']').join(' ') : m);
@@ -208,7 +210,7 @@ function inlineCitations(html, citations){
   const seen = new Map();
   citations.forEach(c => { if (!seen.has(c.citation)) seen.set(c.citation, c); });
   [...seen.entries()].sort((a,b) => b[0].length - a[0].length).forEach(([label, c]) => {
-    if (!c.document_id) return;  // unknown 引用保持纯文本
+    if (!c.document_id) return;  // unknown citations stay plain text
     const m = label.match(/^\[(.+?),\s*(\d{4}-\d{2}-\d{2}|n\.d\.),\s*p\.?\s*(\d+)\]$/);
     const short = m ? `${m[1]}, ${m[2] === 'n.d.' ? 'n.d.' : m[2].slice(5)}, p.${m[3]}` : label;
     const ok = c.status === 'grounded';
@@ -221,21 +223,25 @@ function inlineCitations(html, citations){
   return html;
 }
 
-// 需求原文："surface both the textual summary AND the original asset"——
-// 后端定位器对被引含图页做三选一判定，前端按标记把图卡片插到引用所在段落之后（最多 4 张，去重）。
+// Requirement verbatim: "surface both the textual summary AND the original asset" —
+// the backend locator makes a three-way call on each cited figure-bearing page; the
+// frontend uses those flags to insert figure cards after the paragraph containing the
+// citation (max 4, deduplicated).
 function embedFigures(container, citations){
   const seen = new Set(); let shown = 0;
   (citations||[]).forEach(c => {
     if (!c.document_id || !c.png_path || shown >= 4) return;
-    // 定位器三选一：crop=裁剪嵌入；show_page=整页嵌入（该页本身即图）；
-    // 两者皆无 = 纯文字提取页 → 不插图，引用链接足够
+    // Locator's three-way call: crop = embed a cropped region; show_page = embed the
+    // whole page (the page itself is the figure);
+    // neither = text-only extraction page → no figure, the citation link suffices
     if (!c.crop && !c.show_page) return;
     const k = c.document_id + '_' + c.page_number;
     if (seen.has(k)) return; seen.add(k);
     const fig = document.createElement('a');
     fig.className = 'fig'; fig.target = '_blank';
     fig.href = `/pdf/${c.document_id}#page=${c.page_number}`;
-    // 有裁剪框 → 只显示相关图形；无 → 整页兜底。点击始终打开原 PDF
+    // Crop box present → show only the relevant figure; absent → fall back to the
+    // whole page. Clicking always opens the original PDF
     const src = c.crop
       ? `/page-image/${c.document_id}/${c.page_number}?crop=${c.crop.x0},${c.crop.y0},${c.crop.x1},${c.crop.y1}`
       : `/page-image/${c.document_id}/${c.page_number}`;
@@ -253,17 +259,19 @@ function embedFigures(container, citations){
   });
 }
 
-// 同源表格引用折叠（用户实测反馈）：表内全部引用指向同一页时，
-// 逐行重复是噪音——摘掉格内引用，表格下方放一行 Source。多来源表格
-// （不同券商并排，规则 2/3 的主场）保持逐行引用不动。确定性 DOM 处理，不碰 prompt。
+// Single-source table citation collapsing (from user testing feedback): when every
+// citation in a table points to the same page, per-row repetition is noise — strip the
+// in-cell citations and put a single Source line below the table. Multi-source tables
+// (different brokers side by side, the home turf of rules 2/3) keep per-row citations
+// untouched. Deterministic DOM processing; the prompt is never touched.
 function dedupeTableCitations(container){
   container.querySelectorAll('table').forEach(t => {
     const anchors = [...t.querySelectorAll('a.cite-inline')];
     if (anchors.length < 2) return;
     const key = anchors[0].dataset.key;
-    if (!anchors.every(a => a.dataset.key === key)) return;  // 多来源 → 不折叠
-    const dataRows = t.querySelectorAll('tr').length - 1;    // 减表头行
-    if (anchors.length < dataRows) return;                   // 有行没引用 → 保守不动
+    if (!anchors.every(a => a.dataset.key === key)) return;  // multi-source → don't collapse
+    const dataRows = t.querySelectorAll('tr').length - 1;    // minus the header row
+    if (anchors.length < dataRows) return;                   // some rows uncited → play it safe
     const one = anchors[0].cloneNode(true);
     const badge = anchors[0].nextElementSibling &&
       anchors[0].nextElementSibling.matches('.badge-ok, .badge-warn')
@@ -281,11 +289,11 @@ function dedupeTableCitations(container){
   });
 }
 
-// 建议问题芯片：点击即发送
+// Suggested-question chips: click to send
 document.querySelectorAll('.chip').forEach(c =>
   c.addEventListener('click', () => { msg.value = c.textContent; form.requestSubmit(); }));
 
-// 附件按钮状态
+// Attach button state
 fileInput.addEventListener('change', () => {
   const f = fileInput.files[0];
   attachLabel.textContent = f ? f.name.slice(0, 18) + (f.name.length > 18 ? '…' : '') : 'Attach';
@@ -294,8 +302,9 @@ fileInput.addEventListener('change', () => {
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  // 在途守卫：Enter 与建议芯片走 requestSubmit()，不受按钮 disabled 约束——
-  // 无此守卫可并发两条流，conversation 历史会分叉（审查确认）
+  // In-flight guard: Enter and the suggestion chips go through requestSubmit(), which
+  // ignores the button's disabled state — without this guard two streams can run
+  // concurrently and the conversation history forks (confirmed in review)
   if (send.disabled) return;
   const text = msg.value.trim(); if (!text) return;
   const turn = document.createElement('div'); turn.className = 'turn';
@@ -314,13 +323,14 @@ form.addEventListener('submit', async (e) => {
   try {
     const r = await fetch('/api/chat', {method:'POST', body:fd});
     const ct = r.headers.get('content-type') || '';
-    if (ct.includes('application/json')) {   // 早期校验错误（空消息/不支持的文件类型）
+    if (ct.includes('application/json')) {   // early validation error (empty message / unsupported file type)
       const d0 = await r.json();
       turn.querySelector('.a').innerHTML = `<span class="err">${esc(d0.error || 'Unexpected response')}</span>`;
       return;
     }
 
-    // SSE 流：进度状态行 + 答案增量实时渲染；终帧到达后替换为完整后处理版本
+    // SSE stream: progress status line + live incremental answer rendering; once the
+    // final frame arrives, replace with the fully post-processed version
     const area = turn.querySelector('.a');
     area.innerHTML = `<div class="live"></div><div class="status">` +
       `<span class="dots"><span></span><span></span><span></span></span> ` +
@@ -368,7 +378,7 @@ form.addEventListener('submit', async (e) => {
     conversationId = d.conversation_id;
 
     let html = inlineCitations(md(splitCompound(d.answer)), d.citations);
-    // 底部只留去重后的缩略图 Sources 条（同一页只出现一次）
+    // Bottom keeps only the deduplicated thumbnail Sources strip (each page appears once)
     const uniq = []; const seenKeys = new Set();
     d.citations.forEach(c => {
       if (!c.document_id) return;
@@ -387,8 +397,8 @@ form.addEventListener('submit', async (e) => {
     html += `<div class="footer">$${f.cost_usd} · ${f.seconds}s · ${f.tool_calls} tool calls · ${(f.input_tokens+f.output_tokens).toLocaleString()} tokens${f.cached_tokens ? ` (${f.cached_tokens.toLocaleString()} cached)` : ''}</div>`;
     if (d.trace.length) html += `<details class="trace"><summary>Retrieval trace</summary><pre>${esc(JSON.stringify(d.trace, null, 2))}</pre></details>`;
     turn.querySelector('.a').innerHTML = html;
-    embedFigures(turn.querySelector('.a'), d.citations);   // 先插图（依赖表内锚点定位）
-    dedupeTableCitations(turn.querySelector('.a'));        // 后折叠（会移除表内锚点）
+    embedFigures(turn.querySelector('.a'), d.citations);   // insert figures first (relies on in-table anchors)
+    dedupeTableCitations(turn.querySelector('.a'));        // collapse after (removes in-table anchors)
   } catch (err) {
     turn.querySelector('.a').innerHTML = `<span class="err">${esc(String(err))}</span>`;
   } finally {
@@ -396,7 +406,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// Enter 发送、Shift+Enter 换行
+// Enter sends, Shift+Enter inserts a newline
 msg.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
 });

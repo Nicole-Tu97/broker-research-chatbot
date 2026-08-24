@@ -1,11 +1,11 @@
 {
-  "description": "转录质量基准测试集。四类共 20 页，覆盖下游四种消费方式。选页依据为 PyMuPDF 实测指标；dense_table 类按数字 token 密度选页（初版按字符数选页曾选中免责声明页——已修正）。",
+  "description": "Transcription-quality benchmark set. 20 pages in four categories covering the four downstream consumption modes. Pages picked by measured PyMuPDF metrics; dense_table pages picked by numeric-token density (v1 picked by character count and hit a disclaimer page — fixed).",
   "criteria": {
-    "number_fidelity": "转录中的数字与原页一致；错误数必须为 0（一票否决）",
-    "no_hallucination": "不得出现原页不存在的内容（一票否决）",
-    "table_structure": "行列表头对齐、数值落位正确 >= 90%",
-    "chart_answerability": "坐标轴/系列/关键值/趋势可从转录读出 >= 80%",
-    "coverage": "无整块内容静默丢失 >= 90%（有原图兜底，故权重较低）"
+    "number_fidelity": "Numbers in the transcription match the original page; error count must be 0 (auto-fail)",
+    "no_hallucination": "Nothing absent from the original page may appear (auto-fail)",
+    "table_structure": "Row/column headers aligned and values placed correctly >= 90%",
+    "chart_answerability": "Axes/series/key values/trends readable from the transcription >= 80%",
+    "coverage": "No whole block silently dropped >= 90% (original image is the fallback, so lower weight)"
   },
   "pages": [
     {
@@ -13,140 +13,140 @@
       "cat": "pure_image",
       "file": "GTC-Paris-2025-Keynote.pdf",
       "page": 1,
-      "why": "纯图，0 字符，全页单图"
+      "why": "Pure image, 0 characters, single full-page image"
     },
     {
       "id": "A2",
       "cat": "pure_image",
       "file": "GTC-Paris-2025-Keynote.pdf",
       "page": 6,
-      "why": "纯图，19 个图像对象，复合版面"
+      "why": "Pure image, 19 image objects, composite layout"
     },
     {
       "id": "A3",
       "cat": "pure_image",
       "file": "GTC-Paris-2025-Keynote.pdf",
       "page": 16,
-      "why": "纯图，17 个图像对象"
+      "why": "Pure image, 17 image objects"
     },
     {
       "id": "A4",
       "cat": "pure_image",
       "file": "GTC-Paris-2025-Keynote.pdf",
       "page": 38,
-      "why": "纯图，8 个图像对象"
+      "why": "Pure image, 8 image objects"
     },
     {
       "id": "A5",
       "cat": "pure_image",
       "file": "GTC-Paris-2025-Keynote.pdf",
       "page": 42,
-      "why": "纯图，6 个图像对象"
+      "why": "Pure image, 6 image objects"
     },
     {
       "id": "B1",
       "cat": "vector_chart",
       "file": "20250617 - BofA Global Research - Industrials Multi Industry AI - 26 pages.pdf",
       "page": 4,
-      "why": "矢量元素 666，全语料最密图表页"
+      "why": "666 vector elements, densest chart page in the corpus"
     },
     {
       "id": "B2",
       "cat": "vector_chart",
       "file": "20250915 - BofA Global Research - Industrials Multi Industry Who - 44 pages.pdf",
       "page": 33,
-      "why": "矢量元素 543；且该文档是 跨 ticker 召回测试的关键文档"
+      "why": "543 vector elements; also the key document for the cross-ticker recall test"
     },
     {
       "id": "B3",
       "cat": "vector_chart",
       "file": "20250708 - UBS Research - NVDA - NVIDIA Corp Taiwan Export - 18 pages.pdf",
       "page": 3,
-      "why": "矢量元素 435；UBS 是示例问题的主角，语料中仅此 1 篇"
+      "why": "435 vector elements; UBS stars in the sample question and this is its only report in the corpus"
     },
     {
       "id": "B4",
       "cat": "vector_chart",
       "file": "20250828 - JPMorgan Research - NVDA - Estimates Up - NVIDIA Corporation Blackwell Blackwell - 16 pages.pdf",
       "page": 10,
-      "why": "矢量元素 386 + 7 张位图，图文混排"
+      "why": "386 vector elements + 7 bitmaps, mixed text and graphics"
     },
     {
       "id": "B5",
       "cat": "vector_chart",
       "file": "20250923 - BNP Paribas Exane - NVDA - NVIDIA Open AI a - 9 pages.pdf",
       "page": 6,
-      "why": "矢量元素 358，位图与矢量共存"
+      "why": "358 vector elements, bitmaps and vectors coexist"
     },
     {
       "id": "B6",
       "cat": "vector_chart",
       "file": "20250929 - BNP Paribas Exane - NVDA -  Bluesky scenario China - 14 pages.pdf",
       "page": 9,
-      "why": "矢量元素 357，情景分析图表"
+      "why": "357 vector elements, scenario-analysis charts"
     },
     {
       "id": "C1",
       "cat": "dense_table",
       "file": "20250828 - JPMorgan Research - NVDA - Estimates Up - NVIDIA Corporation Blackwell Blackwell - 16 pages.pdf",
       "page": 7,
-      "why": "835 个数字 token，全语料数字最密页；财务模型表"
+      "why": "835 numeric tokens, numerically densest page in the corpus; financial model table"
     },
     {
       "id": "C2",
       "cat": "dense_table",
       "file": "20250708 - UBS Research - NVDA - NVIDIA Corp Taiwan Export - 18 pages.pdf",
       "page": 5,
-      "why": "643 个数字 token；UBS 财务表 + 客户水印陷阱"
+      "why": "643 numeric tokens; UBS financial table + client-watermark trap"
     },
     {
       "id": "C3",
       "cat": "dense_table",
       "file": "20250801 - BNP Paribas Exane - NVDA - Estimates Up - The AI Factory race - 39 pages.pdf",
       "page": 2,
-      "why": "10,821 字符 + 183 矢量元素，表格与图表混排"
+      "why": "10,821 characters + 183 vector elements, tables mixed with charts"
     },
     {
       "id": "C4",
       "cat": "dense_table",
       "file": "20250801 - BNP Paribas Exane - NVDA - Estimates Up - The AI Factory race - 39 pages.pdf",
       "page": 39,
-      "why": "10,746 字符，末页附表"
+      "why": "10,746 characters, appendix table on the final page"
     },
     {
       "id": "C5",
       "cat": "dense_table",
       "file": "20250617 - Barclays - NVDA - Target Up,Estimates Up - U S Semiconductors Semiconductor - 14 pages.pdf",
       "page": 5,
-      "why": "556 个数字 token；横放页（11×8.5″），同时测按页渲染与密集表"
+      "why": "556 numeric tokens; landscape page (11×8.5″), tests per-page rendering and dense tables at once"
     },
     {
       "id": "D1",
       "cat": "rating_action",
       "file": "20250617 - Barclays - NVDA - Target Up,Estimates Up - U S Semiconductors Semiconductor - 14 pages.pdf",
       "page": 1,
-      "why": "Barclays 上调目标价；直接对应 RatingAction 抽取"
+      "why": "Barclays raises price target; maps directly to RatingAction extraction"
     },
     {
       "id": "D2",
       "cat": "rating_action",
       "file": "20250803 - Mizuho Securities USA - NVDA - Estimates Up,Target Up - AI Ramps Hyperscalers Raise - 10 pages.pdf",
       "page": 1,
-      "why": "Mizuho 上调目标价"
+      "why": "Mizuho raises price target"
     },
     {
       "id": "D3",
       "cat": "rating_action",
       "file": "20250925 - Barclays - NVDA - Revision - U S Semiconductors Semiconductor - 18 pages.pdf",
       "page": 1,
-      "why": "Barclays 修订；与 D1 构成同券商时序对比（示例问题的核心模式）"
+      "why": "Barclays revision; forms a same-broker time-series comparison with D1 (core pattern of the sample question)"
     },
     {
       "id": "D4",
       "cat": "rating_action",
       "file": "20250708 - UBS Research - NVDA - NVIDIA Corp Taiwan Export - 18 pages.pdf",
       "page": 1,
-      "why": "UBS 首页；与 D1/D3 构成跨券商对比（示例问题原型）"
+      "why": "UBS first page; forms a cross-broker comparison with D1/D3 (sample-question prototype)"
     }
   ]
 }

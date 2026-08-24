@@ -4,8 +4,9 @@ from django.db import migrations, models
 
 
 def empty_markdown_to_null(apps, schema_editor):
-    """历史行的 '' 均产生于本迁移之前，语义是「未转录」→ 置 NULL 让 resume 重录。
-    本迁移之后 '' 表示「已转录且合法为空」（免责声明页）。"""
+    """All pre-existing '' rows predate this migration and mean "not transcribed"
+    → set to NULL so resume re-transcribes them. After this migration, '' means
+    "transcribed and legitimately empty" (disclaimer pages)."""
     Page = apps.get_model("research", "Page")
     Page.objects.filter(markdown="").update(markdown=None)
 

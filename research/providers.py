@@ -1,9 +1,10 @@
-"""全部外部调用集中在此文件。
+"""All external calls are concentrated in this file.
 
-不是抽象层——就是"外部调用都在这个文件里"。三个调用点：
-transcribe_page / embed / chat。API 形态锁定 OpenAI Responses API
-（/v1/responses）：function_call_output 携带图像仅它支持（已实测）。
-零第三方 SDK：urllib 足够，依赖面最小。
+Not an abstraction layer -- simply "every external call lives in this file".
+Three call sites: transcribe_page / embed / chat. The API shape is locked to
+the OpenAI Responses API (/v1/responses): it is the only one that supports
+images inside function_call_output (verified empirically).
+Zero third-party SDKs: urllib is enough, keeping the dependency surface minimal.
 """
 
 import base64
@@ -18,7 +19,13 @@ from django.conf import settings
 
 _BASE = "https://api.openai.com/v1"
 
-# 转录 prompt v3（唯一真源；与 bench/run_bench.py 逐字一致）
+# Transcription prompt (v3, benchmark-locked, in Chinese). It was benchmarked and used to
+# build the shipped index; translating it would invalidate the benchmark. Rules it enforces:
+# never output information absent from the page; every number must exist on the page and
+# keep its original surface form; unclear glyphs become [?]; tables rebuilt with exact cell
+# placement; each chart described with axes and readable values; headers/footers/watermarks/
+# disclaimers ignored; first line reports HAS_VISUAL: true|false.
+# Single source of truth; verbatim identical to bench/run_bench.py.
 TRANSCRIBE_SYSTEM = """你是金融文档转录引擎。你的输出会成为券商研报检索系统中该页的唯一文本表示。
 
 绝对约束：
@@ -78,7 +85,8 @@ class ProviderError(RuntimeError):
 
 
 def _post(path: str, payload: dict, timeout: int = 300, retries: int = 3) -> dict:
-    """429/5xx 指数退避重试（全量摄取是小时级长跑，瞬时限流不该变成页失败）。"""
+    """Exponential-backoff retry on 429/5xx (a full ingest is an hours-long run;
+    transient rate limits should not turn into per-page failures)."""
     body = json.dumps(payload).encode()
     for attempt in range(retries + 1):
         req = urllib.request.Request(
@@ -98,26 +106,28 @@ def _post(path: str, payload: dict, timeout: int = 300, retries: int = 3) -> dic
                 time.sleep(2 ** attempt * 5)  # 5s, 10s, 20s
                 continue
             raise ProviderError(f"HTTP {exc.code}: {detail}") from exc
-        # OSError 覆盖 URLError/TimeoutError/ConnectionResetError/SSLError——
-        # 200 之后读 body 时的连接中断不会被包成 URLError（审查确认的空档）。
-        # HTTPError 是 OSError 子类，必须保持在上面的分支先接。
+        # OSError covers URLError/TimeoutError/ConnectionResetError/SSLError --
+        # a connection dropped while reading the body after a 200 is NOT wrapped
+        # as URLError (a gap confirmed in review).
+        # HTTPError is an OSError subclass; the branch above must catch it first.
         except (OSError, http.client.HTTPException) as exc:
             if attempt < retries:
                 time.sleep(2 ** attempt * 5)
                 continue
-            raise ProviderError(f"网络错误: {exc}") from exc
+            raise ProviderError(f"Network error: {exc}") from exc
 
 
 def _check(res: dict):
-    """未完成或拒答的响应不得作为权威转录静默入库（评审修正）。"""
+    """An incomplete or refused response must never be silently stored as an
+    authoritative transcription (review fix)."""
     status = res.get("status")
     if status and status != "completed":
         detail = res.get("incomplete_details") or {}
-        raise ProviderError(f"响应未完成: status={status} {detail}")
+        raise ProviderError(f"Response not completed: status={status} {detail}")
     for o in res.get("output", []):
         for c in o.get("content", []) if o.get("type") == "message" else []:
             if c.get("type") == "refusal":
-                raise ProviderError(f"模型拒答: {c.get('refusal', '')[:200]}")
+                raise ProviderError(f"Model refused: {c.get('refusal', '')[:200]}")
 
 
 def _output_text(res: dict) -> str:
@@ -134,7 +144,7 @@ _HAS_VISUAL_RE = re.compile(r"HAS_VISUAL:\s*(true|false)", re.I)
 
 
 def transcribe_page(png_bytes: bytes, raw_text: str) -> tuple[str, bool, dict]:
-    """单次多模态调用 → (markdown, has_visual, usage)。"""
+    """Single multimodal call -> (markdown, has_visual, usage)."""
     res = _post("/responses", {
         "model": settings.OPENAI_VISION_MODEL,
         "instructions": TRANSCRIBE_SYSTEM,
@@ -146,7 +156,8 @@ def transcribe_page(png_bytes: bytes, raw_text: str) -> tuple[str, bool, dict]:
     })
     text = _output_text(res)
     m = _HAS_VISUAL_RE.search(text[:300])
-    # 元数据行缺失时取安全方向 True（多回传一张原图的代价远小于图页失去兜底）
+    # If the metadata line is missing, default to True as the safe direction (sending one
+    # extra page image back costs far less than a visual page losing its fallback).
     has_visual = m.group(1).lower() == "true" if m else True
     body = _HAS_VISUAL_RE.sub("", text, count=1)
     if "---" in body[:80]:
@@ -175,10 +186,12 @@ Return STRICT JSON only, one of:
 
 
 def figure_bbox(png_bytes: bytes, question: str) -> tuple[dict | None, dict]:
-    """定位被引页上与问题最相关的视觉元素 → (原始判定, usage)。
+    """Locate the visual element on a cited page most relevant to the question
+    -> (raw verdict, usage).
 
-    判定三选一：{坐标} / {"whole_page": true} / {"no_figure": true}；
-    None 仅表示解析失败。语义解释与坐标校验在调用方（chat._figure_crops）。"""
+    The verdict is one of three: {coordinates} / {"whole_page": true} /
+    {"no_figure": true}; None only means parsing failed. Semantic interpretation
+    and coordinate validation happen in the caller (chat._figure_crops)."""
     res = _post("/responses", {
         "model": settings.OPENAI_VISION_MODEL,
         "input": [{"role": "user", "content": [
@@ -204,17 +217,20 @@ def embed(texts: list[str]) -> list[list[float]]:
         "dimensions": settings.EMBED_DIMENSIONS,
     })
     if "data" not in res:
-        raise ProviderError(f"embeddings 响应异常: {str(res)[:200]}")
+        raise ProviderError(f"Unexpected embeddings response: {str(res)[:200]}")
     return [d["embedding"] for d in sorted(res["data"], key=lambda d: d["index"])]
 
 
 def chat(input_items: list[dict], instructions: str, tools: list[dict] | None = None,
          on_delta=None) -> dict:
-    """对话循环的单次往返。返回完整 response 对象，循环逻辑在调用方。
+    """One round trip of the conversation loop. Returns the full response
+    object; the loop logic lives in the caller.
 
-    on_delta 提供时走 SSE 流式：每个 output_text 增量调用 on_delta(str)，
-    返回值仍是完整 response 对象（取自 response.completed 事件）——
-    调用方的循环逻辑对流式/非流式完全无感。evaluate 等离线路径不传，零开销。"""
+    When on_delta is provided, SSE streaming is used: on_delta(str) is called
+    for each output_text delta, and the return value is still the full response
+    object (taken from the response.completed event) -- the caller's loop logic
+    is entirely agnostic to streaming vs non-streaming. Offline paths such as
+    evaluate simply omit it, at zero cost."""
     payload = {
         "model": settings.OPENAI_VISION_MODEL,
         "instructions": instructions,
@@ -229,9 +245,11 @@ def chat(input_items: list[dict], instructions: str, tools: list[dict] | None = 
 
 
 def _sse_data(fp):
-    """SSE 帧解析：按空行分帧，yield 每帧 data: 行的 JSON。纯函数，可测。
+    """SSE frame parsing: split frames on blank lines, yield the JSON from each
+    frame's data: lines. Pure function, testable.
 
-    容错：跨多行的 data、非 JSON 数据（如 [DONE] 哨兵）直接跳过。"""
+    Tolerant of multi-line data and of non-JSON data (e.g. the [DONE]
+    sentinel), which is simply skipped."""
     data_lines: list[str] = []
     for raw in fp:
         line = raw.decode("utf-8").rstrip("\r\n")
@@ -244,7 +262,7 @@ def _sse_data(fp):
                 yield json.loads(joined)
             except ValueError:
                 continue
-    if data_lines:  # 无结尾空行的最后一帧
+    if data_lines:  # final frame with no trailing blank line
         try:
             yield json.loads("\n".join(data_lines))
         except ValueError:
@@ -253,10 +271,13 @@ def _sse_data(fp):
 
 def _post_stream(path: str, payload: dict, on_delta, timeout: int = 300,
                  retries: int = 3) -> dict:
-    """流式 /responses：增量转发给 on_delta，返回 response.completed 里的完整对象。
+    """Streaming /responses: forward deltas to on_delta, return the full object
+    from response.completed.
 
-    重试语义与 _post 一致，但仅当尚未向客户端转发过任何增量时才重试——
-    已转发后重试会在 UI 里产生重复文本，此时宁可让这一轮显式失败。"""
+    Retry semantics match _post, but retries happen only while no delta has yet
+    been forwarded to the client -- retrying after forwarding would produce
+    duplicated text in the UI, so at that point we prefer an explicit failure
+    for this round."""
     body = json.dumps(payload).encode()
     for attempt in range(retries + 1):
         req = urllib.request.Request(
@@ -277,13 +298,14 @@ def _post_stream(path: str, payload: dict, on_delta, timeout: int = 300,
                         on_delta(data.get("delta", ""))
                         emitted = True
                     elif t in ("response.completed", "response.incomplete"):
-                        # incomplete（长度/内容过滤截停）与非流式语义对齐：
-                        # 照样返回 response 对象，调用方消费其中的部分输出
+                        # incomplete (cut off by length/content filter) aligns with the
+                        # non-streaming semantics: still return the response object and
+                        # let the caller consume the partial output it contains
                         final = data.get("response")
                     elif t == "error" or t.startswith("response.failed"):
-                        raise ProviderError(f"流式响应错误: {str(data)[:300]}")
+                        raise ProviderError(f"Streaming response error: {str(data)[:300]}")
                 if final is None:
-                    raise ProviderError("流式响应未收到 response.completed")
+                    raise ProviderError("Streaming response never received response.completed")
                 return final
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode()[:300]
@@ -293,9 +315,10 @@ def _post_stream(path: str, payload: dict, on_delta, timeout: int = 300,
             raise ProviderError(f"HTTP {exc.code}: {detail}") from exc
         except ProviderError:
             raise
-        # 同 _post：OSError 才能接住流中途的连接重置（URLError 接不住）
+        # Same as _post: only OSError catches a connection reset mid-stream
+        # (URLError does not)
         except (OSError, http.client.HTTPException) as exc:
             if attempt < retries and not emitted:
                 time.sleep(2 ** attempt * 5)
                 continue
-            raise ProviderError(f"网络错误: {exc}") from exc
+            raise ProviderError(f"Network error: {exc}") from exc

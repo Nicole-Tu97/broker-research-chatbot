@@ -1,16 +1,20 @@
-"""摄取管线：发现 → 渲染 → 转录 → 索引。
+"""Ingestion pipeline: discover → render → transcribe → index.
 
 python manage.py ingest [--resume] [--limit N] [--file PATH] [--workers 8]
                         [--dry-run] [--render-only]
 
-设计要点：
-- 同步 + 有界并发（无 Celery/Batch）。
-- Document.status 状态机 + --resume 提供幂等；content_hash 去重。
-  DONE 只在全部页完整（png + markdown + embedding）时才写入——任何页失败
-  则落 ERROR 并记录数量，--resume 会重入补齐（评审修正）。
-- 单页失败不中断整份文档（语料含损坏 XObject 与空文本层页）。
-- 渲染 DPI 按页计算（渲染表 + 每页物理尺寸归一；keynote p3 是 53.3×30″）。
-- --render-only 供 make demo 使用：loaddata 后按库内记录本地重渲 PNG，零 API 调用。
+Design notes:
+- Synchronous + bounded concurrency (no Celery/Batch).
+- Document.status state machine + --resume give idempotency; content_hash dedupes.
+  DONE is written only when every page is complete (png + markdown + embedding) —
+  any page failure lands on ERROR with counts recorded, and --resume re-enters to
+  backfill (review fix).
+- A single failed page does not abort the whole document (the corpus contains
+  corrupt XObjects and pages with empty text layers).
+- Render DPI is computed per page (render table + per-page physical-size
+  normalization; keynote p3 is 53.3×30″).
+- --render-only is for make demo: after loaddata, re-render PNGs locally from
+  DB records with zero API calls.
 """
 
 import concurrent.futures
@@ -29,18 +33,20 @@ from research.models import Document, Page
 from research.numeric import suspect_numbers
 from research.tickers import extract_ticker_pages
 
-# 渲染表（基准实测定档）。类别给出基准 DPI 与基准页宽，
-# 实际 DPI 按每页自身宽度归一（同类内目标像素宽恒定）。
-REPORT_DPI = 150                      # letter/A4/横版研报；100 在密集表上有数字 veto
-SLIDE_TARGET_PX = 2080                # 40×22.5″ 大字 deck → 52 DPI 等效
-KEYNOTE_TARGET_PX = 2880              # keynote → 72 DPI 等效（150 反而幻觉）
-SLIDE_MIN_WIDTH_IN = 20               # 页宽超过 20″ 视为幻灯片类
-EMBED_CHAR_LIMIT = 12_000             # 见 embedding 步骤注释（实测校准）
+# Render table (tiers set by baseline measurement). Each class defines a baseline
+# DPI and baseline page width; actual DPI is normalized to each page's own width
+# (constant target pixel width within a class).
+REPORT_DPI = 150                      # letter/A4/landscape reports; 100 trips the digit veto on dense tables
+SLIDE_TARGET_PX = 2080                # 40×22.5″ large-type decks → ~52 DPI equivalent
+KEYNOTE_TARGET_PX = 2880              # keynote → 72 DPI equivalent (150 hallucinates instead)
+SLIDE_MIN_WIDTH_IN = 20               # pages wider than 20″ are treated as slides
+EMBED_CHAR_LIMIT = 12_000             # see embedding-step comment (calibrated by measurement)
 
 
 def page_dpi(page_width_in: float, is_keynote: bool) -> int:
-    """研报类固定 150（字号口径是物理 pt）；幻灯片类按页宽归一到目标像素宽，
-    使 keynote p3（53.3″）与其余页（40″）渲染到同一像素预算。"""
+    """Report class is fixed at 150 (font sizes are physical pt); slide class is
+    normalized by page width to a target pixel width, so keynote p3 (53.3″) and
+    the remaining pages (40″) render to the same pixel budget."""
     if page_width_in < SLIDE_MIN_WIDTH_IN:
         return REPORT_DPI
     target = KEYNOTE_TARGET_PX if is_keynote else SLIDE_TARGET_PX
@@ -48,17 +54,17 @@ def page_dpi(page_width_in: float, is_keynote: bool) -> int:
 
 
 class Command(BaseCommand):
-    help = "摄取 case_study/ 下的 PDF：渲染、转录、数字校验、索引"
+    help = "Ingest PDFs under case_study/: render, transcribe, numeric checks, index"
 
     def add_arguments(self, parser):
-        parser.add_argument("--resume", action="store_true", help="跳过 status=done 的文档")
-        parser.add_argument("--limit", type=int, help="只处理前 N 份文档（按文件名排序）")
-        parser.add_argument("--file", type=Path, help="只摄取单个 PDF（demo 现场新增用）")
-        parser.add_argument("--workers", type=int, default=8, help="转录并发数")
+        parser.add_argument("--resume", action="store_true", help="Skip documents with status=done")
+        parser.add_argument("--limit", type=int, help="Process only the first N documents (sorted by filename)")
+        parser.add_argument("--file", type=Path, help="Ingest a single PDF (for adding files live in the demo)")
+        parser.add_argument("--workers", type=int, default=8, help="Transcription concurrency")
         parser.add_argument("--dry-run", action="store_true",
-                            help="只做发现与渲染，不调用任何外部 API")
+                            help="Discovery and rendering only; no external API calls")
         parser.add_argument("--render-only", action="store_true",
-                            help="只补渲缺失的 PNG（make demo 的 loaddata 之后用）")
+                            help="Only re-render missing PNGs (use after make demo's loaddata)")
 
     def handle(self, *args, **opts):
         pdfs = ([opts["file"]] if opts["file"]
@@ -66,7 +72,7 @@ class Command(BaseCommand):
         if opts["limit"]:
             pdfs = pdfs[: opts["limit"]]
         if not pdfs:
-            self.stderr.write("没有找到 PDF")
+            self.stderr.write("No PDFs found")
             sys.exit(2)
 
         settings.PAGE_ASSET_DIR.mkdir(parents=True, exist_ok=True)
@@ -75,29 +81,29 @@ class Command(BaseCommand):
         for pdf in pdfs:
             try:
                 self.ingest_one(pdf, opts)
-            except Exception as exc:  # 单文档失败不中断整批
+            except Exception as exc:  # one failed document does not abort the batch
                 self.stderr.write(self.style.ERROR(f"[FAIL] {pdf.name}: {exc}"))
                 Document.objects.filter(filename=pdf.name).update(
                     status=Document.Status.ERROR, error=str(exc)[:500])
 
-    # ---- 单文档流程 ----
+    # ---- Single-document flow ----
 
     def ingest_one(self, pdf: Path, opts):
         content_hash = hashlib.sha256(pdf.read_bytes()).hexdigest()
 
-        # 同名文件内容变化 → 清页重摄（不得把旧行翻成 ERROR）
+        # Same filename, new content → clear pages and re-ingest (never flip old row to ERROR)
         doc = Document.objects.filter(filename=pdf.name).first()
         if doc and doc.content_hash != content_hash:
-            self.stdout.write(f"[REDO] {pdf.name}: 内容已变化，重摄取")
+            self.stdout.write(f"[REDO] {pdf.name}: content changed, re-ingesting")
             doc.pages.all().delete()
             doc.content_hash = content_hash
             doc.status = Document.Status.PENDING
         elif doc is None:
-            # content_hash 去重：同内容不同文件名 → no-op（demo 剧本第 4 问）
+            # content_hash dedupe: same content, different filename → no-op (demo script Q4)
             dup = Document.objects.filter(content_hash=content_hash).first()
             if dup:
                 self.stdout.write(
-                    f"[SKIP] {pdf.name}: 内容与 {dup.filename} 相同（去重 no-op）")
+                    f"[SKIP] {pdf.name}: same content as {dup.filename} (dedupe no-op)")
                 return
             meta = parse_filename(pdf.stem)
             doc = Document(
@@ -107,50 +113,50 @@ class Command(BaseCommand):
             )
         if (opts["resume"] and not opts["render_only"]
                 and doc.status == Document.Status.DONE):
-            self.stdout.write(f"[SKIP] {pdf.name}: 已完成")
+            self.stdout.write(f"[SKIP] {pdf.name}: already done")
             return
         doc.save()
 
-        # 1+2. 渲染 + 文本层（DPI 按页归一）
+        # 1+2. Render + text layer (DPI normalized per page)
         is_keynote = "keynote" in pdf.name.lower()
         render_failures = 0
         with pymupdf.open(pdf) as fitz_doc:
             doc.page_count = len(fitz_doc)
             for i, fpage in enumerate(fitz_doc, start=1):
                 page, _ = Page.objects.get_or_create(document=doc, page_number=i)
-                png_name = f"{doc.id}_{i}.png"  # 只存 basename，fixture 可迁移
+                png_name = f"{doc.id}_{i}.png"  # store basename only; keeps fixtures portable
                 png_file = settings.PAGE_ASSET_DIR / png_name
                 if page.png_path and png_file.exists():
-                    continue  # 渲染幂等：文件在即跳过
+                    continue  # render idempotency: skip if the file exists
                 try:
                     dpi = page_dpi(fpage.rect.width / 72, is_keynote)
                     fpage.get_pixmap(dpi=dpi).save(png_file)
                     page.png_path = png_name
                     page.raw_text = fpage.get_text().strip()
                     page.save()
-                except Exception as exc:  # 页级容错
+                except Exception as exc:  # per-page fault tolerance
                     render_failures += 1
-                    self.stderr.write(f"  [page {i}] 渲染失败: {exc}")
+                    self.stderr.write(f"  [page {i}] render failed: {exc}")
 
-        # 首页内容侧元数据兜底（文件名为主，内容校验兜底）
+        # Metadata fallback from page-1 content (filename first, content check as backup)
         p1 = doc.pages.filter(page_number=1).first()
         if p1 and p1.raw_text:
             content_date = date_from_text(p1.raw_text)
             if content_date and doc.published_date is None:
                 doc.published_date = content_date
-                self.stdout.write(f"  [meta] 首页内容补齐日期: {content_date}")
+                self.stdout.write(f"  [meta] date backfilled from page 1: {content_date}")
             elif content_date and doc.published_date and content_date != doc.published_date:
                 self.stderr.write(
-                    f"  [meta] 日期不一致: 文件名 {doc.published_date} vs 首页 {content_date}"
-                    "（保留文件名值，已记录）")
+                    f"  [meta] date mismatch: filename {doc.published_date} vs page 1 {content_date}"
+                    " (keeping filename value; logged)")
 
         doc.status = Document.Status.RENDERED
         doc.save()
-        self.stdout.write(f"[RENDER] {pdf.name}: {doc.page_count} 页")
+        self.stdout.write(f"[RENDER] {pdf.name}: {doc.page_count} pages")
         if opts["dry_run"] or opts["render_only"]:
             return
 
-        # 3. 转录（同步 + 有界并发；worker 内关闭线程私有 DB 连接）
+        # 3. Transcribe (sync + bounded concurrency; workers close thread-local DB connections)
         todo = list(doc.pages.exclude(png_path="").filter(markdown__isnull=True))
         transcribe_failures = 0
         with concurrent.futures.ThreadPoolExecutor(max_workers=opts["workers"]) as pool:
@@ -161,11 +167,11 @@ class Command(BaseCommand):
                     fut.result()
                 except Exception as exc:
                     transcribe_failures += 1
-                    self.stderr.write(f"  [page {p.page_number}] 转录失败: {exc}")
+                    self.stderr.write(f"  [page {p.page_number}] transcription failed: {exc}")
         doc.status = Document.Status.TRANSCRIBED
         doc.save()
 
-        # 4. 索引：数字校验 → ticker 提取 → embedding
+        # 4. Index: numeric checks → ticker extraction → embeddings
         pages = list(doc.pages.order_by("page_number"))
         for p in pages:
             flags = suspect_numbers(p.markdown or "", p.raw_text)
@@ -177,11 +183,13 @@ class Command(BaseCommand):
         doc.ticker_pages = hits
         doc.tickers = primary + sorted(t for t in hits if t not in primary)
 
-        # 截断上限：模型硬约束 8,192 token。**实测**最密财务页的比率是
-        # 1.76 char/token（不是英文散文的 ~4:1——数字符号各占一个 token），
-        # 故 8,192 × 1.76 ≈ 14.4k 字符是理论上限，取 12,000 留 ~15% 余量。
-        # 初版 6,000 过度保守（误伤 7/423 页）；改 30,000 则直接超限报错——
-        # 两次都错在用错换算比率，第三次是量出来的。
+        # Truncation cap: the model's hard limit is 8,192 tokens. The **measured**
+        # ratio on the densest financial pages is 1.76 chars/token (not English
+        # prose's ~4:1 — digits and symbols each take a token), so 8,192 × 1.76
+        # ≈ 14.4k chars is the theoretical cap; 12,000 leaves ~15% headroom.
+        # The initial 6,000 was overly conservative (clipped 7/423 pages);
+        # 30,000 blew straight past the limit and errored — both mistakes used
+        # the wrong ratio; the third value was measured.
         to_embed = [p for p in pages if p.markdown and p.embedding is None]
         for batch_start in range(0, len(to_embed), 64):
             batch = to_embed[batch_start: batch_start + 64]
@@ -190,16 +198,17 @@ class Command(BaseCommand):
                 p.embedding = v
             Page.objects.bulk_update(batch, ["embedding"])
 
-        # DONE 门槛：全部页完整才算完成，否则 ERROR + 计数，--resume 可重入补齐
+        # DONE gate: all pages complete, else ERROR + counts; --resume re-enters to backfill
         incomplete = sum(
             1 for p in doc.pages.all()
             if not p.png_path or p.markdown is None
-            or (p.markdown and p.embedding is None))  # "" = 合法空转录（免责声明页）
+            or (p.markdown and p.embedding is None))  # "" = valid empty transcription (disclaimer pages)
         if render_failures or transcribe_failures or incomplete:
             doc.status = Document.Status.ERROR
-            doc.error = (f"{incomplete} 页未完成"
-                         f"（渲染失败 {render_failures}，转录失败 {transcribe_failures}）；"
-                         "重跑 ingest 可补齐")
+            doc.error = (f"{incomplete} pages incomplete"
+                         f" (render failures: {render_failures}, "
+                         f"transcription failures: {transcribe_failures}); "
+                         "re-run ingest to backfill")
             doc.save()
             self.stderr.write(self.style.WARNING(f"[PART] {pdf.name}: {doc.error}"))
             return
@@ -209,8 +218,8 @@ class Command(BaseCommand):
         doc.save()
         n_flags = sum(1 for p in pages if p.numeric_flags)
         self.stdout.write(self.style.SUCCESS(
-            f"[DONE] {pdf.name}: {len(pages)} 页, tickers={doc.tickers}, "
-            f"可疑数字页={n_flags}"))
+            f"[DONE] {pdf.name}: {len(pages)} pages, tickers={doc.tickers}, "
+            f"suspect-number pages={n_flags}"))
 
     @staticmethod
     def _transcribe(page: Page):
@@ -221,4 +230,4 @@ class Command(BaseCommand):
             page.has_visual = has_visual
             page.save()
         finally:
-            connections.close_all()  # 线程私有连接不留给 GC（评审修正）
+            connections.close_all()  # never leave thread-local connections to the GC (review fix)

@@ -1,7 +1,8 @@
-"""阶段 1 测试：纯函数（元数据/ticker/数字校验）+ 真实语料文件名全量回归。
+"""Stage 1 tests: pure functions (metadata/ticker/number checks) + full regression
+over real-corpus filenames.
 
-确定性核心的测试无需 API key 与数据库（除模型测试外），
-呼应"保证来自校验"的设计。
+Tests for the deterministic core need no API key or database (except the model tests),
+echoing the "guarantees come from validation" design.
 """
 
 from datetime import date
@@ -22,7 +23,7 @@ class MetadataTests(SimpleTestCase):
         self.assertEqual(m.broker, "Barclays")
         self.assertEqual(m.published_date, date(2025, 6, 17))
         self.assertEqual(m.ticker, "NVDA")
-        self.assertEqual(m.claimed_page_count, 14)  # 已知不可信，仅存档
+        self.assertEqual(m.claimed_page_count, 14)  # known unreliable; archived only
 
     def test_no_ticker_multi_industry(self):
         m = parse_filename(
@@ -44,7 +45,7 @@ class MetadataTests(SimpleTestCase):
         self.assertEqual(m.ticker, "NVDA")
 
     def test_date_from_first_page_text(self):
-        # 内容侧兜底：deck 无文件名日期，靠首页文本
+        # Content-side fallback: deck has no filename date, so rely on first-page text
         self.assertEqual(date_from_text("NVIDIA Corp 8 July 2025 ab"), date(2025, 7, 8))
         self.assertEqual(date_from_text("... June 11, 2025 keynote"), date(2025, 6, 11))
         self.assertEqual(date_from_text("North America Equity Research 28 August 2025"),
@@ -52,10 +53,10 @@ class MetadataTests(SimpleTestCase):
         self.assertIsNone(date_from_text("no date here, just 2025 revenue"))
 
     def test_whole_corpus_parses(self):
-        """真实语料 30 份全量回归：每份都能解析出 broker，研报类都有日期。"""
+        """Full regression on 30 real corpus files: each parses a broker; reports have dates."""
         corpus = Path(settings.CORPUS_DIR)
         if not corpus.exists():
-            self.skipTest("语料目录不存在")
+            self.skipTest("corpus directory missing")
         pdfs = sorted(corpus.glob("*.pdf"))
         self.assertGreaterEqual(len(pdfs), 30)
         for pdf in pdfs:
@@ -71,13 +72,14 @@ class TickerTests(SimpleTestCase):
         self.assertNotIn("NVDA", tickers_in("nvda lowercase noise"))
 
     def test_company_name_maps_to_ticker(self):
-        # 关键回归：NVIDIA 官方 deck 与多行业报告只写公司名
+        # Key regression: NVIDIA's own deck and multi-industry reports use only company names
         self.assertIn("NVDA", tickers_in("NVIDIA Serving $2 Trillion Europe Automotive"))
         self.assertIn("MSFT", tickers_in("Microsoft capex is rising"))
         self.assertIn("GOOG", tickers_in("Alphabet and Google Cloud"))
 
     def test_uppercase_common_words_not_tagged(self):
-        # "AI"/"ON"/"ARM" 这类大写普通词不得误标（29/30 份文档含大写 AI）
+        # Uppercase common words like "AI"/"ON"/"ARM" must not be mistagged
+        # (29/30 documents contain uppercase "AI")
         found = tickers_in("AI FACTORY requires ARM-based designs ON premises")
         self.assertEqual(found, set())
 
@@ -93,15 +95,16 @@ class NumericTests(SimpleTestCase):
         self.assertEqual(canon("$3,539,639"), "3539639")
         self.assertEqual(canon("170.00"), "170")
         self.assertEqual(canon("45.6%"), "45.6")
-        self.assertEqual(canon("(123)"), "-123")  # 会计负数
-        self.assertIsNone(canon("2025"))  # 裸年份白名单
-        # 白名单收窄（评审修正）：带逗号/小数/单位的 4 位值不是年份，参与比对
+        self.assertEqual(canon("(123)"), "-123")  # accounting negative
+        self.assertIsNone(canon("2025"))  # bare-year whitelist
+        # Whitelist narrowed (review fix): 4-digit values with commas/decimals/units
+        # are not years and do take part in comparison
         self.assertEqual(canon("2,080"), "2080")
         self.assertEqual(canon("2025.5"), "2025.5")
         self.assertEqual(canon("$2025"), "2025")
 
     def test_reformat_not_flagged(self):
-        # 37% 页面的误报来源：换写法不算可疑
+        # Source of false positives on 37% of pages: reformatting is not suspect
         self.assertEqual(suspect_numbers("PT 170 with 3539639 shares",
                                          "PT $170.00 ... 3,539,639"), [])
 
@@ -109,14 +112,15 @@ class NumericTests(SimpleTestCase):
         self.assertEqual(suspect_numbers("PT raised to 250", "PT is 240.00"), ["250"])
 
     def test_restatement_allowed(self):
-        # 图表描述合理复述页面上存在的数字
+        # Chart descriptions may legitimately restate numbers that exist on the page
         self.assertEqual(suspect_numbers("peak 45.6 ... again 45.6", "45.6%"), [])
 
     def test_empty_raw_text_returns_empty(self):
         self.assertEqual(suspect_numbers("$100T only in pixels", ""), [])
 
     def test_known_blind_spot_documented(self):
-        # 诚实边界：同值碰撞不可检——此测试记录该事实而非掩盖
+        # Honest boundary: same-value collisions are undetectable — this test
+        # documents that fact rather than hiding it
         self.assertEqual(suspect_numbers("PT is 200.00", "240.00 ... 200.00"), [])
 
 
@@ -130,12 +134,12 @@ class ModelTests(TestCase):
                             markdown="Price target raised to $240")
         p = Page.objects.get(document=d, page_number=1)
         self.assertEqual(p.page_number, 1)
-        # search_vector 为生成列：写入 markdown 即有索引值
+        # search_vector is a generated column: writing markdown yields an index value
         self.assertIsNotNone(p.search_vector)
 
 
 class ToolTests(TestCase):
-    """检索工具：合成向量 + mock embed，不触外部 API。"""
+    """Retrieval tools: synthetic vectors + mocked embed; no external API calls."""
 
     @classmethod
     def setUpTestData(cls):
@@ -143,7 +147,7 @@ class ToolTests(TestCase):
 
         from .models import Document, Page
 
-        def vec(axis):  # 1024 维单位向量，方向由 axis 决定
+        def vec(axis):  # 1024-dim unit vector; direction set by axis
             v = [0.0] * 1024
             v[axis] = 1.0
             return v
@@ -163,7 +167,8 @@ class ToolTests(TestCase):
                             numeric_flags=["999"])
         Page.objects.create(document=cls.ubs, page_number=1, embedding=vec(2),
                             markdown="12-month rating Buy, price target US$175.00")
-        # 无日期文档（公司自家 deck，页面上无任何可解析日期——如 NVIDIA 季报 deck）
+        # Undated document (company's own deck with no parseable date on any page —
+        # e.g. an NVIDIA earnings deck)
         cls.deck = Document.objects.create(
             filename="d.pdf", content_hash="d" * 64, broker="NVIDIA",
             published_date=None, tickers=["NVDA"],
@@ -179,13 +184,13 @@ class ToolTests(TestCase):
 
     def test_hybrid_prefers_agreement_and_traces_legs(self):
         from . import tools
-        with self._patch_embed(0):  # 向量一路指向 Barclays p1；FTS 也命中它
+        with self._patch_embed(0):  # vector leg points at Barclays p1; FTS hits it too
             out = tools.search_pages("price target raised", k=2)
         top = out["results"][0]
         self.assertEqual((top["broker"], top["page_number"]), ("Barclays", 1))
         ranks = out["trace"]["per_result_ranks"][0]
         self.assertIsNotNone(ranks["vector"])
-        self.assertIsNotNone(ranks["fts"])  # 双路命中，排名都在追踪里
+        self.assertIsNotNone(ranks["fts"])  # both legs hit; both ranks are in the trace
 
     def test_filters_narrow_results(self):
         from . import tools
@@ -193,7 +198,7 @@ class ToolTests(TestCase):
             out = tools.search_pages("price target", brokers=["UBS"], k=5)
         self.assertTrue(all(r["broker"] == "UBS Research" for r in out["results"]))
         with self._patch_embed(0):
-            out = tools.search_pages("price target", tickers=["tsm"], k=5)  # 大小写归一
+            out = tools.search_pages("price target", tickers=["tsm"], k=5)  # case-normalized
         self.assertTrue(all(r["broker"] == "UBS Research" for r in out["results"]))
 
     def test_suspect_numbers_surface_in_payload(self):
@@ -207,30 +212,31 @@ class ToolTests(TestCase):
         out = tools.list_reports(tickers=["NVDA"])
         self.assertEqual(out["count"], 3)
         self.assertEqual([r["broker"] for r in out["reports"]],
-                         ["Barclays", "UBS Research", "NVIDIA"])  # 日期升序，无日期排最后
+                         ["Barclays", "UBS Research", "NVIDIA"])  # date ascending, undated last
         self.assertIn("USD 200", out["reports"][0]["first_page"]["markdown"])
         self.assertEqual(out["reports"][0]["ticker_hit_pages"], {"NVDA": [1, 3]})
 
     def test_date_filter_warns_about_undated_documents(self):
-        # 回归:published_date=None 的文档被日期过滤静默排除,曾让模型
-        # 13 次调用找不到 NVIDIA deck($4.85 一轮)。工具必须给出恢复提示。
+        # Regression: docs with published_date=None were silently excluded by date
+        # filters, once costing the model 13 calls ($4.85 a round) failing to find
+        # the NVIDIA deck. The tool must give a recovery hint.
         from datetime import date as d
         from . import tools
         out = tools.list_reports(brokers=["NVIDIA"], date_from=d(2025, 6, 1),
                                  date_to=d(2025, 9, 30))
-        self.assertEqual(out["count"], 0)          # 过滤语义不变:仍被排除
-        self.assertIn("warning", out)              # 但排除必须可见
+        self.assertEqual(out["count"], 0)          # filter semantics unchanged: still excluded
+        self.assertIn("warning", out)              # but the exclusion must be visible
         self.assertIn("EXCLUDED", out["warning"])
-        # 去掉日期过滤 → 恢复路径成立
+        # Dropping the date filter → the recovery path works
         out2 = tools.list_reports(brokers=["NVIDIA"])
         self.assertEqual(out2["count"], 1)
         self.assertNotIn("warning", out2)
-        # search_pages 同款(fts 模式避免 embed 调用)
+        # Same for search_pages (fts mode avoids the embed call)
         out3 = tools.search_pages("Data Center revenue", brokers=["NVIDIA"],
                                   date_from=d(2025, 6, 1), mode="fts")
         self.assertEqual(len(out3["results"]), 0)
         self.assertIn("warning", out3)
-        # 无日期过滤时不应有提示噪音
+        # No warning noise when no date filter is applied
         out4 = tools.search_pages("Data Center revenue", brokers=["NVIDIA"], mode="fts")
         self.assertTrue(out4["results"])
         self.assertNotIn("warning", out4)
@@ -245,7 +251,7 @@ class ToolTests(TestCase):
 
 
 class ChatPureTests(TestCase):
-    """chat 层确定性后处理：不触任何外部 API。"""
+    """Deterministic post-processing in the chat layer: no external API calls."""
 
     @classmethod
     def setUpTestData(cls):
@@ -271,7 +277,7 @@ class ChatPureTests(TestCase):
         frags = list(_citation_fragments(
             "目标价上调 [Barclays, 2025-06-17, p.1]，累计 "
             "[Barclays, 2025-06-17, p.3; Barclays, 2025-09-25, p.1]"))
-        self.assertEqual(len(frags), 3)  # 复合引用按 ';' 拆条
+        self.assertEqual(len(frags), 3)  # compound citations split on ';'
         self.assertEqual(frags[0][1].group(1), "Barclays")
         self.assertEqual(int(frags[2][1].group(3)), 1)
 
@@ -282,13 +288,15 @@ class ChatPureTests(TestCase):
         badges = grounding_badges(answer, pages)
         self.assertEqual(badges[0]["status"], "grounded")
         self.assertIn("200", badges[0]["matched_numbers"])
-        # 引用了不在本轮检索结果里的页 → unknown（防伪造引用）
+        # Citing a page absent from this turn's retrieval results → unknown
+        # (guards against fabricated citations)
         badges = grounding_badges("[UBS, 2025-07-08, p.4]", pages)
         self.assertEqual(badges[0]["status"], "unknown")
 
     def test_citation_human_date_formats_resolve(self):
-        # 实测 bug：模型写 "September 2025" 而非 ISO，旧解析器整条丢弃 →
-        # 链接/徽章/Sources 全部消失。解析层必须比 prompt 措辞更宽。
+        # Observed bug: the model wrote "September 2025" instead of ISO and the old
+        # parser dropped the whole citation → links/badges/Sources all vanished.
+        # The parsing layer must be looser than the prompt wording.
         from .chat import grounding_badges
         pages = {("Barclays", "2025-06-17", 1): self.p1}
         for cite in ("[Barclays, June 2025, p.1]",
@@ -298,17 +306,19 @@ class ChatPureTests(TestCase):
                      "[Barclays, n.d., p.1]"):
             badges = grounding_badges(f"PT $200 {cite}", pages)
             self.assertEqual(badges[0]["status"], "grounded", cite)
-        # 月份对不上 → 不得张冠李戴到别的报告
+        # Month mismatch → must not be misattributed to a different report
         badges = grounding_badges("PT $200 [Barclays, July 2025, p.1]", pages)
         self.assertEqual(badges[0]["status"], "unknown")
-        # 文档本身无日期（如 NVIDIA 自家 deck）→ 日期无从核对，不作为否决项；
-        # broker+页号+本轮检索集仍是防伪造硬门
+        # Document itself undated (e.g. NVIDIA's own deck) → the date cannot be
+        # checked, so it is not a veto; broker + page number + this turn's retrieval
+        # set remain the hard anti-fabrication gate
         pages_nd = {("NVIDIA", "None", 1): self.p1}
         badges = grounding_badges("$200 [NVIDIA, September 2025, p.1]", pages_nd)
         self.assertEqual(badges[0]["status"], "grounded")
 
     def test_badge_carries_has_visual_for_inline_figures(self):
-        # 前端行内原页图（需求 "surface the original asset"）依赖此字段
+        # Front-end inline original-page images (requirement: "surface the
+        # original asset") rely on this field
         from .chat import grounding_badges
         pages = {("Barclays", "2025-06-17", 1): self.p1}
         badges = grounding_badges("PT $200 [Barclays, 2025-06-17, p.1]", pages)
@@ -323,7 +333,8 @@ class ChatPureTests(TestCase):
         self.assertEqual(labels[0]["superseded_by"], "2025-09-25")
 
     def test_sse_parser_frames_and_tolerance(self):
-        # SSE 帧解析：分帧、多行 data、非 JSON 哨兵容错、无结尾空行
+        # SSE frame parsing: framing, multi-line data, tolerance for non-JSON
+        # sentinels, and no trailing blank line
         import io
         from .providers import _sse_data
         stream = io.BytesIO(
@@ -335,14 +346,14 @@ class ChatPureTests(TestCase):
             b'data: {"type": "response.completed", "response": {"usage": {}}}'
         )
         frames = list(_sse_data(stream))
-        self.assertEqual(len(frames), 3)  # [DONE] 被容错跳过
+        self.assertEqual(len(frames), 3)  # [DONE] tolerated and skipped
         self.assertEqual(frames[0]["delta"], "Hel")
-        self.assertEqual(frames[1]["delta"], "lo")  # 跨行 data 合并
-        self.assertEqual(frames[2]["type"], "response.completed")  # 无结尾空行也收到
+        self.assertEqual(frames[1]["delta"], "lo")  # multi-line data merged
+        self.assertEqual(frames[2]["type"], "response.completed")  # received without trailing blank
 
     def test_run_turn_offline_path_unchanged(self):
-        # emit 不传 → streaming=False → providers.chat 必须收到 on_delta=None
-        # （evaluate 离线路径零流式开销的守卫）
+        # No emit passed → streaming=False → providers.chat must receive on_delta=None
+        # (guards the zero streaming overhead of evaluate's offline path)
         from unittest.mock import patch
         from . import chat as chat_mod
         from .models import Conversation
@@ -355,26 +366,28 @@ class ChatPureTests(TestCase):
         self.assertIsNone(m.call_args.kwargs.get("on_delta"))
 
     def test_conversation_append_survives_concurrent_writer(self):
-        # lost-update 回归（审查确认）：run_turn 持有的是请求线程的过期快照,
-        # 期间另一并发轮已落库——原子重取追加后,两轮的消息都必须幸存
+        # Lost-update regression (confirmed in review): run_turn holds the request
+        # thread's stale snapshot while a concurrent turn has already persisted —
+        # after the atomic refetch-and-append, both turns' messages must survive
         from unittest.mock import patch
         from . import chat as chat_mod
         from .models import Conversation
         conv = Conversation.objects.create()
-        stale = Conversation.objects.get(id=conv.id)  # run_turn 拿到的快照
+        stale = Conversation.objects.get(id=conv.id)  # the snapshot run_turn holds
         conv.messages = conv.messages + [
             {"role": "user", "content": [{"type": "input_text", "text": "OTHER-TURN"}]}]
-        conv.save()  # 并发轮先写
+        conv.save()  # the concurrent turn writes first
         fake = {"usage": {}, "output": [{"type": "message",
                 "content": [{"type": "output_text", "text": "A2"}]}]}
         with patch.object(chat_mod.providers, "chat", return_value=fake):
             chat_mod.run_turn(stale, "SECOND-TURN")
         final = str(Conversation.objects.get(id=conv.id).messages)
-        self.assertIn("OTHER-TURN", final)   # 旧实现在这里被覆盖丢失
+        self.assertIn("OTHER-TURN", final)   # the old implementation lost this to an overwrite
         self.assertIn("SECOND-TURN", final)
 
     def test_tool_output_images_deduped_within_turn(self):
-        # 成本修复:轮内同一页原图只附一次(api_input 累积,首份仍在上下文)
+        # Cost fix: attach each page's original image only once per turn
+        # (api_input accumulates; the first copy stays in context)
         import tempfile
         from pathlib import Path
         from django.test import override_settings
@@ -389,25 +402,27 @@ class ChatPureTests(TestCase):
                 api2, _ = _tool_output_items("c2", payload, sent)
         n_img = lambda item: sum(1 for c in item["output"] if c["type"] == "input_image")
         self.assertEqual(n_img(api1), 1)
-        self.assertEqual(n_img(api2), 0)  # 同页第二次不再附
+        self.assertEqual(n_img(api2), 0)  # same page is not attached a second time
         self.assertEqual(sent, {(1, 5)})
 
     def test_valid_crop_guardrails(self):
-        # bbox 的确定性校验——坏框回退整页,好框外扩 2% 并夹回边界
+        # Deterministic bbox validation — bad boxes fall back to the full page;
+        # good boxes expand 2% and clamp to the bounds
         from .chat import _valid_crop
         self.assertIsNone(_valid_crop(None))
-        self.assertIsNone(_valid_crop({"x0": 10, "y0": 10}))            # 缺坐标
-        self.assertIsNone(_valid_crop({"x0": 50, "y0": 10, "x1": 40, "y1": 90}))  # 退化
-        self.assertIsNone(_valid_crop({"x0": 0, "y0": 0, "x1": 5, "y1": 5}))      # 太小
-        self.assertIsNone(_valid_crop({"x0": 0, "y0": 0, "x1": 100, "y1": 99}))   # ≈整页
-        c = _valid_crop({"x0": 5, "y0": 8, "x1": 50, "y1": 86})  # probe 实测框
+        self.assertIsNone(_valid_crop({"x0": 10, "y0": 10}))            # missing coords
+        self.assertIsNone(_valid_crop({"x0": 50, "y0": 10, "x1": 40, "y1": 90}))  # degenerate
+        self.assertIsNone(_valid_crop({"x0": 0, "y0": 0, "x1": 5, "y1": 5}))      # too small
+        self.assertIsNone(_valid_crop({"x0": 0, "y0": 0, "x1": 100, "y1": 99}))   # ~ full page
+        c = _valid_crop({"x0": 5, "y0": 8, "x1": 50, "y1": 86})  # box measured in probe
         self.assertEqual(c, {"x0": 3.0, "y0": 6.0, "x1": 52.0, "y1": 88.0})
-        c2 = _valid_crop({"x0": 0, "y0": 0, "x1": 50, "y1": 50})  # 外扩不越界
+        c2 = _valid_crop({"x0": 0, "y0": 0, "x1": 50, "y1": 50})  # expansion stays in bounds
         self.assertEqual((c2["x0"], c2["y0"]), (0, 0))
 
     def test_figure_locator_three_way_decision(self):
-        # 定位器三选一——坐标→crop;整页即图→show_page;纯文字页→不标;
-        # 找到图但坐标没过校验→退回 show_page(图确实在,整页比不给强)
+        # Locator picks one of three — coords → crop; whole page is the figure →
+        # show_page; text-only page → no tag; figure found but coords fail validation
+        # → fall back to show_page (the figure is real; full page beats nothing)
         import tempfile
         from pathlib import Path
         from unittest.mock import patch
@@ -420,7 +435,7 @@ class ChatPureTests(TestCase):
                 ({"whole_page": True}, "show_page"),
                 ({"no_figure": True}, None),
                 ({"x0": 0, "y0": 0, "x1": 3, "y1": 3}, "show_page"),
-                (None, None),  # 解析失败 → 不插图
+                (None, None),  # parse failure → no figure inserted
             ]
             with override_settings(PAGE_ASSET_DIR=Path(td)):
                 for ret, expect in cases:
@@ -436,12 +451,13 @@ class ChatPureTests(TestCase):
                         self.assertIn(expect, bs[0], ret)
 
     def test_page_image_crop_endpoint(self):
-        # ?crop= 从 PDF 重渲区域;坐标非法回退整页(不 404 不炸)
+        # ?crop= re-renders the region from the PDF; invalid coords fall back to
+        # the full page (no 404, no crash)
         from django.conf import settings as st
         from .models import Document, Page
         pdfs = sorted(st.CORPUS_DIR.glob("*.pdf")) if st.CORPUS_DIR.exists() else []
         if not pdfs:
-            self.skipTest("语料目录不存在")
+            self.skipTest("corpus directory missing")
         doc = Document.objects.create(
             filename=pdfs[0].name, content_hash="e" * 64, broker="X",
             status=Document.Status.DONE)
@@ -453,7 +469,7 @@ class ChatPureTests(TestCase):
         body = b"".join(r.streaming_content) if r.streaming else r.content
         self.assertEqual(body[:8], b"\x89PNG\r\n\x1a\n")
         r2 = self.client.get(f"/page-image/{doc.id}/1", {"crop": "60,10,10,60"})
-        self.assertEqual(r2.status_code, 404)  # 坏坐标→兜底整页,但 png 文件不存在→404
+        self.assertEqual(r2.status_code, 404)  # bad coords → full-page fallback, but png missing → 404
 
     def test_history_keeps_only_role_messages(self):
         from .chat import _history_to_api
@@ -467,5 +483,6 @@ class ChatPureTests(TestCase):
             {"role": "assistant", "content": [{"type": "output_text", "text": "A1"}]},
         ]
         api = _history_to_api(hist)
-        # 工具流量（含图像引用）不跨轮回传：推理模型的 reasoning 配对约束 + 成本
+        # Tool traffic (incl. image refs) never replays across turns: reasoning
+        # models' reasoning-pairing constraint + cost
         self.assertEqual([m.get("role") for m in api], ["user", "assistant"])

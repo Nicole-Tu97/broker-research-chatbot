@@ -1,8 +1,9 @@
-"""最小化 Django 配置。
+"""Minimal Django configuration.
 
-不做的事与理由（见 DESIGN.md §10）：无 auth/admin/sessions（与考察点无关），
-无前端框架（模板足够）。.env 由 shell 或 docker compose 注入，不引入 dotenv 依赖：
-本地跑 `export $(grep -v '^#' .env | xargs)`，容器里 compose env_file 处理。
+What we skip and why (see DESIGN.md §10): no auth/admin/sessions (irrelevant to
+the assessment), no frontend framework (templates suffice). .env is injected by
+the shell or docker compose; no dotenv dependency: locally run
+`export $(grep -v '^#' .env | xargs)`, in containers compose env_file handles it.
 """
 
 import os
@@ -12,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-not-secret")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS = ["*"]  # 内部 demo；无公网暴露面
+ALLOWED_HOSTS = ["*"]  # internal demo; no public exposure
 
 INSTALLED_APPS = [
     "django.contrib.staticfiles",
@@ -52,7 +53,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 USE_TZ = True
 TIME_ZONE = "UTC"
 
-# ---- 项目自有配置（外部调用集中在 research/providers.py）----
+# ---- Project-specific settings (external calls centralized in research/providers.py) ----
 
 CORPUS_DIR = Path(os.environ.get("CORPUS_DIR", BASE_DIR / "case_study"))
 PAGE_ASSET_DIR = Path(os.environ.get("PAGE_ASSET_DIR", BASE_DIR / "page_assets"))

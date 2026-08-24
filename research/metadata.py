@@ -1,14 +1,15 @@
-"""文件名元数据解析。
+"""Filename metadata parsing.
 
-文件名格式（券商研报）：
+Filename format (broker research reports):
     YYYYMMDD - Broker - [TICKER - ] Title... - N pages.pdf
-已实测的坑：
-- 文件名页数系统性错误（12→6、18→8、40→32）——只存为 claimed_page_count，
-  真实页数以 PyMuPDF 打开后为准。
-- 4 份 NVIDIA 官方 deck 无此格式 → broker="NVIDIA"（发行方），日期留空，
-  由摄取时的首页内容校验兜底。
-- Title 段内可能再含 " - "（如 "Revision - U S Semiconductors"），
-  故 ticker 只认第一个段落且须匹配别名字典的符号。
+Pitfalls observed in practice:
+- Page counts in filenames are systematically wrong (12→6, 18→8, 40→32) — stored
+  only as claimed_page_count; the true count comes from opening with PyMuPDF.
+- 4 official NVIDIA decks don't follow this format → broker="NVIDIA" (the issuer),
+  date left empty; the first-page content check at ingest time is the fallback.
+- The Title segment may itself contain " - " (e.g. "Revision - U S Semiconductors"),
+  so the ticker is only taken from the first segment and must match a symbol in the
+  alias dictionary.
 """
 
 import re
@@ -19,7 +20,7 @@ from .tickers import TICKER_ALIASES
 
 _MONTHS = ("January|February|March|April|May|June|July|"
            "August|September|October|November|December")
-# 首页常见日期写法："8 July 2025" / "June 11, 2025" / "August 28, 2025"
+# Common first-page date styles: "8 July 2025" / "June 11, 2025" / "August 28, 2025"
 _TEXT_DATE_RES = [
     (re.compile(rf"\b(\d{{1,2}})\s+({_MONTHS})\s+(20\d{{2}})\b"), "%d %B %Y", (1, 2, 3)),
     (re.compile(rf"\b({_MONTHS})\s+(\d{{1,2}}),?\s+(20\d{{2}})\b"), "%B %d %Y", (2, 1, 3)),
@@ -27,7 +28,7 @@ _TEXT_DATE_RES = [
 
 
 def date_from_text(text: str) -> date | None:
-    """首页文本中的第一个可解析日期（内容侧兜底）。"""
+    """First parseable date in the first-page text (content-side fallback)."""
     for pat, fmt, order in _TEXT_DATE_RES:
         m = pat.search(text)
         if m:
@@ -47,15 +48,15 @@ _BROKER_RE = re.compile(
 class FileMeta:
     broker: str
     published_date: date | None
-    ticker: str | None  # 文件名声明的主 ticker（tickers[] 首位）
+    ticker: str | None  # Primary ticker declared in the filename (first in tickers[])
     title: str
-    claimed_page_count: int | None  # 已知不可信，仅存档
+    claimed_page_count: int | None  # Known unreliable; kept for the record only
 
 
 def parse_filename(stem: str) -> FileMeta:
     m = _BROKER_RE.match(stem)
     if not m:
-        # NVIDIA 官方 deck：GTC-Paris-2025-Keynote / NVDA-F1Q26-... / NVIDIA-2025-NDR-...
+        # Official NVIDIA decks: GTC-Paris-2025-Keynote / NVDA-F1Q26-... / NVIDIA-2025-NDR-...
         return FileMeta(
             broker="NVIDIA",
             published_date=None,

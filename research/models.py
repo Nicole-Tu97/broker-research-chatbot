@@ -1,9 +1,12 @@
-"""三张表。
+"""Three tables.
 
-- Page 为检索原子：markdown 是检索语料，raw_text 是数字校验与调和的依据。
-- search_vector 是数据库生成列——转录写入即索引，无应用侧同步代码。
-- Conversation.messages 存整个消息列表；图像只存引用 (document_id, page_number,
-  png_path)，构造请求时按当轮 rehydrate。
+- Page is the retrieval atom: markdown is the retrieval corpus, raw_text is
+  the basis for numeric checks and reconciliation.
+- search_vector is a database-generated column — transcriptions are indexed on
+  write, with no application-side sync code.
+- Conversation.messages stores the whole message list; images are stored as
+  references only (document_id, page_number, png_path) and rehydrated per turn
+  when building the request.
 """
 
 import uuid
@@ -27,7 +30,8 @@ class Document(models.Model):
     content_hash = models.CharField(max_length=64, unique=True)
     broker = models.TextField(blank=True, default="")
     published_date = models.DateField(null=True, blank=True)
-    # mentioned-tickers 语义：提及即标，主 ticker（文件名解析）排首位
+    # mentioned-tickers semantics: any mention is tagged; the primary ticker
+    # (parsed from the filename) comes first
     tickers = ArrayField(models.TextField(), default=list, blank=True)
     ticker_pages = models.JSONField(default=dict, blank=True)  # {"NVDA": [1, 7, 12]}
     title = models.TextField(blank=True, default="")
@@ -44,10 +48,12 @@ class Document(models.Model):
 
 class Page(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="pages")
-    page_number = models.IntegerField()  # 1-indexed，引用锚点
+    page_number = models.IntegerField()  # 1-indexed, citation anchor
     raw_text = models.TextField(blank=True, default="")
-    # NULL = 尚未转录；"" = 已转录且合法为空（免责声明页被 prompt 忽略）。
-    # 这是 TextField 用 null 的教科书反例场景——恰恰需要三态。
+    # NULL = not yet transcribed; "" = transcribed and legitimately empty
+    # (disclaimer pages the prompt is told to ignore). This is the textbook
+    # counterexample to "never use null on a TextField" — three states are
+    # exactly what we need.
     markdown = models.TextField(null=True, blank=True, default=None)
     has_visual = models.BooleanField(default=False)
     png_path = models.TextField(blank=True, default="")
@@ -57,11 +63,12 @@ class Page(models.Model):
         output_field=SearchVectorField(),
         db_persist=True,
     )
-    numeric_flags = models.JSONField(null=True, blank=True)  # 可疑数字列表（摄取期校验产物）
+    numeric_flags = models.JSONField(null=True, blank=True)  # suspect-number list (ingest-time check output)
 
     @property
     def png_abspath(self):
-        """png_path 只存 basename（fixture 可跨机器迁移）；读取侧在此拼接。"""
+        """png_path stores only the basename (fixtures stay portable across
+        machines); the read side joins the full path here."""
         from django.conf import settings
 
         return settings.PAGE_ASSET_DIR / self.png_path if self.png_path else None

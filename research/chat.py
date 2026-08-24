@@ -1,9 +1,12 @@
-"""对话循环：标准 function calling，两个工具。
+"""Chat loop: standard function calling with two tools.
 
-- 语料边界注入：启动时从库里算（覆盖区间、券商、篇数），事实进 system。
-- 消息持久化只存图像引用；构造请求时仅当前轮工具结果 rehydrate 原图。
-- 回答后处理全部为确定性纯函数：溯源徽章（数字 ↔ 被引页）、时效性标签
-  （同券商同 ticker 是否有更新报告）、成本脚注（usage 累计）。零额外 API 调用。
+- Corpus-boundary injection: computed from the DB at startup (coverage window,
+  brokers, report count); the facts go into the system prompt.
+- Message persistence stores image references only; when building a request, only
+  the current turn's tool results rehydrate the original images.
+- All answer post-processing is deterministic pure functions: grounding badges
+  (numbers vs. cited pages), recency labels (whether the same broker has a newer
+  report on the same ticker), cost footer (accumulated usage). Zero extra API calls.
 """
 
 import base64
@@ -19,7 +22,7 @@ from . import providers, tools
 from .models import Conversation, Document, Page
 from .numeric import numbers_in
 
-PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M，Sol 假设价（官方定价待核对）
+PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M, assumed prices for Sol (official pricing TBD)
 MAX_TOOL_ROUNDS = 6
 
 BEHAVIOR_RULES = """
@@ -52,7 +55,7 @@ Answer rules (non-negotiable):
 
 
 def corpus_boundary() -> str:
-    """启动时算一次的语料边界事实（行为规则 1 的数据侧）。"""
+    """Corpus-boundary facts computed once at startup (the data side of behavior rule 1)."""
     docs = Document.objects.filter(status=Document.Status.DONE)
     n = docs.count()
     if not n:
@@ -86,11 +89,13 @@ def _png_b64(png_path: str) -> str | None:
 
 def _tool_output_items(call_id: str, payload: dict,
                        sent_images: set | None = None) -> tuple[dict, dict]:
-    """(带图的 API item, 只带引用的存储 item)。原图只进当前轮请求，不进历史。
+    """(API item with images, storage item with references only). Original images
+    go only into the current turn's request, never into history.
 
-    sent_images：本轮已附过图的 (document_id, page_number) 集合。轮内 api_input
-    是累积的——第一次附的图在后续每轮上下文里都还在，同页重附纯属烧钱
-    （实测一次失败回合 115 次附图仅 37 张不同页）。"""
+    sent_images: set of (document_id, page_number) already attached this turn.
+    Within a turn api_input is cumulative — an image attached once stays in every
+    later round's context, so re-attaching the same page just burns money (one
+    observed failing turn attached images 115 times for only 37 distinct pages)."""
     slim = json.dumps(payload, ensure_ascii=False)
     image_refs = []
     content: list[dict] = [{"type": "input_text", "text": slim}]
@@ -99,7 +104,7 @@ def _tool_output_items(call_id: str, payload: dict,
             key = (r["document_id"], r["page_number"])
             if sent_images is not None:
                 if key in sent_images:
-                    continue  # 本轮上下文里已有这张原图
+                    continue  # this original image is already in this turn's context
                 sent_images.add(key)
             b64 = _png_b64(r["png_path"])
             if b64:
@@ -115,18 +120,21 @@ def _tool_output_items(call_id: str, payload: dict,
 
 
 def _history_to_api(messages: list[dict]) -> list[dict]:
-    """历史消息 → API input：只保留 user/assistant 消息。
+    """History messages -> API input: keep only user/assistant messages.
 
-    工具流量（function_call / 其结果 / reasoning）不跨轮回传：推理模型要求
-    function_call 与其 reasoning item 成对出现，而合成答案已携带结论、
-    页面可随时通过工具重取（"历史图像不重放"的动机推广到全部工具流量）。
-    完整工具流量仍持久化在 Conversation.messages 里供审计与 UI。"""
+    Tool traffic (function_call / its results / reasoning) is not replayed across
+    turns: reasoning models require each function_call to appear paired with its
+    reasoning item, the synthesized answer already carries the conclusions, and
+    pages can be re-fetched via the tools at any time (the "don't replay past
+    images" rationale generalized to all tool traffic). Full tool traffic is still
+    persisted in Conversation.messages for auditing and the UI."""
     return [m for m in messages if m.get("role") in ("user", "assistant")]
 
 
 _BRACKET_RE = re.compile(r"\[([^\[\]]+)\]")
-# 日期接受多种表面形式：模型不总输出 ISO（实测写过 "September 2025"），解析层
-# 必须比 prompt 的措辞更宽——引用解析失败的代价是链接/徽章/Sources 全部消失。
+# Dates accept multiple surface forms: the model does not always emit ISO (it has
+# been seen writing "September 2025"), so the parsing layer must be looser than the
+# prompt's wording — a failed citation parse costs all links/badges/Sources.
 _MONTH = (r"Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|"
           r"Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|"
           r"Nov(?:ember)?|Dec(?:ember)?")
@@ -141,10 +149,11 @@ _MONTHS = {m: i for i, m in enumerate(
 
 
 def _date_prefix(date_s: str) -> str | None:
-    """引用里的日期表面形式 → ISO 前缀（与 published_date 做前缀比对）。
+    """Date surface form in a citation -> ISO prefix (prefix-matched against published_date).
 
-    "2025-09-05" → "2025-09-05"；"September 2025" → "2025-09"；"2025" → "2025"；
-    "n.d." 或解析不出 → None（不按日期过滤——broker+页号+本轮检索集仍是硬门）。"""
+    "2025-09-05" -> "2025-09-05"; "September 2025" -> "2025-09"; "2025" -> "2025";
+    "n.d." or unparseable -> None (no date filtering — broker + page number +
+    this turn's retrieved set remain the hard gate)."""
     s = date_s.strip()
     if re.fullmatch(r"\d{4}-\d{2}-\d{2}", s) or re.fullmatch(r"\d{4}", s):
         return s
@@ -159,7 +168,7 @@ def _date_prefix(date_s: str) -> str | None:
 
 
 def _citation_fragments(answer: str):
-    """支持复合引用 [A, date, p.1; B, date, p.3]：按 ';' 拆分逐条解析。"""
+    """Support compound citations [A, date, p.1; B, date, p.3]: split on ';', parse each."""
     for bm in _BRACKET_RE.finditer(answer):
         for frag in bm.group(1).split(";"):
             m = CITATION_RE.fullmatch(frag.strip())
@@ -168,14 +177,17 @@ def _citation_fragments(answer: str):
 
 
 def grounding_badges(answer: str, turn_pages: dict[tuple, Page]) -> list[dict]:
-    """溯源徽章：答案里的每条引用 → 数字是否都在被引页上。纯函数。"""
+    """Grounding badges: for each citation in the answer, are its numbers on the
+    cited page. Pure function."""
     answer_nums = set(numbers_in(answer))
     badges = []
     for label, m in _citation_fragments(answer):
         broker_frag, date_s, page_no = m.group(1).strip(), m.group(2), int(m.group(3))
-        # 防伪造的硬门 = 该页必须在本轮检索结果里（broker+页号）。日期是附加校验：
-        # 仅当文档本身有日期时才比对（ds="None" 即无日期——如 NVIDIA 自家 deck，
-        # 文件名与首页都无日期可解析；此时模型引用里的日期无从核对，不作为否决项）。
+        # Anti-fabrication hard gate = the page must be among this turn's retrieved
+        # results (broker + page number). The date is an extra check, compared only
+        # when the document itself has one (ds="None" means no date — e.g. NVIDIA's
+        # own decks, where neither filename nor first page yields a parseable date;
+        # then the citation's date cannot be verified and is not treated as a veto).
         want = _date_prefix(date_s)
         page = next((p for (b, ds, n), p in turn_pages.items()
                      if broker_frag.lower() in b.lower() and n == page_no
@@ -186,9 +198,12 @@ def grounding_badges(answer: str, turn_pages: dict[tuple, Page]) -> list[dict]:
                            "note": "cited page not among this turn's retrieved results"})
             continue
         page_nums = set(numbers_in(f"{page.raw_text}\n{page.markdown or ''}"))
-        # 只核对"既在答案里、又落在这条引用附近语境"过重——取保守口径：
-        # 答案数字 ∩ 页面数字 ≥ 1 且无"答案独有且被归于此页"的能力做不到纯函数判定，
-        # 徽章口径 = 该页数字与答案数字有交集 → 绿；无交集 → 警示（可能是纯定性引用）
+        # Checking only numbers "in the answer AND near this citation's context"
+        # is too heavy — take the conservative reading: "answer nums ∩ page nums
+        # >= 1 with no answer-only number attributed to this page" cannot be
+        # decided by a pure function, so the badge criterion = page numbers
+        # intersect answer numbers -> green; no intersection -> warning (the
+        # citation may be purely qualitative)
         overlap = answer_nums & page_nums
         badges.append({
             "citation": label,
@@ -203,15 +218,16 @@ def grounding_badges(answer: str, turn_pages: dict[tuple, Page]) -> list[dict]:
     return badges
 
 
-FIGURE_CROP_CAP = 2      # 每回答最多定位 2 张图（约 $0.025/张，控制成本与延迟）
-_CROP_PAD = 2.0          # 外扩 2%：宁多裁一圈，不切掉轴标签
+FIGURE_CROP_CAP = 2      # at most 2 figure locates per answer (~$0.025 each; caps cost/latency)
+_CROP_PAD = 2.0          # expand 2% outward: better to over-crop than cut off axis labels
 
 
 def _valid_crop(box) -> dict | None:
-    """bbox 的确定性校验与外扩。纯函数。
+    """Deterministic bbox validation and expansion. Pure function.
 
-    拒绝：坐标缺失/越界/退化、面积 <8%（可能定位错）或 >85%（等于整页，
-    直接回退整页更诚实）。通过 → 外扩 _CROP_PAD 并夹回 [0,100]。"""
+    Rejects: missing/out-of-range/degenerate coordinates, area <8% (likely a
+    mislocate) or >85% (effectively the whole page — falling back to the full
+    page is more honest). On pass -> expand by _CROP_PAD and clamp to [0,100]."""
     try:
         x0, y0 = float(box["x0"]), float(box["y0"])
         x1, y1 = float(box["x1"]), float(box["y1"])
@@ -227,14 +243,19 @@ def _valid_crop(box) -> dict | None:
 
 
 def _figure_crops(question: str, badges: list[dict], emit) -> tuple[int, int, int]:
-    """对被引且含图的页（去重、上限 FIGURE_CROP_CAP）做三选一判定：
+    """Three-way call for cited pages with visuals (deduped, capped at FIGURE_CROP_CAP):
 
-    - 页上有与问题相关的图表/表格 → badge 带 crop（前端裁剪嵌入）
-    - 这页本身就是一张图（如 keynote slide）→ badge 带 show_page（整页嵌入）
-    - 纯文字提取页 → 什么都不标（前端不插图——引用链接足够）
+    - page has a chart/table relevant to the question -> badge gets crop
+      (frontend embeds the cropped region)
+    - the page itself is one big figure (e.g. a keynote slide) -> badge gets
+      show_page (embed the whole page)
+    - plain text-extraction page -> mark nothing (frontend embeds no image —
+      the citation link is enough)
 
-    找到了相关图形但坐标没过校验 → 退回 show_page（图确实在这页上，整页比不给强）；
-    调用失败/解析失败 → 不插图（宁静默，不冗余）。纯展示层，仅 UI 流式路径调用。"""
+    Relevant figure found but the bbox fails validation -> fall back to show_page
+    (the figure really is on this page; the whole page beats nothing); call or
+    parse failure -> no image (prefer silence over noise). Pure presentation
+    layer, called only on the streaming UI path."""
     seen: set[tuple] = set()
     u_in = u_out = calls = 0
     for b in badges:
@@ -271,7 +292,8 @@ def _figure_crops(question: str, badges: list[dict], emit) -> tuple[int, int, in
 
 
 def recency_labels(badges: list[dict]) -> list[dict]:
-    """时效性标签：被引报告的同券商同主 ticker 是否存在更新的报告。"""
+    """Recency labels: whether the cited report's broker has a newer report on
+    the same primary ticker."""
     labels = []
     for b in badges:
         if "document_id" not in b:
@@ -294,29 +316,30 @@ def recency_labels(badges: list[dict]) -> list[dict]:
 def run_turn(conversation: Conversation, text: str,
              image_b64: str | None = None, pdf_b64: str | None = None,
              pdf_name: str = "upload.pdf", emit=None) -> dict:
-    """一轮完整对话。emit 提供时发进度事件（SSE 用）：round / tool / tool_result /
-    delta；不提供时（evaluate 等离线路径）行为与旧非流式版完全一致。"""
+    """One full conversation turn. When emit is given, sends progress events (for
+    SSE): round / tool / tool_result / delta; without it (offline paths such as
+    evaluate) behavior matches the old non-streaming version exactly."""
     streaming = emit is not None
     emit = emit or (lambda e: None)
-    # 非流式路径（evaluate 等）on_delta=None → providers.chat 走旧的一次性 POST
+    # non-streaming path (evaluate etc.): on_delta=None -> providers.chat does the old one-shot POST
     on_delta = (lambda s: emit({"type": "delta", "text": s})) if streaming else None
     t0 = time.time()
     usage_in = usage_out = usage_cached = calls = 0
     trace: list[dict] = []
     turn_pages: dict[tuple, Page] = {}
-    sent_images: set[tuple] = set()  # 轮内已附原图的页（去重）
+    sent_images: set[tuple] = set()  # pages whose originals were already attached this turn (dedup)
 
     user_content: list[dict] = [{"type": "input_text", "text": text}]
-    if image_b64:  # 图片直接进 user message（不做描述中转）
+    if image_b64:  # image goes straight into the user message (no description relay)
         user_content.append({"type": "input_image", "detail": "high",
                              "image_url": f"data:image/png;base64,{image_b64}"})
-    if pdf_b64:  # PDF 走 input_file 直传，不入索引
+    if pdf_b64:  # PDF is passed directly via input_file; it is not indexed
         user_content.append({"type": "input_file", "filename": pdf_name,
                              "file_data": f"data:application/pdf;base64,{pdf_b64}"})
     user_msg = {"role": "user", "content": user_content}
 
     api_input = _history_to_api(conversation.messages) + [user_msg]
-    # 存储侧：上传件不落库（体积），只存占位说明
+    # storage side: uploads are not persisted (size); store only a placeholder note
     store_user = {"role": "user", "content": [{"type": "input_text", "text": text}]}
     if image_b64 or pdf_b64:
         store_user["content"].append(
@@ -343,8 +366,9 @@ def run_turn(conversation: Conversation, text: str,
                               "content": [{"type": "output_text", "text": answer}]})
             break
 
-        # 推理模型要求：function_call 必须连同其 reasoning item 一起回传，
-        # 故轮内把本次响应的全部 output items 原样接回 input。
+        # Reasoning models require each function_call to be sent back together with
+        # its reasoning item, so within the turn this response's output items are
+        # appended to the input verbatim.
         api_input.extend(res.get("output", []))
         for fc in fcalls:
             new_items.append({"type": "function_call", "call_id": fc["call_id"],
@@ -353,7 +377,7 @@ def run_turn(conversation: Conversation, text: str,
             emit({"type": "tool", "name": fc["name"], "args": args})
             try:
                 payload = tools.dispatch(fc["name"], dict(args))
-            except Exception as exc:  # 工具错误回给模型自我修正，不炸整轮
+            except Exception as exc:  # feed tool errors back for self-correction; don't kill the turn
                 payload = {"error": str(exc)[:300]}
             n_res = len(payload.get("results", [])) or payload.get("count") or 0
             emit({"type": "tool_result", "name": fc["name"], "n_results": n_res})
@@ -371,13 +395,14 @@ def run_turn(conversation: Conversation, text: str,
             api_input.append(api_item)
             new_items.append(store_item)
     else:
-        # 撞轮次上限 → 强制一轮无工具的尽力作答（放弃消息是严格更差的输出）
+        # Hit the round cap -> force one tool-free best-effort answer (a give-up
+        # message is a strictly worse output)
         api_input.append({"role": "user", "content": [{"type": "input_text", "text":
             "(System) Tool-round limit reached. Answer now from the content retrieved "
             "above; explicitly state what could not be retrieved. Do not fabricate. "
             "Do not call any more tools."}]})
         emit({"type": "round", "round": MAX_TOOL_ROUNDS + 1})
-        res = providers.chat(api_input, instructions, on_delta=on_delta)  # 不传 tools
+        res = providers.chat(api_input, instructions, on_delta=on_delta)  # no tools passed
         u = res.get("usage", {})
         usage_in += u.get("input_tokens", 0)
         usage_out += u.get("output_tokens", 0)
@@ -390,22 +415,25 @@ def run_turn(conversation: Conversation, text: str,
                           "content": [{"type": "output_text", "text": answer}]})
 
     badges = grounding_badges(answer, turn_pages)
-    if streaming:  # 图形定位仅 UI 路径；evaluate 不跑，评估成本为零
+    if streaming:  # figure locating is UI-path only; evaluate skips it, so eval cost is zero
         ci, co, cc = _figure_crops(text, badges, emit)
         usage_in += ci
         usage_out += co
         calls += cc
-    # 原子追加（审查确认的 lost-update 修复）：请求线程加载的快照做
-    # read-modify-write 会让并发轮（双开标签页/断连后立刻重问）互相覆盖。
-    # 行锁内重取再追加；updated_at 是 auto_now，必须列入 update_fields 才会刷新。
+    # Atomic append (review-confirmed lost-update fix): read-modify-write on the
+    # snapshot loaded by the request thread lets concurrent turns (two open tabs /
+    # an immediate re-ask after a disconnect) overwrite each other. Re-fetch under
+    # a row lock, then append; updated_at is auto_now and only refreshes if it is
+    # listed in update_fields.
     with transaction.atomic():
         locked = Conversation.objects.select_for_update().get(id=conversation.id)
         locked.messages = locked.messages + new_items
         locked.save(update_fields=["messages", "updated_at"])
     conversation.messages = locked.messages
 
-    # 缓存命中的输入按 1/10 价估算（OpenAI 自动前缀缓存的典型折扣；官方价核实前
-    # 与 $5/$30 同为假设价）。此前按全价估，多轮回合显著虚高。
+    # Cache-hit input is estimated at 1/10 price (the typical discount of OpenAI's
+    # automatic prefix caching; like $5/$30, an assumed rate until official pricing
+    # is verified). Estimating at full price previously overstated multi-round turns.
     cost = ((usage_in - usage_cached) / 1e6 * PRICE_IN
             + usage_cached / 1e6 * PRICE_IN * 0.1
             + usage_out / 1e6 * PRICE_OUT)

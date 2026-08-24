@@ -1,11 +1,14 @@
-"""两个检索工具。schema 与实现同文件，避免漂移。
+"""The two retrieval tools. Schemas live in the same file as the
+implementations to avoid drift.
 
-- search_pages：向量（pgvector cosine）与全文（ts_rank_cd）各取 top-50，
-  RRF（rrf_k=10）融合取前 k。每路独立排名进检索追踪，供 eval 归因。
-- list_reports：纯元数据 SQL。返回首页转录 + 各 ticker 命中页码；
-  description 写明恢复路径（2/21 份报告 PT 不在首页）。
-- 原图回传是 chat 层的职责：工具返回 png_path 与 has_visual，
-  由循环组装 function_call_output 的 image content。
+- search_pages: vector (pgvector cosine) and full-text (ts_rank_cd) legs each
+  take top-50, fused via RRF (rrf_k=10), returning the top k. Each leg's
+  independent rank goes into the retrieval trace for eval attribution.
+- list_reports: pure metadata SQL. Returns the first-page transcription plus
+  the pages where each ticker is mentioned; the description spells out the
+  recovery path (2 of 21 reports keep the PT off page 1).
+- Returning the original image is the chat layer's job: tools return png_path
+  and has_visual, and the loop assembles the function_call_output image content.
 """
 
 from datetime import date
@@ -17,8 +20,8 @@ from pgvector.django import CosineDistance
 from . import providers
 from .models import Document, Page
 
-LEG_DEPTH = 50   # 每路候选深度（融合前每路 ≥50）
-RRF_K = 10       # 小常数：单路强命中不被稀释
+LEG_DEPTH = 50   # candidate depth per leg (>=50 per leg before fusion)
+RRF_K = 10       # small constant: a strong single-leg hit is not diluted
 
 
 def _doc_filters(tickers=None, brokers=None, date_from=None, date_to=None) -> Q:
@@ -38,9 +41,11 @@ def _doc_filters(tickers=None, brokers=None, date_from=None, date_to=None) -> Q:
 
 
 def _undated_warning(tickers=None, brokers=None) -> str | None:
-    """日期过滤的盲区提示：published_date=None 的文档（公司自家 deck，
-    页面上无任何可解析日期）会被任何日期过滤静默排除。此提示让 agent 能在
-    一次重试内恢复，而不是在 0 results 里反复换措辞。确定性 SQL，零 API。"""
+    """Blind-spot warning for date filters: documents with published_date=None
+    (company-authored decks with no parseable date anywhere on the page) are
+    silently excluded by any date filter. This warning lets the agent recover
+    within one retry instead of rewording endlessly against 0 results.
+    Deterministic SQL, zero API calls."""
     q = Q(status=Document.Status.DONE, published_date=None)
     if tickers:
         q &= Q(tickers__overlap=[t.upper() for t in tickers])
@@ -73,7 +78,7 @@ def _page_payload(page: Page, extra: dict | None = None) -> dict:
         "png_path": page.png_path,
     }
     if page.numeric_flags:
-        out["suspect_numbers"] = page.numeric_flags  # 摄取期数字校验的工具侧消费者
+        out["suspect_numbers"] = page.numeric_flags  # tool-side consumer of ingest-time numeric checks
     if extra:
         out.update(extra)
     return out
@@ -82,14 +87,15 @@ def _page_payload(page: Page, extra: dict | None = None) -> dict:
 def search_pages(query: str, tickers=None, brokers=None,
                  date_from=None, date_to=None, k: int = 8,
                  mode: str = "hybrid") -> dict:
-    """混合检索。返回 {results: [...], trace: {...}}。
+    """Hybrid retrieval. Returns {results: [...], trace: {...}}.
 
-    mode 仅供消融评估（dense/fts/hybrid），不暴露给模型（不在 TOOL_SCHEMAS）。"""
+    mode is for ablation evals only (dense/fts/hybrid) and is not exposed to
+    the model (absent from TOOL_SCHEMAS)."""
     base = Page.objects.exclude(markdown=None).exclude(markdown="").filter(
         _doc_filters(tickers, brokers, date_from, date_to)
     ).select_related("document")
 
-    # 向量一路
+    # Vector leg
     vec_ids = []
     if mode in ("hybrid", "dense"):
         qvec = providers.embed([query])[0]
@@ -98,7 +104,7 @@ def search_pages(query: str, tickers=None, brokers=None,
             .order_by(CosineDistance("embedding", qvec))
             .values_list("id", flat=True)[:LEG_DEPTH])
 
-    # 全文一路（websearch 语法：容忍分析师的自然措辞）
+    # Full-text leg (websearch syntax: tolerates analysts' natural phrasing)
     fts_ids = []
     if mode in ("hybrid", "fts"):
         sq = SearchQuery(query, config="english", search_type="websearch")
@@ -108,7 +114,7 @@ def search_pages(query: str, tickers=None, brokers=None,
             .order_by("-rank")
             .values_list("id", flat=True)[:LEG_DEPTH])
 
-    # RRF 融合
+    # RRF fusion
     scores: dict[int, float] = {}
     for leg in (vec_ids, fts_ids):
         for rank, pid in enumerate(leg, start=1):
@@ -122,7 +128,7 @@ def search_pages(query: str, tickers=None, brokers=None,
         _page_payload(pages[pid], {"rrf_score": round(scores[pid], 4)})
         for pid in top if pid in pages
     ]
-    # 检索追踪：每路独立排名，miss 可归因到具体一路
+    # Retrieval trace: independent per-leg ranks, so a miss is attributable to a specific leg
     trace = {
         "query": query,
         "filters": {"tickers": tickers, "brokers": brokers,
@@ -143,10 +149,11 @@ def search_pages(query: str, tickers=None, brokers=None,
 
 
 def list_reports(tickers=None, brokers=None, date_from=None, date_to=None) -> dict:
-    """元数据 SQL：匹配报告按日期排序，各带首页转录与 ticker 命中页码。"""
+    """Metadata SQL: matching reports sorted by date, each with its first-page
+    transcription and the pages where each ticker is mentioned."""
     docs = Document.objects.filter(status=Document.Status.DONE)
     inner = _doc_filters(tickers, brokers, date_from, date_to)
-    # _doc_filters 生成的是 Page 侧前缀，剥掉 document__ 前缀复用于 Document 查询
+    # _doc_filters emits Page-side lookups; strip the document__ prefix to reuse on Document
     docs = docs.filter(_strip_document_prefix(inner)).order_by("published_date")
 
     reports = []
@@ -184,7 +191,7 @@ def _strip_document_prefix(q: Q) -> Q:
     return new
 
 
-# ---- Responses API 工具 schema（与上方签名同源维护）----
+# ---- Responses API tool schemas (maintained alongside the signatures above) ----
 
 TOOL_SCHEMAS = [
     {
@@ -244,7 +251,8 @@ TOOL_SCHEMAS = [
 
 
 def dispatch(name: str, args: dict) -> dict:
-    """chat 循环的工具分发入口。日期串转 date，未知工具名显式报错。"""
+    """Tool-dispatch entry point for the chat loop. Converts date strings to
+    date objects; raises explicitly on unknown tool names."""
     for key in ("date_from", "date_to"):
         if args.get(key):
             args[key] = date.fromisoformat(args[key])
@@ -252,4 +260,4 @@ def dispatch(name: str, args: dict) -> dict:
         return search_pages(**args)
     if name == "list_reports":
         return list_reports(**args)
-    raise ValueError(f"未知工具: {name}")
+    raise ValueError(f"Unknown tool: {name}")
