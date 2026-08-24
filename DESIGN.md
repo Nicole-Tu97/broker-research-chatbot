@@ -1,8 +1,8 @@
 # Design — Broker Research Chatbot
 
-> English deliverable. The full working log — every failed path, reversal, and
-> measurement that produced this design — is in `DECISION-LOG.md` (Chinese; ask me
-> anything about it). Evaluation evidence: `eval/validation_report.md` + Appendix A below.
+> English deliverable. Behind it sits a fuller personal working log (Chinese) with
+> every failed path, reversal, and measurement — kept outside the repo; ask me
+> anything about it. Evaluation evidence: `eval/validation_report.md` + Appendix A below.
 
 ## 1. The problem, taken seriously
 
@@ -185,8 +185,9 @@ sub-page chunking, no bbox cropping, no Celery/Redis, no Batch API at this scale
 prompt-caching engineering (system prompt is ~5% of spend), no LLM-as-judge anywhere
 (deterministic validation instead — "who validates the validator" terminates), no
 frontend framework, no auth/multi-tenancy. Each omission is argued, and several were
-*reversals of our own earlier designs* — documented with their trigger and lesson in
-`DECISION-LOG.md`, per the brief's request for what we tried and what didn't work.
+*reversals of our own earlier designs* — each documented with its trigger and lesson
+in the working log, and the biggest ones summarized throughout this document, per the
+brief's request for what we tried and what didn't work.
 
 ## 11. Known limits (stated, not hidden)
 
@@ -200,8 +201,8 @@ sampling.
 
 ## Appendix A — Pre-registered predictions vs. outcomes
 
-Registered before the first evaluation run (Chinese original preserved in
-`DECISION-LOG.md` 附录二); thresholds were fixed in advance and results were
+Registered before the first evaluation run (Chinese original preserved in the
+working log); thresholds were fixed in advance and results were
 never used to revise a prediction. Two predictions were falsified — kept as-is.
 
 | # | Prediction (threshold) | Outcome |

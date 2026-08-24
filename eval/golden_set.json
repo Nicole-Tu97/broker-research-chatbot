@@ -1,5 +1,5 @@
 {
-  "description": "检索与行为评估 golden set（ARCHITECTURE.md §8.2）。expected_pages 为 [文件名片段, 页码]，全部经语料实证（见 DECISION-LOG §十）。expected_facts 为答案必须包含的规范化数字/关键词；forbidden_facts 为出现即失败。",
+  "description": "检索与行为评估 golden set。expected_pages 为 [文件名片段, 页码]，全部经语料实证。expected_facts 为答案必须包含的规范化数字/关键词；forbidden_facts 为出现即失败。",
   "items": [
     {
       "id": "CT1",
@@ -26,7 +26,7 @@
         "175"
       ],
       "must_declare_boundary": true,
-      "notes": "旗舰题。标准答案见 DECISION-LOG 附录：Barclays 170→200→240，UBS 单点 175 无前值"
+      "notes": "旗舰题。标准答案：Barclays 170→200→240，UBS 单点 175 无前值"
     },
     {
       "id": "CT2",

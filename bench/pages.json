@@ -1,5 +1,5 @@
 {
-  "description": "转录质量基准测试集。四类共 20 页，覆盖下游四种消费方式。选页依据为 PyMuPDF 实测指标；dense_table 类按数字 token 密度选页（初版按字符数选页选中了免责声明页，见 DECISION-LOG §八）。",
+  "description": "转录质量基准测试集。四类共 20 页，覆盖下游四种消费方式。选页依据为 PyMuPDF 实测指标；dense_table 类按数字 token 密度选页（初版按字符数选页曾选中免责声明页——已修正）。",
   "criteria": {
     "number_fidelity": "转录中的数字与原页一致；错误数必须为 0（一票否决）",
     "no_hallucination": "不得出现原页不存在的内容（一票否决）",

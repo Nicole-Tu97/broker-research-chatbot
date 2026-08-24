@@ -23,7 +23,7 @@ render:        ## 只补渲页面 PNG（loaddata 之后用，零 API 调用）
 
 demo:          ## clone 后最短路径：数据库 + 迁移 + fixture + 重渲 PNG + 起服务
 	@test -f fixtures/corpus.json.gz || \
-		(echo "fixture 在交付阶段生成（ARCHITECTURE.md §6.4）——当前请用 make ingest"; exit 1)
+		(echo "fixture 随交付包提供（内含授权内容，不入公开仓库）——或用 make ingest 自建"; exit 1)
 	docker compose up -d db
 	$(PY) manage.py migrate
 	$(PY) manage.py loaddata fixtures/corpus.json.gz

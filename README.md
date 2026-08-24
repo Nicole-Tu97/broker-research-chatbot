@@ -3,15 +3,26 @@
 Django chatbot over broker research PDFs — hybrid retrieval (pgvector + Postgres FTS)
 with page-level citations, deterministic grounding badges, and recency labels.
 
-> **Start here:** [`DESIGN.md`](DESIGN.md) (design & trade-offs, English) ·
-> [`DECISION-LOG.md`](DECISION-LOG.md) (every failed path and reversal) ·
-> [`eval/validation_report.md`](eval/validation_report.md) (pre-registered, deterministic scoring) ·
-> demo script: `ARCHITECTURE.md` §13 (Chinese, personal notes)
+> **Start here:** [`DESIGN.md`](DESIGN.md) (design & trade-offs, and what we tried
+> that didn't work) · [`eval/validation_report.md`](eval/validation_report.md)
+> (pre-registered, deterministic scoring). A fuller personal working log (Chinese)
+> sits behind this repo — code comments cite its §sections; ask me anything about it.
 
 All six behavior dimensions pass machine scoring (final strict round): grounding 1.0,
 expected facts 1.0, abstention 4/4 (incl. a user-caught scope-substitution case),
 reproducibility 3/3, robustness 3/3, prompt-injection canary 0 leaks on both
 untrusted-input surfaces, client-watermark PII 0 leaks.
+
+## Deliverables map (per the case-study brief)
+
+| The brief asks for | Where it lives |
+|---|---|
+| Django app with a functional chatbot interface | `research/` app — chat UI at `/` (SSE streaming, page-level citations, inline figures) |
+| Data pipeline: how PDFs are processed and indexed | `research/management/commands/ingest.py` (discover → render → transcribe → validate → index) + transcription benchmark in `bench/` |
+| Documentation: choices, trade-offs, what didn't work, deliberate omissions | [`DESIGN.md`](DESIGN.md) — incl. §10 deliberately-not-built, §11 known limits, Appendix A with two falsified predictions kept as-is |
+| Retrieval quality evidence | `manage.py evaluate` → [`eval/validation_report.md`](eval/validation_report.md) (retrieval ablation + 6 behavior dimensions) |
+| References back to the original page/figure | every answer cites `[broker, date, p.N]`, links into the PDF at that page, and embeds the located figure |
+| Instructions to run locally | this README (Quick start · Full ingestion · Local development) |
 
 ## Quick start (fixture path — no ingestion cost, ~3 minutes)
 

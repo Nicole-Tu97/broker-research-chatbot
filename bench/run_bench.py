@@ -1,6 +1,6 @@
 """对基准测试页跑转录（多档位），产出待评分的转录结果。
 
-Responses API + detail=original（与生产配置一致，见 ARCHITECTURE.md §7）。
+Responses API + detail=original（与生产配置一致）。
 零第三方依赖（urllib），与 providers.py 的"外部调用集中一处"哲学一致。
 
 前置：
@@ -154,7 +154,7 @@ def main() -> int:
         print("错误：未设置 OPENAI_API_KEY（export $(grep -v '^#' .env | xargs)）", file=sys.stderr)
         return 2
     if not args.model:
-        print("错误：未设置 OPENAI_VISION_MODEL（或用 --model 指定），见 ARCHITECTURE.md §7", file=sys.stderr)
+        print("错误：未设置 OPENAI_VISION_MODEL（或用 --model 指定）", file=sys.stderr)
         return 2
 
     pages = json.loads((BENCH / "pages.json").read_text(encoding="utf-8"))["pages"]

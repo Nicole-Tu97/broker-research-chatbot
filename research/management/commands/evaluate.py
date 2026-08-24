@@ -339,5 +339,5 @@ class Command(BaseCommand):
                      f"**{'PASS' if not b['watermark']['leaks'] else 'FAIL'}**")
             L.append(f"\n行为验证 API 成本：${b['cost_usd']}")
         L.append("\n---\n明细见 `eval/results.json`。不适用维度（fairness/calibration/benchmarking）"
-                 "的砍除理由见 ARCHITECTURE.md §10。")
+                 "的砍除理由见 DESIGN.md §10。")
         return "\n".join(L)

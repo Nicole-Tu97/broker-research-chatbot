@@ -33,4 +33,4 @@
 行为验证 API 成本：$7.17
 
 ---
-明细见 `eval/results.json`。不适用维度（fairness/calibration/benchmarking）的砍除理由见 ARCHITECTURE.md §10。
+明细见 `eval/results.json`。不适用维度（fairness/calibration/benchmarking）的砍除理由见 DESIGN.md §10。
