@@ -1,8 +1,8 @@
-"""视图（§6.3）：聊天页 + SSE 流式对话 API + 页面资产。
+"""视图：聊天页 + SSE 流式对话 API + 页面资产。
 
 对话 API 返回 text/event-stream：进度事件（round/tool/tool_result）+ 答案增量
 （delta）+ 终帧（final，携带与旧 JSON 响应完全相同的 payload）。流式不改变
-总耗时，改变的是"第一个字出现"的时间（DECISION-LOG §十五）。
+总耗时，改变的是"第一个字出现"的时间。
 早期校验错误（空消息、不支持的文件类型）仍返回 JSON——前端按 content-type 区分。"""
 
 import base64
@@ -32,7 +32,7 @@ def index(request):
                   {"boundary": chat_mod.corpus_boundary()})
 
 
-@csrf_exempt  # 内部 demo，无认证面（§10）
+@csrf_exempt  # 内部 demo，无认证面（DESIGN.md §10）
 @require_POST
 def chat_api(request):
     text = (request.POST.get("message") or "").strip()
@@ -58,7 +58,7 @@ def chat_api(request):
             pdf_b64, pdf_name = base64.b64encode(blob).decode(), up.name
         elif (up.content_type or "").startswith("image/"):
             image_b64 = base64.b64encode(blob).decode()
-        else:  # 其他格式显式优雅拒绝（需求 #8，§6.3）
+        else:  # 其他格式显式优雅拒绝
             return JsonResponse({"error": f"Unsupported type {up.content_type or up.name} "
                                           "— text, images, and PDF are accepted"}, status=415)
 
@@ -112,7 +112,7 @@ def chat_api(request):
 
 def page_image(request, document_id: int, page_number: int):
     """页面图。可选 ?crop=x0,y0,x1,y1（页面宽高的百分比,0-100）——
-    从 PDF 按 clip 重渲该区域（§十八 图形裁剪),坐标非法时回退整页而非报错。"""
+    从 PDF 按 clip 重渲该区域（图形裁剪),坐标非法时回退整页而非报错。"""
     page = (Page.objects.filter(document_id=document_id, page_number=page_number)
             .select_related("document").first())
     if not page or not page.png_path:

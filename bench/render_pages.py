@@ -4,7 +4,7 @@
     python3 bench/render_pages.py [--dpi 150]   # 单档位 → bench/out/
     python3 bench/render_pages.py --tiers       # 多档位矩阵 → bench/out_tiers/<dpi>/
 
-多档位矩阵（§8.1）：keynote 类跑 4 档找质量下限；研报类跑 2 档验证 150 是否可降。
+多档位矩阵：keynote 类跑 4 档找质量下限；研报类跑 2 档验证 150 是否可降。
 文本层与 DPI 无关，只在 bench/out/ 存一份。
 
 产物：
@@ -26,7 +26,7 @@ OUT = ROOT / "bench" / "out"
 OUT_TIERS = ROOT / "bench" / "out_tiers"
 CORPUS = ROOT / "case_study"
 
-# §8.1 多档位矩阵：类别 → DPI 列表
+# 多档位矩阵：类别 → DPI 列表
 # keynote(40×22.5″)：150 为已验证的质量上限档，52 对应"幻灯片按字高归一"的理论档
 # 研报(letter/A4)：150 为按 ~7pt 正文推导的生产档，100 测试可否再降
 TIER_MATRIX = {

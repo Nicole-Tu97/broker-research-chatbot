@@ -1,7 +1,7 @@
 """阶段 1 测试：纯函数（元数据/ticker/数字校验）+ 真实语料文件名全量回归。
 
 确定性核心的测试无需 API key 与数据库（除模型测试外），
-呼应"保证来自校验"的设计（§4.3）。
+呼应"保证来自校验"的设计。
 """
 
 from datetime import date
@@ -44,7 +44,7 @@ class MetadataTests(SimpleTestCase):
         self.assertEqual(m.ticker, "NVDA")
 
     def test_date_from_first_page_text(self):
-        # §6.1 步骤 1 内容侧兜底：deck 无文件名日期，靠首页文本
+        # 内容侧兜底：deck 无文件名日期，靠首页文本
         self.assertEqual(date_from_text("NVIDIA Corp 8 July 2025 ab"), date(2025, 7, 8))
         self.assertEqual(date_from_text("... June 11, 2025 keynote"), date(2025, 6, 11))
         self.assertEqual(date_from_text("North America Equity Research 28 August 2025"),
@@ -71,7 +71,7 @@ class TickerTests(SimpleTestCase):
         self.assertNotIn("NVDA", tickers_in("nvda lowercase noise"))
 
     def test_company_name_maps_to_ticker(self):
-        # 关键回归：NVIDIA 官方 deck 与多行业报告只写公司名（DECISION-LOG §七.4）
+        # 关键回归：NVIDIA 官方 deck 与多行业报告只写公司名
         self.assertIn("NVDA", tickers_in("NVIDIA Serving $2 Trillion Europe Automotive"))
         self.assertIn("MSFT", tickers_in("Microsoft capex is rising"))
         self.assertIn("GOOG", tickers_in("Alphabet and Google Cloud"))
@@ -101,7 +101,7 @@ class NumericTests(SimpleTestCase):
         self.assertEqual(canon("$2025"), "2025")
 
     def test_reformat_not_flagged(self):
-        # 37% 页面的误报来源（DECISION-LOG §七.3）：换写法不算可疑
+        # 37% 页面的误报来源：换写法不算可疑
         self.assertEqual(suspect_numbers("PT 170 with 3539639 shares",
                                          "PT $170.00 ... 3,539,639"), [])
 
@@ -116,7 +116,7 @@ class NumericTests(SimpleTestCase):
         self.assertEqual(suspect_numbers("$100T only in pixels", ""), [])
 
     def test_known_blind_spot_documented(self):
-        # 诚实边界（§4.3/§8.1.1）：同值碰撞不可检——此测试记录该事实而非掩盖
+        # 诚实边界：同值碰撞不可检——此测试记录该事实而非掩盖
         self.assertEqual(suspect_numbers("PT is 200.00", "240.00 ... 200.00"), [])
 
 
@@ -135,7 +135,7 @@ class ModelTests(TestCase):
 
 
 class ToolTests(TestCase):
-    """检索工具（§6.2）：合成向量 + mock embed，不触外部 API。"""
+    """检索工具：合成向量 + mock embed，不触外部 API。"""
 
     @classmethod
     def setUpTestData(cls):
@@ -212,7 +212,7 @@ class ToolTests(TestCase):
         self.assertEqual(out["reports"][0]["ticker_hit_pages"], {"NVDA": [1, 3]})
 
     def test_date_filter_warns_about_undated_documents(self):
-        # §十七 回归:published_date=None 的文档被日期过滤静默排除,曾让模型
+        # 回归:published_date=None 的文档被日期过滤静默排除,曾让模型
         # 13 次调用找不到 NVIDIA deck($4.85 一轮)。工具必须给出恢复提示。
         from datetime import date as d
         from . import tools
@@ -245,7 +245,7 @@ class ToolTests(TestCase):
 
 
 class ChatPureTests(TestCase):
-    """chat 层确定性后处理（§6.3）：不触任何外部 API。"""
+    """chat 层确定性后处理：不触任何外部 API。"""
 
     @classmethod
     def setUpTestData(cls):
@@ -323,7 +323,7 @@ class ChatPureTests(TestCase):
         self.assertEqual(labels[0]["superseded_by"], "2025-09-25")
 
     def test_sse_parser_frames_and_tolerance(self):
-        # SSE 帧解析（§十五 流式）：分帧、多行 data、非 JSON 哨兵容错、无结尾空行
+        # SSE 帧解析：分帧、多行 data、非 JSON 哨兵容错、无结尾空行
         import io
         from .providers import _sse_data
         stream = io.BytesIO(
@@ -355,7 +355,7 @@ class ChatPureTests(TestCase):
         self.assertIsNone(m.call_args.kwargs.get("on_delta"))
 
     def test_conversation_append_survives_concurrent_writer(self):
-        # lost-update 回归（§十五 审查确认）：run_turn 持有的是请求线程的过期快照,
+        # lost-update 回归（审查确认）：run_turn 持有的是请求线程的过期快照,
         # 期间另一并发轮已落库——原子重取追加后,两轮的消息都必须幸存
         from unittest.mock import patch
         from . import chat as chat_mod
@@ -374,7 +374,7 @@ class ChatPureTests(TestCase):
         self.assertIn("SECOND-TURN", final)
 
     def test_tool_output_images_deduped_within_turn(self):
-        # §十七 成本修复:轮内同一页原图只附一次(api_input 累积,首份仍在上下文)
+        # 成本修复:轮内同一页原图只附一次(api_input 累积,首份仍在上下文)
         import tempfile
         from pathlib import Path
         from django.test import override_settings
@@ -393,7 +393,7 @@ class ChatPureTests(TestCase):
         self.assertEqual(sent, {(1, 5)})
 
     def test_valid_crop_guardrails(self):
-        # §十八:bbox 的确定性校验——坏框回退整页,好框外扩 2% 并夹回边界
+        # bbox 的确定性校验——坏框回退整页,好框外扩 2% 并夹回边界
         from .chat import _valid_crop
         self.assertIsNone(_valid_crop(None))
         self.assertIsNone(_valid_crop({"x0": 10, "y0": 10}))            # 缺坐标
@@ -406,7 +406,7 @@ class ChatPureTests(TestCase):
         self.assertEqual((c2["x0"], c2["y0"]), (0, 0))
 
     def test_figure_locator_three_way_decision(self):
-        # §二十一:定位器三选一——坐标→crop;整页即图→show_page;纯文字页→不标;
+        # 定位器三选一——坐标→crop;整页即图→show_page;纯文字页→不标;
         # 找到图但坐标没过校验→退回 show_page(图确实在,整页比不给强)
         import tempfile
         from pathlib import Path
@@ -436,7 +436,7 @@ class ChatPureTests(TestCase):
                         self.assertIn(expect, bs[0], ret)
 
     def test_page_image_crop_endpoint(self):
-        # §十八:?crop= 从 PDF 重渲区域;坐标非法回退整页(不 404 不炸)
+        # ?crop= 从 PDF 重渲区域;坐标非法回退整页(不 404 不炸)
         from django.conf import settings as st
         from .models import Document, Page
         pdfs = sorted(st.CORPUS_DIR.glob("*.pdf")) if st.CORPUS_DIR.exists() else []

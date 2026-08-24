@@ -5,8 +5,7 @@ with page-level citations, deterministic grounding badges, and recency labels.
 
 > **Start here:** [`DESIGN.md`](DESIGN.md) (design & trade-offs, and what we tried
 > that didn't work) · [`eval/validation_report.md`](eval/validation_report.md)
-> (pre-registered, deterministic scoring). A fuller personal working log (Chinese)
-> sits behind this repo — code comments cite its §sections; ask me anything about it.
+> (pre-registered, deterministic scoring).
 
 All six behavior dimensions pass machine scoring (final strict round): grounding 1.0,
 expected facts 1.0, abstention 4/4 (incl. a user-caught scope-substitution case),

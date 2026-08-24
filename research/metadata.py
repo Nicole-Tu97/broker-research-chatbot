@@ -1,10 +1,10 @@
-"""文件名元数据解析（ARCHITECTURE.md §6.1 步骤 1）。
+"""文件名元数据解析。
 
 文件名格式（券商研报）：
     YYYYMMDD - Broker - [TICKER - ] Title... - N pages.pdf
 已实测的坑：
 - 文件名页数系统性错误（12→6、18→8、40→32）——只存为 claimed_page_count，
-  真实页数以 PyMuPDF 打开后为准（§3）。
+  真实页数以 PyMuPDF 打开后为准。
 - 4 份 NVIDIA 官方 deck 无此格式 → broker="NVIDIA"（发行方），日期留空，
   由摄取时的首页内容校验兜底。
 - Title 段内可能再含 " - "（如 "Revision - U S Semiconductors"），
@@ -27,7 +27,7 @@ _TEXT_DATE_RES = [
 
 
 def date_from_text(text: str) -> date | None:
-    """首页文本中的第一个可解析日期（§6.1 步骤 1 的内容侧兜底）。"""
+    """首页文本中的第一个可解析日期（内容侧兜底）。"""
     for pat, fmt, order in _TEXT_DATE_RES:
         m = pat.search(text)
         if m:

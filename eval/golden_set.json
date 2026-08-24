@@ -281,7 +281,7 @@
       "expected_facts": [
         "220"
       ],
-      "notes": "PT 在 p3 而非首页——list_reports 恢复路径的直接测试（§6.2）"
+      "notes": "PT 在 p3 而非首页——list_reports 恢复路径的直接测试"
     },
     {
       "id": "NF2",

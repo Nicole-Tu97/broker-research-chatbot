@@ -222,13 +222,12 @@ function inlineCitations(html, citations){
 }
 
 // 需求原文："surface both the textual summary AND the original asset"——
-// 被引页含图表（has_visual）时，把原页图卡片插到该引用所在段落之后（最多 4 张，去重）。
-// 不做图表裁剪（bbox 检测被否决，DECISION-LOG §二.7）：交付的是原始资产本身。
+// 后端定位器对被引含图页做三选一判定，前端按标记把图卡片插到引用所在段落之后（最多 4 张，去重）。
 function embedFigures(container, citations){
   const seen = new Set(); let shown = 0;
   (citations||[]).forEach(c => {
     if (!c.document_id || !c.png_path || shown >= 4) return;
-    // 定位器三选一（§二十一）：crop=裁剪嵌入；show_page=整页嵌入（该页本身即图）；
+    // 定位器三选一：crop=裁剪嵌入；show_page=整页嵌入（该页本身即图）；
     // 两者皆无 = 纯文字提取页 → 不插图，引用链接足够
     if (!c.crop && !c.show_page) return;
     const k = c.document_id + '_' + c.page_number;
@@ -236,7 +235,7 @@ function embedFigures(container, citations){
     const fig = document.createElement('a');
     fig.className = 'fig'; fig.target = '_blank';
     fig.href = `/pdf/${c.document_id}#page=${c.page_number}`;
-    // 有裁剪框 → 只显示相关图形（§十八）；无 → 整页兜底。点击始终打开原 PDF
+    // 有裁剪框 → 只显示相关图形；无 → 整页兜底。点击始终打开原 PDF
     const src = c.crop
       ? `/page-image/${c.document_id}/${c.page_number}?crop=${c.crop.x0},${c.crop.y0},${c.crop.x1},${c.crop.y1}`
       : `/page-image/${c.document_id}/${c.page_number}`;
@@ -254,7 +253,7 @@ function embedFigures(container, citations){
   });
 }
 
-// 同源表格引用折叠（用户实测反馈，§十九）：表内全部引用指向同一页时，
+// 同源表格引用折叠（用户实测反馈）：表内全部引用指向同一页时，
 // 逐行重复是噪音——摘掉格内引用，表格下方放一行 Source。多来源表格
 // （不同券商并排，规则 2/3 的主场）保持逐行引用不动。确定性 DOM 处理，不碰 prompt。
 function dedupeTableCitations(container){

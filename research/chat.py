@@ -1,8 +1,7 @@
-"""对话循环（ARCHITECTURE.md §6.3）：标准 function calling，两个工具。
+"""对话循环：标准 function calling，两个工具。
 
 - 语料边界注入：启动时从库里算（覆盖区间、券商、篇数），事实进 system。
-- 消息持久化只存图像引用；构造请求时仅当前轮工具结果 rehydrate 原图
-  （§6.0，DECISION-LOG §七.7）。
+- 消息持久化只存图像引用；构造请求时仅当前轮工具结果 rehydrate 原图。
 - 回答后处理全部为确定性纯函数：溯源徽章（数字 ↔ 被引页）、时效性标签
   （同券商同 ticker 是否有更新报告）、成本脚注（usage 累计）。零额外 API 调用。
 """
@@ -20,7 +19,7 @@ from . import providers, tools
 from .models import Conversation, Document, Page
 from .numeric import numbers_in
 
-PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M，Sol 假设价（§14）
+PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M，Sol 假设价（官方定价待核对）
 MAX_TOOL_ROUNDS = 6
 
 BEHAVIOR_RULES = """
@@ -53,7 +52,7 @@ Answer rules (non-negotiable):
 
 
 def corpus_boundary() -> str:
-    """启动时算一次的语料边界事实（§6.3 规则 1 的数据侧）。"""
+    """启动时算一次的语料边界事实（行为规则 1 的数据侧）。"""
     docs = Document.objects.filter(status=Document.Status.DONE)
     n = docs.count()
     if not n:
@@ -91,7 +90,7 @@ def _tool_output_items(call_id: str, payload: dict,
 
     sent_images：本轮已附过图的 (document_id, page_number) 集合。轮内 api_input
     是累积的——第一次附的图在后续每轮上下文里都还在，同页重附纯属烧钱
-    （实测一次失败回合 115 次附图仅 37 张不同页，§十七）。"""
+    （实测一次失败回合 115 次附图仅 37 张不同页）。"""
     slim = json.dumps(payload, ensure_ascii=False)
     image_refs = []
     content: list[dict] = [{"type": "input_text", "text": slim}]
@@ -120,7 +119,7 @@ def _history_to_api(messages: list[dict]) -> list[dict]:
 
     工具流量（function_call / 其结果 / reasoning）不跨轮回传：推理模型要求
     function_call 与其 reasoning item 成对出现，而合成答案已携带结论、
-    页面可随时通过工具重取（§6.0 的动机——历史图像不重放——推广到全部工具流量）。
+    页面可随时通过工具重取（"历史图像不重放"的动机推广到全部工具流量）。
     完整工具流量仍持久化在 Conversation.messages 里供审计与 UI。"""
     return [m for m in messages if m.get("role") in ("user", "assistant")]
 
@@ -169,7 +168,7 @@ def _citation_fragments(answer: str):
 
 
 def grounding_badges(answer: str, turn_pages: dict[tuple, Page]) -> list[dict]:
-    """溯源徽章（§6.3）：答案里的每条引用 → 数字是否都在被引页上。纯函数。"""
+    """溯源徽章：答案里的每条引用 → 数字是否都在被引页上。纯函数。"""
     answer_nums = set(numbers_in(answer))
     badges = []
     for label, m in _citation_fragments(answer):
@@ -209,7 +208,7 @@ _CROP_PAD = 2.0          # 外扩 2%：宁多裁一圈，不切掉轴标签
 
 
 def _valid_crop(box) -> dict | None:
-    """bbox 的确定性校验与外扩（§十八）。纯函数。
+    """bbox 的确定性校验与外扩。纯函数。
 
     拒绝：坐标缺失/越界/退化、面积 <8%（可能定位错）或 >85%（等于整页，
     直接回退整页更诚实）。通过 → 外扩 _CROP_PAD 并夹回 [0,100]。"""
@@ -228,11 +227,11 @@ def _valid_crop(box) -> dict | None:
 
 
 def _figure_crops(question: str, badges: list[dict], emit) -> tuple[int, int, int]:
-    """对被引且含图的页（去重、上限 FIGURE_CROP_CAP）做三选一判定（§十八/§二十一）：
+    """对被引且含图的页（去重、上限 FIGURE_CROP_CAP）做三选一判定：
 
     - 页上有与问题相关的图表/表格 → badge 带 crop（前端裁剪嵌入）
     - 这页本身就是一张图（如 keynote slide）→ badge 带 show_page（整页嵌入）
-    - 纯文字提取页 → 什么都不标（前端不插图——引用链接足够，§二十一 用户反馈）
+    - 纯文字提取页 → 什么都不标（前端不插图——引用链接足够）
 
     找到了相关图形但坐标没过校验 → 退回 show_page（图确实在这页上，整页比不给强）；
     调用失败/解析失败 → 不插图（宁静默，不冗余）。纯展示层，仅 UI 流式路径调用。"""
@@ -272,7 +271,7 @@ def _figure_crops(question: str, badges: list[dict], emit) -> tuple[int, int, in
 
 
 def recency_labels(badges: list[dict]) -> list[dict]:
-    """时效性标签（§6.3）：被引报告的同券商同主 ticker 是否存在更新的报告。"""
+    """时效性标签：被引报告的同券商同主 ticker 是否存在更新的报告。"""
     labels = []
     for b in badges:
         if "document_id" not in b:
@@ -305,13 +304,13 @@ def run_turn(conversation: Conversation, text: str,
     usage_in = usage_out = usage_cached = calls = 0
     trace: list[dict] = []
     turn_pages: dict[tuple, Page] = {}
-    sent_images: set[tuple] = set()  # 轮内已附原图的页（§十七 去重）
+    sent_images: set[tuple] = set()  # 轮内已附原图的页（去重）
 
     user_content: list[dict] = [{"type": "input_text", "text": text}]
-    if image_b64:  # 图片直接进 user message（§6.3，不做描述中转）
+    if image_b64:  # 图片直接进 user message（不做描述中转）
         user_content.append({"type": "input_image", "detail": "high",
                              "image_url": f"data:image/png;base64,{image_b64}"})
-    if pdf_b64:  # PDF 走 input_file 直传，不入索引（§6.3）
+    if pdf_b64:  # PDF 走 input_file 直传，不入索引
         user_content.append({"type": "input_file", "filename": pdf_name,
                              "file_data": f"data:application/pdf;base64,{pdf_b64}"})
     user_msg = {"role": "user", "content": user_content}
@@ -391,7 +390,7 @@ def run_turn(conversation: Conversation, text: str,
                           "content": [{"type": "output_text", "text": answer}]})
 
     badges = grounding_badges(answer, turn_pages)
-    if streaming:  # 图形定位仅 UI 路径（§十八）；evaluate 不跑，评估成本为零
+    if streaming:  # 图形定位仅 UI 路径；evaluate 不跑，评估成本为零
         ci, co, cc = _figure_crops(text, badges, emit)
         usage_in += ci
         usage_out += co
@@ -406,7 +405,7 @@ def run_turn(conversation: Conversation, text: str,
     conversation.messages = locked.messages
 
     # 缓存命中的输入按 1/10 价估算（OpenAI 自动前缀缓存的典型折扣；官方价核实前
-    # 与 $5/$30 同为假设价——见 §14）。此前按全价估，多轮回合显著虚高。
+    # 与 $5/$30 同为假设价）。此前按全价估，多轮回合显著虚高。
     cost = ((usage_in - usage_cached) / 1e6 * PRICE_IN
             + usage_cached / 1e6 * PRICE_IN * 0.1
             + usage_out / 1e6 * PRICE_OUT)

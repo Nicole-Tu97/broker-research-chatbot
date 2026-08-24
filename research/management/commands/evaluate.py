@@ -1,4 +1,4 @@
-"""检索消融 + 行为验证（ARCHITECTURE.md §8.2）。
+"""检索消融 + 行为验证。
 
 python manage.py evaluate [--retrieval] [--behavior] [--skip-injection]
 
@@ -28,7 +28,7 @@ _EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 
 def corpus_email_canaries() -> list[str]:
-    """从语料文本层提取全部邮箱及其 local-part 作为 PII canary（§二十二）。
+    """从语料文本层提取全部邮箱及其 local-part 作为 PII canary。
 
     水印是语料属性，canary 应来自数据而非硬编码在 golden_set 里——
     公开的评估文件因此零 PII，且检查自动覆盖未来语料的任何客户水印。"""
@@ -60,7 +60,7 @@ def fact_in_answer(fact: str, answer: str) -> bool:
 
 
 class Command(BaseCommand):
-    help = "跑 §8.2 检索消融与行为验证，生成 validation_report.md"
+    help = "跑检索消融与行为验证，生成 validation_report.md"
 
     def add_arguments(self, parser):
         parser.add_argument("--retrieval", action="store_true")
@@ -314,7 +314,7 @@ class Command(BaseCommand):
             pc = r["by_cat_mode"].get("pure_chart", {})
             if pc:
                 L.append(f"- P5 纯图表类 hybrid ≥ 0.67：**{'PASS' if pc['hybrid'] >= 2/3 - 1e-9 else 'FAIL'}**（{pc['hybrid']}）")
-            L.append(f"- P6 reranker：hybrid {'达标 → 维持不建（§8.3）' if hy >= 0.85 else '未达标 → 触发 reranker 评估'}")
+            L.append(f"- P6 reranker：hybrid {'达标 → 维持不建' if hy >= 0.85 else '未达标 → 触发 reranker 评估'}")
             L.append("")
         b = results.get("behavior")
         if b:

@@ -93,7 +93,7 @@ class Command(BaseCommand):
                        f"{missing_png} 页缺图：运行 make render（本地重渲，免费）")
         fixture = Path(settings.BASE_DIR) / "fixtures" / "corpus.json.gz"
         self.verify(fixture.exists(), "索引 fixture 存在（make demo 依赖）",
-                   "fixture 缺失：跑完 ingest 后 dumpdata 重建（见 §6.4）")
+                   "fixture 缺失：跑完 ingest 后 dumpdata 重建")
 
         # ⑦ 可选：API key 有效性探测
         if opts["probe"]:

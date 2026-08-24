@@ -1,15 +1,15 @@
-"""摄取管线（ARCHITECTURE.md §6.1）：发现 → 渲染 → 转录 → 索引。
+"""摄取管线：发现 → 渲染 → 转录 → 索引。
 
 python manage.py ingest [--resume] [--limit N] [--file PATH] [--workers 8]
                         [--dry-run] [--render-only]
 
 设计要点：
-- 同步 + 有界并发（无 Celery/Batch，见 §6.1 与 DECISION-LOG §七.1）。
+- 同步 + 有界并发（无 Celery/Batch）。
 - Document.status 状态机 + --resume 提供幂等；content_hash 去重。
   DONE 只在全部页完整（png + markdown + embedding）时才写入——任何页失败
-  则落 ERROR 并记录数量，--resume 会重入补齐（评审修正，见 DECISION-LOG §九）。
-- 单页失败不中断整份文档（语料含损坏 XObject 与空文本层页，§3）。
-- 渲染 DPI 按页计算（§6.1 渲染表 + 每页物理尺寸归一；keynote p3 是 53.3×30″）。
+  则落 ERROR 并记录数量，--resume 会重入补齐（评审修正）。
+- 单页失败不中断整份文档（语料含损坏 XObject 与空文本层页）。
+- 渲染 DPI 按页计算（渲染表 + 每页物理尺寸归一；keynote p3 是 53.3×30″）。
 - --render-only 供 make demo 使用：loaddata 后按库内记录本地重渲 PNG，零 API 调用。
 """
 
@@ -29,7 +29,7 @@ from research.models import Document, Page
 from research.numeric import suspect_numbers
 from research.tickers import extract_ticker_pages
 
-# §6.1 渲染表（§8.1.1 基准实测定档）。类别给出基准 DPI 与基准页宽，
+# 渲染表（基准实测定档）。类别给出基准 DPI 与基准页宽，
 # 实际 DPI 按每页自身宽度归一（同类内目标像素宽恒定）。
 REPORT_DPI = 150                      # letter/A4/横版研报；100 在密集表上有数字 veto
 SLIDE_TARGET_PX = 2080                # 40×22.5″ 大字 deck → 52 DPI 等效
@@ -118,7 +118,7 @@ class Command(BaseCommand):
             doc.page_count = len(fitz_doc)
             for i, fpage in enumerate(fitz_doc, start=1):
                 page, _ = Page.objects.get_or_create(document=doc, page_number=i)
-                png_name = f"{doc.id}_{i}.png"  # 只存 basename，fixture 可迁移（§6.4）
+                png_name = f"{doc.id}_{i}.png"  # 只存 basename，fixture 可迁移
                 png_file = settings.PAGE_ASSET_DIR / png_name
                 if page.png_path and png_file.exists():
                     continue  # 渲染幂等：文件在即跳过
@@ -128,11 +128,11 @@ class Command(BaseCommand):
                     page.png_path = png_name
                     page.raw_text = fpage.get_text().strip()
                     page.save()
-                except Exception as exc:  # 页级容错（§6.1）
+                except Exception as exc:  # 页级容错
                     render_failures += 1
                     self.stderr.write(f"  [page {i}] 渲染失败: {exc}")
 
-        # 首页内容侧元数据兜底（§6.1 步骤 1：文件名为主，内容校验兜底）
+        # 首页内容侧元数据兜底（文件名为主，内容校验兜底）
         p1 = doc.pages.filter(page_number=1).first()
         if p1 and p1.raw_text:
             content_date = date_from_text(p1.raw_text)
@@ -181,7 +181,7 @@ class Command(BaseCommand):
         # 1.76 char/token（不是英文散文的 ~4:1——数字符号各占一个 token），
         # 故 8,192 × 1.76 ≈ 14.4k 字符是理论上限，取 12,000 留 ~15% 余量。
         # 初版 6,000 过度保守（误伤 7/423 页）；改 30,000 则直接超限报错——
-        # 两次都错在用错换算比率，第三次是量出来的（见 DECISION-LOG §十二）。
+        # 两次都错在用错换算比率，第三次是量出来的。
         to_embed = [p for p in pages if p.markdown and p.embedding is None]
         for batch_start in range(0, len(to_embed), 64):
             batch = to_embed[batch_start: batch_start + 64]

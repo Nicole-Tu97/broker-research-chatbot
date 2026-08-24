@@ -1,11 +1,11 @@
-"""两个检索工具（ARCHITECTURE.md §6.2）。schema 与实现同文件，避免漂移。
+"""两个检索工具。schema 与实现同文件，避免漂移。
 
 - search_pages：向量（pgvector cosine）与全文（ts_rank_cd）各取 top-50，
-  RRF（rrf_k=10）融合取前 k。每路独立排名进检索追踪，供 eval 归因（§8.2）。
+  RRF（rrf_k=10）融合取前 k。每路独立排名进检索追踪，供 eval 归因。
 - list_reports：纯元数据 SQL。返回首页转录 + 各 ticker 命中页码；
-  description 写明恢复路径（2/21 份报告 PT 不在首页，§3）。
+  description 写明恢复路径（2/21 份报告 PT 不在首页）。
 - 原图回传是 chat 层的职责：工具返回 png_path 与 has_visual，
-  由循环组装 function_call_output 的 image content（§4.4）。
+  由循环组装 function_call_output 的 image content。
 """
 
 from datetime import date
@@ -17,8 +17,8 @@ from pgvector.django import CosineDistance
 from . import providers
 from .models import Document, Page
 
-LEG_DEPTH = 50   # 每路候选深度（§6.2：融合前每路 ≥50）
-RRF_K = 10       # 小常数：单路强命中不被稀释（§6.2）
+LEG_DEPTH = 50   # 每路候选深度（融合前每路 ≥50）
+RRF_K = 10       # 小常数：单路强命中不被稀释
 
 
 def _doc_filters(tickers=None, brokers=None, date_from=None, date_to=None) -> Q:
@@ -38,7 +38,7 @@ def _doc_filters(tickers=None, brokers=None, date_from=None, date_to=None) -> Q:
 
 
 def _undated_warning(tickers=None, brokers=None) -> str | None:
-    """日期过滤的盲区提示（§十七）：published_date=None 的文档（公司自家 deck，
+    """日期过滤的盲区提示：published_date=None 的文档（公司自家 deck，
     页面上无任何可解析日期）会被任何日期过滤静默排除。此提示让 agent 能在
     一次重试内恢复，而不是在 0 results 里反复换措辞。确定性 SQL，零 API。"""
     q = Q(status=Document.Status.DONE, published_date=None)
@@ -73,7 +73,7 @@ def _page_payload(page: Page, extra: dict | None = None) -> dict:
         "png_path": page.png_path,
     }
     if page.numeric_flags:
-        out["suspect_numbers"] = page.numeric_flags  # §4.3 的工具侧消费者
+        out["suspect_numbers"] = page.numeric_flags  # 摄取期数字校验的工具侧消费者
     if extra:
         out.update(extra)
     return out
@@ -84,7 +84,7 @@ def search_pages(query: str, tickers=None, brokers=None,
                  mode: str = "hybrid") -> dict:
     """混合检索。返回 {results: [...], trace: {...}}。
 
-    mode 仅供 §8.2 消融评估（dense/fts/hybrid），不暴露给模型（不在 TOOL_SCHEMAS）。"""
+    mode 仅供消融评估（dense/fts/hybrid），不暴露给模型（不在 TOOL_SCHEMAS）。"""
     base = Page.objects.exclude(markdown=None).exclude(markdown="").filter(
         _doc_filters(tickers, brokers, date_from, date_to)
     ).select_related("document")
@@ -122,7 +122,7 @@ def search_pages(query: str, tickers=None, brokers=None,
         _page_payload(pages[pid], {"rrf_score": round(scores[pid], 4)})
         for pid in top if pid in pages
     ]
-    # 检索追踪（§6.3）：每路独立排名，miss 可归因到具体一路（§8.2）
+    # 检索追踪：每路独立排名，miss 可归因到具体一路
     trace = {
         "query": query,
         "filters": {"tickers": tickers, "brokers": brokers,

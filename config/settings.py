@@ -1,6 +1,6 @@
 """最小化 Django 配置。
 
-不做的事与理由（见 ARCHITECTURE.md §10）：无 auth/admin/sessions（与考察点无关），
+不做的事与理由（见 DESIGN.md §10）：无 auth/admin/sessions（与考察点无关），
 无前端框架（模板足够）。.env 由 shell 或 docker compose 注入，不引入 dotenv 依赖：
 本地跑 `export $(grep -v '^#' .env | xargs)`，容器里 compose env_file 处理。
 """
@@ -52,7 +52,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 USE_TZ = True
 TIME_ZONE = "UTC"
 
-# ---- 项目自有配置（外部调用集中在 research/providers.py，见 §7）----
+# ---- 项目自有配置（外部调用集中在 research/providers.py）----
 
 CORPUS_DIR = Path(os.environ.get("CORPUS_DIR", BASE_DIR / "case_study"))
 PAGE_ASSET_DIR = Path(os.environ.get("PAGE_ASSET_DIR", BASE_DIR / "page_assets"))

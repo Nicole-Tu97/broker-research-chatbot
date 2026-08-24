@@ -1,9 +1,9 @@
-"""三张表（ARCHITECTURE.md §6.0）。
+"""三张表。
 
 - Page 为检索原子：markdown 是检索语料，raw_text 是数字校验与调和的依据。
 - search_vector 是数据库生成列——转录写入即索引，无应用侧同步代码。
 - Conversation.messages 存整个消息列表；图像只存引用 (document_id, page_number,
-  png_path)，构造请求时按当轮 rehydrate（§6.0，DECISION-LOG §七.7）。
+  png_path)，构造请求时按当轮 rehydrate。
 """
 
 import uuid
@@ -27,7 +27,7 @@ class Document(models.Model):
     content_hash = models.CharField(max_length=64, unique=True)
     broker = models.TextField(blank=True, default="")
     published_date = models.DateField(null=True, blank=True)
-    # mentioned-tickers 语义（§6.0）：提及即标，主 ticker（文件名解析）排首位
+    # mentioned-tickers 语义：提及即标，主 ticker（文件名解析）排首位
     tickers = ArrayField(models.TextField(), default=list, blank=True)
     ticker_pages = models.JSONField(default=dict, blank=True)  # {"NVDA": [1, 7, 12]}
     title = models.TextField(blank=True, default="")
@@ -46,7 +46,7 @@ class Page(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="pages")
     page_number = models.IntegerField()  # 1-indexed，引用锚点
     raw_text = models.TextField(blank=True, default="")
-    # NULL = 尚未转录；"" = 已转录且合法为空（免责声明页被 prompt 忽略，§8.1.1.3）。
+    # NULL = 尚未转录；"" = 已转录且合法为空（免责声明页被 prompt 忽略）。
     # 这是 TextField 用 null 的教科书反例场景——恰恰需要三态。
     markdown = models.TextField(null=True, blank=True, default=None)
     has_visual = models.BooleanField(default=False)
@@ -57,11 +57,11 @@ class Page(models.Model):
         output_field=SearchVectorField(),
         db_persist=True,
     )
-    numeric_flags = models.JSONField(null=True, blank=True)  # 可疑数字列表（§4.3）
+    numeric_flags = models.JSONField(null=True, blank=True)  # 可疑数字列表（摄取期校验产物）
 
     @property
     def png_abspath(self):
-        """png_path 只存 basename（fixture 可跨机器迁移，§6.4）；读取侧在此拼接。"""
+        """png_path 只存 basename（fixture 可跨机器迁移）；读取侧在此拼接。"""
         from django.conf import settings
 
         return settings.PAGE_ASSET_DIR / self.png_path if self.png_path else None

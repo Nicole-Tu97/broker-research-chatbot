@@ -1,8 +1,8 @@
-"""全部外部调用集中在此文件（ARCHITECTURE.md §7）。
+"""全部外部调用集中在此文件。
 
 不是抽象层——就是"外部调用都在这个文件里"。三个调用点：
 transcribe_page / embed / chat。API 形态锁定 OpenAI Responses API
-（/v1/responses）：function_call_output 携带图像仅它支持（§4.4，已实测）。
+（/v1/responses）：function_call_output 携带图像仅它支持（已实测）。
 零第三方 SDK：urllib 足够，依赖面最小。
 """
 
@@ -18,7 +18,7 @@ from django.conf import settings
 
 _BASE = "https://api.openai.com/v1"
 
-# 转录 prompt v3（唯一真源；与 bench/run_bench.py 逐字一致，基准实测记录见 §8.1.1）
+# 转录 prompt v3（唯一真源；与 bench/run_bench.py 逐字一致）
 TRANSCRIBE_SYSTEM = """你是金融文档转录引擎。你的输出会成为券商研报检索系统中该页的唯一文本表示。
 
 绝对约束：
@@ -134,7 +134,7 @@ _HAS_VISUAL_RE = re.compile(r"HAS_VISUAL:\s*(true|false)", re.I)
 
 
 def transcribe_page(png_bytes: bytes, raw_text: str) -> tuple[str, bool, dict]:
-    """单次多模态调用（§4.2）→ (markdown, has_visual, usage)。"""
+    """单次多模态调用 → (markdown, has_visual, usage)。"""
     res = _post("/responses", {
         "model": settings.OPENAI_VISION_MODEL,
         "instructions": TRANSCRIBE_SYSTEM,
@@ -175,7 +175,7 @@ Return STRICT JSON only, one of:
 
 
 def figure_bbox(png_bytes: bytes, question: str) -> tuple[dict | None, dict]:
-    """定位被引页上与问题最相关的视觉元素（§十八/§二十一）→ (原始判定, usage)。
+    """定位被引页上与问题最相关的视觉元素 → (原始判定, usage)。
 
     判定三选一：{坐标} / {"whole_page": true} / {"no_figure": true}；
     None 仅表示解析失败。语义解释与坐标校验在调用方（chat._figure_crops）。"""
@@ -210,7 +210,7 @@ def embed(texts: list[str]) -> list[list[float]]:
 
 def chat(input_items: list[dict], instructions: str, tools: list[dict] | None = None,
          on_delta=None) -> dict:
-    """对话循环的单次往返（§6.3）。返回完整 response 对象，循环逻辑在调用方。
+    """对话循环的单次往返。返回完整 response 对象，循环逻辑在调用方。
 
     on_delta 提供时走 SSE 流式：每个 output_text 增量调用 on_delta(str)，
     返回值仍是完整 response 对象（取自 response.completed 事件）——

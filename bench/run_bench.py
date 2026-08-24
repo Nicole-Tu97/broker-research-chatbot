@@ -8,7 +8,7 @@ Responses API + detail=original（与生产配置一致）。
     python3 bench/render_pages.py --tiers      # 先渲染多档位
 
 用法：
-    python3 bench/run_bench.py --tiers                  # 全部页 × 全部档位（§8.1 全量）
+    python3 bench/run_bench.py --tiers                  # 全部页 × 全部档位（全量矩阵）
     python3 bench/run_bench.py --tiers --only A3 D1     # 指定页
     python3 bench/run_bench.py --tiers --cat pure_image # 指定类别
     python3 bench/run_bench.py                          # 单档位（bench/out/，legacy）
@@ -38,7 +38,7 @@ BENCH = ROOT / "bench"
 OUT = BENCH / "out"
 OUT_TIERS = BENCH / "out_tiers"
 
-PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M tokens，Sol 假设价（§14：官方定价待核对）
+PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M tokens，Sol 假设价（官方定价待核对）
 
 # ---- 转录 prompt v3（与 research/providers.py 逐字一致，那里是唯一真源） ----
 

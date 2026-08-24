@@ -1,4 +1,4 @@
-"""Ticker 别名字典与确定性提取（ARCHITECTURE.md §6.0，DECISION-LOG §七.4）。
+"""Ticker 别名字典与确定性提取。
 
 为什么是字典而不是符号匹配或模型输出：
 - 字面符号匹配漏标——keynote、NVIDIA 官方 deck、BofA 多行业报告全篇只写
@@ -8,7 +8,7 @@
 
 规则：符号大小写敏感（防 "AI"/"ON" 类大写普通词），公司名大小写不敏感。
 语义是 mentioned tickers（提及即标），配合 ticker_pages 让读到原文的模型
-自行判断相关性。千文档量级的迁移点是接入 security master（§9）。
+自行判断相关性。千文档量级的迁移点是接入 security master（DESIGN.md §9）。
 """
 
 import re
