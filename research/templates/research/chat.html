@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Broker Research Chat</title>
+<style>
+  :root {
+    --red:#EC111A; --red-dark:#C8102E; --red-tint:#FDF0F0;
+    --fg:#1f2329; --muted:#5f6b7a; --line:#e6e8eb; --bg:#f5f6f7; --card:#ffffff;
+    --ok:#0e7a3d; --warn:#b45309;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+         color:var(--fg); background:var(--bg); }
+
+  /* ---- header：白底 + Scotia 红顶线 ---- */
+  header { background:var(--card); border-bottom:1px solid var(--line);
+           border-top:4px solid var(--red); padding:16px 24px; }
+  .brand { display:flex; align-items:baseline; gap:10px; max-width:920px; margin:0 auto; }
+  .brand .mark { width:12px; height:12px; background:var(--red); border-radius:2px;
+                 align-self:center; flex:none; }
+  .brand h1 { margin:0; font-size:17px; font-weight:700; letter-spacing:-.01em; }
+  .brand .sub { color:var(--muted); font-size:12.5px; font-weight:500; }
+  .boundary { max-width:920px; margin:6px auto 0; color:var(--muted); font-size:12.5px; }
+
+  main { max-width:920px; margin:0 auto; padding:24px 16px 150px; }
+
+  /* ---- 对话气泡 ---- */
+  .turn { margin:20px 0; }
+  .q { display:flex; justify-content:flex-end; }
+  .q > div { max-width:78%; background:var(--card); border:1px solid var(--line);
+             border-right:3px solid var(--red); border-radius:10px 10px 2px 10px;
+             padding:10px 14px; font-weight:600; box-shadow:var(--shadow); }
+  .a { background:var(--card); border:1px solid var(--line); border-radius:2px 10px 10px 10px;
+       padding:16px 18px; margin-top:10px; overflow-x:auto; box-shadow:var(--shadow); }
+  .a p { margin:.5em 0; }
+  .a h4 { margin:.8em 0 .3em; font-size:14.5px; }
+  .a table { border-collapse:collapse; margin:10px 0; font-variant-numeric:tabular-nums; }
+  .a th,.a td { border:1px solid var(--line); padding:6px 11px; font-size:13.5px; text-align:left; }
+  .a th { background:#fafbfc; border-bottom:2px solid var(--red); font-weight:600; }
+  .a tr:nth-child(even) td { background:#fcfcfd; }
+
+  /* ---- 欢迎卡 + 建议问题 ---- */
+  .welcome .a { border-left:3px solid var(--red); }
+  .welcome .hello { font-size:16px; font-weight:700; margin:0 0 6px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .chip { border:1px solid var(--line); background:var(--card); color:var(--fg);
+          border-radius:999px; padding:7px 14px; font:inherit; font-size:13px;
+          cursor:pointer; transition:border-color .15s, background .15s; text-align:left; }
+  .chip:hover { border-color:var(--red); background:var(--red-tint); }
+  .chip::before { content:"→ "; color:var(--red); font-weight:700; }
+
+  /* ---- 内嵌引用 ---- */
+  .cite-inline { color:var(--red-dark); text-decoration:none; font-size:.9em;
+                 border-bottom:1px dotted var(--red); white-space:nowrap; }
+  .cite-inline:hover { border-bottom-style:solid; background:var(--red-tint); }
+  .src-label { margin-top:12px; font-size:11px; font-weight:700; letter-spacing:.06em;
+               text-transform:uppercase; color:var(--muted); }
+
+  /* ---- 行内原页图（需求：surface the original asset）---- */
+  .fig { display:block; margin:12px 0; border:1px solid var(--line); border-radius:8px;
+         overflow:hidden; max-width:560px; text-decoration:none; color:var(--muted);
+         background:var(--card); box-shadow:var(--shadow); transition:border-color .15s; }
+  .fig:hover { border-color:var(--red); }
+  .fig img { display:block; width:100%; }
+  .fig span { display:block; font-size:11.5px; padding:6px 10px;
+              border-top:1px solid var(--line); }
+  .fig span::before { content:"◳ "; color:var(--red); }
+
+  /* ---- 引用芯片 ---- */
+  .cites { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
+  .cite { display:flex; align-items:center; gap:7px; border:1px solid var(--line);
+          border-radius:8px; padding:5px 9px; font-size:12.5px; background:var(--card);
+          text-decoration:none; color:var(--fg); transition:border-color .15s, box-shadow .15s; }
+  .cite:hover { border-color:var(--red); box-shadow:var(--shadow); }
+  .cite img { height:46px; border:1px solid var(--line); border-radius:3px; }
+  .badge-ok { color:var(--ok); font-weight:700; } .badge-warn { color:var(--warn); font-weight:700; }
+  .recency { color:var(--warn); font-size:12.5px; margin-top:8px; }
+  .footer { color:var(--muted); font-size:12px; margin-top:10px; padding-top:8px;
+            border-top:1px solid var(--line); }
+  details.trace { margin-top:8px; font-size:12.5px; color:var(--muted); }
+  details.trace summary { cursor:pointer; }
+  details.trace summary:hover { color:var(--red); }
+  details.trace pre { white-space:pre-wrap; background:var(--bg); padding:10px;
+                      border-radius:6px; max-height:280px; overflow:auto; }
+
+  /* ---- 输入区 ---- */
+  form { position:fixed; bottom:0; left:0; right:0; background:var(--card);
+         border-top:1px solid var(--line); padding:14px 16px 16px;
+         box-shadow:0 -4px 12px rgba(16,24,40,.04); }
+  .row { max-width:920px; margin:0 auto; display:flex; gap:10px; align-items:flex-end; }
+  textarea { flex:1; resize:none; height:54px; padding:12px 14px; font:inherit;
+             border:1px solid var(--line); border-radius:10px; outline:none;
+             transition:border-color .15s, box-shadow .15s; }
+  textarea:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(236,17,26,.08); }
+  button.send { padding:0 22px; height:54px; border:0; border-radius:10px;
+                background:var(--red); color:#fff; font:inherit; font-weight:600;
+                cursor:pointer; transition:background .15s; }
+  button.send:hover { background:var(--red-dark); }
+  button.send:disabled { opacity:.45; cursor:default; }
+  .attach { height:54px; display:flex; align-items:center; gap:6px; padding:0 14px;
+            border:1px solid var(--line); border-radius:10px; cursor:pointer;
+            color:var(--muted); font-size:13px; background:var(--card);
+            transition:border-color .15s; user-select:none; white-space:nowrap; }
+  .attach:hover { border-color:var(--red); color:var(--fg); }
+  .attach.hasfile { border-color:var(--red); color:var(--red-dark); }
+  #file { display:none; }
+  .hint { max-width:920px; margin:8px auto 0; color:var(--muted); font-size:11.5px; }
+
+  /* ---- 同源表格的折叠引用行 ---- */
+  .table-src { font-size:12px; color:var(--muted); margin:-4px 0 12px; }
+
+  /* ---- 流式进度状态行 ---- */
+  .status { display:flex; align-items:center; gap:8px; margin-top:6px;
+            color:var(--muted); font-size:13px; }
+  .live:empty { display:none; }
+
+  /* ---- 加载动画 ---- */
+  .dots span { display:inline-block; width:6px; height:6px; margin-right:4px;
+               border-radius:50%; background:var(--red); opacity:.35;
+               animation:pulse 1.2s infinite ease-in-out; }
+  .dots span:nth-child(2) { animation-delay:.2s; } .dots span:nth-child(3) { animation-delay:.4s; }
+  @keyframes pulse { 0%,80%,100%{opacity:.25; transform:scale(.85);} 40%{opacity:1; transform:scale(1);} }
+  .err { color:#b91c1c; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="mark"></span>
+    <h1>Broker Research Chat</h1>
+    <span class="sub">Equity Research Knowledge Base</span>
+  </div>
+  <div class="boundary">{{ boundary }}</div>
+</header>
+
+<main id="log">
+  <!-- 开场问候（不落库：纯前端引导，不进 Conversation.messages） -->
+  <div class="turn welcome">
+    <div class="a">
+      <p class="hello">Hello — I'm your broker research assistant.</p>
+      <p>Ask me anything about the research library above. I answer with page-level
+         citations you can click to open the original PDF, verify every number against
+         its cited page, and flag citations that have been superseded by newer reports.
+         When a cited page carries a chart or figure, the original page appears inline
+         with the answer. You can also attach a chart screenshot or a PDF.</p>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:0;">Try one of these to start:</p>
+      <div class="chips">
+        <button class="chip">Compare the change in price target for NVDA between UBS's research and Barclays's research over the past two years.</button>
+        <button class="chip">What are the latest NVDA price targets across all brokers?</button>
+        <button class="chip">What total market size does the GTC Paris keynote associate with AI factories?</button>
+        <button class="chip">What is Wells Fargo's price target for NVDA?</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<form id="f">
+  <div class="row">
+    <textarea id="msg" placeholder="Ask about the research library — e.g. how a broker's price target evolved"></textarea>
+    <label class="attach" id="attach" for="file">📎 <span id="attachlabel">Attach</span></label>
+    <input type="file" id="file" accept="image/*,application/pdf">
+    <button class="send" id="send">Send</button>
+  </div>
+  <div class="hint">Answers cite broker, date and page · ✓ numbers verified against the cited page · every reply shows its own cost</div>
+</form>
+
+<script>
+let conversationId = null;
+const log = document.getElementById('log');
+const form = document.getElementById('f');
+const msg = document.getElementById('msg');
+const fileInput = document.getElementById('file');
+const attachLabel = document.getElementById('attachlabel');
+const attach = document.getElementById('attach');
+const send = document.getElementById('send');
+
+// 极简 markdown 渲染：转义 → 表格/标题/粗体/水平线。表格是行为规则 #2 的主角。
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function md(src){
+  const lines = esc(src).split('\n'); const out = []; let tbl = [];
+  const flush = () => {
+    if (!tbl.length) return;
+    const rows = tbl.filter(r => !/^\s*\|[\s:|-]+\|\s*$/.test(r));
+    out.push('<table>' + rows.map((r,i) => '<tr>' + r.replace(/^\||\|$/g,'')
+      .split('|').map(c => `<t${i?'d':'h'}>${c.trim().replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}</t${i?'d':'h'}>`).join('')
+      + '</tr>').join('') + '</table>');
+    tbl = [];
+  };
+  for (const l of lines){
+    if (/^\s*\|.*\|\s*$/.test(l)) { tbl.push(l); continue; }
+    flush();
+    if (/^###?\s/.test(l)) out.push('<h4>'+l.replace(/^#+\s*/,'')+'</h4>');
+    else if (/^---+$/.test(l.trim())) out.push('<hr>');
+    else if (l.trim()) out.push('<p>'+l.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</p>');
+  }
+  flush(); return out.join('');
+}
+
+// 引用内嵌化：把答案文本里的 [Broker, date, p.N] 换成可点击的紧凑链接（✓/⚠ 随行）
+function splitCompound(text){
+  return text.replace(/\[([^\[\]]+)\]/g,
+    (m, inner) => inner.includes(';') ? inner.split(';').map(x => '[' + x.trim() + ']').join(' ') : m);
+}
+function inlineCitations(html, citations){
+  const seen = new Map();
+  citations.forEach(c => { if (!seen.has(c.citation)) seen.set(c.citation, c); });
+  [...seen.entries()].sort((a,b) => b[0].length - a[0].length).forEach(([label, c]) => {
+    if (!c.document_id) return;  // unknown 引用保持纯文本
+    const m = label.match(/^\[(.+?),\s*(\d{4}-\d{2}-\d{2}|n\.d\.),\s*p\.?\s*(\d+)\]$/);
+    const short = m ? `${m[1]}, ${m[2] === 'n.d.' ? 'n.d.' : m[2].slice(5)}, p.${m[3]}` : label;
+    const ok = c.status === 'grounded';
+    const badge = `<span class="${ok ? 'badge-ok' : 'badge-warn'}" title="${ok ? 'Numbers verified against the cited page' : 'No numeric overlap with the cited page'}">${ok ? '✓' : '⚠'}</span>`;
+    const a = `<a class="cite-inline" data-key="${c.document_id}_${c.page_number}"` +
+              ` target="_blank" title="${label.replace(/"/g, '&quot;')}"` +
+              ` href="/pdf/${c.document_id}#page=${c.page_number}">${short}</a>${badge}`;
+    html = html.split(label).join(a);
+  });
+  return html;
+}
+
+// 需求原文："surface both the textual summary AND the original asset"——
+// 被引页含图表（has_visual）时，把原页图卡片插到该引用所在段落之后（最多 4 张，去重）。
+// 不做图表裁剪（bbox 检测被否决，DECISION-LOG §二.7）：交付的是原始资产本身。
+function embedFigures(container, citations){
+  const seen = new Set(); let shown = 0;
+  (citations||[]).forEach(c => {
+    if (!c.document_id || !c.png_path || shown >= 4) return;
+    // 定位器三选一（§二十一）：crop=裁剪嵌入；show_page=整页嵌入（该页本身即图）；
+    // 两者皆无 = 纯文字提取页 → 不插图，引用链接足够
+    if (!c.crop && !c.show_page) return;
+    const k = c.document_id + '_' + c.page_number;
+    if (seen.has(k)) return; seen.add(k);
+    const fig = document.createElement('a');
+    fig.className = 'fig'; fig.target = '_blank';
+    fig.href = `/pdf/${c.document_id}#page=${c.page_number}`;
+    // 有裁剪框 → 只显示相关图形（§十八）；无 → 整页兜底。点击始终打开原 PDF
+    const src = c.crop
+      ? `/page-image/${c.document_id}/${c.page_number}?crop=${c.crop.x0},${c.crop.y0},${c.crop.x1},${c.crop.y1}`
+      : `/page-image/${c.document_id}/${c.page_number}`;
+    const kind = c.crop ? 'figure from the cited page' : 'original page';
+    fig.innerHTML = `<img src="${src}" alt="">` +
+                    `<span>${esc(c.citation.replace(/^\[|\]$/g,''))} — ${kind} (click to open the PDF)</span>`;
+    const anchor = [...container.querySelectorAll('a.cite-inline')].find(a => a.dataset.key === k);
+    const block = anchor ? anchor.closest('p, table, h4, li') : null;
+    if (block) block.insertAdjacentElement('afterend', fig);
+    else {
+      const srcLabel = container.querySelector('.src-label');
+      srcLabel ? srcLabel.insertAdjacentElement('beforebegin', fig) : container.appendChild(fig);
+    }
+    shown++;
+  });
+}
+
+// 同源表格引用折叠（用户实测反馈，§十九）：表内全部引用指向同一页时，
+// 逐行重复是噪音——摘掉格内引用，表格下方放一行 Source。多来源表格
+// （不同券商并排，规则 2/3 的主场）保持逐行引用不动。确定性 DOM 处理，不碰 prompt。
+function dedupeTableCitations(container){
+  container.querySelectorAll('table').forEach(t => {
+    const anchors = [...t.querySelectorAll('a.cite-inline')];
+    if (anchors.length < 2) return;
+    const key = anchors[0].dataset.key;
+    if (!anchors.every(a => a.dataset.key === key)) return;  // 多来源 → 不折叠
+    const dataRows = t.querySelectorAll('tr').length - 1;    // 减表头行
+    if (anchors.length < dataRows) return;                   // 有行没引用 → 保守不动
+    const one = anchors[0].cloneNode(true);
+    const badge = anchors[0].nextElementSibling &&
+      anchors[0].nextElementSibling.matches('.badge-ok, .badge-warn')
+      ? anchors[0].nextElementSibling.cloneNode(true) : null;
+    anchors.forEach(a => {
+      const b = a.nextElementSibling;
+      if (b && b.matches('.badge-ok, .badge-warn')) b.remove();
+      a.remove();
+    });
+    const src = document.createElement('div');
+    src.className = 'table-src';
+    src.append('Source: ', one);
+    if (badge) src.append(badge);
+    t.insertAdjacentElement('afterend', src);
+  });
+}
+
+// 建议问题芯片：点击即发送
+document.querySelectorAll('.chip').forEach(c =>
+  c.addEventListener('click', () => { msg.value = c.textContent; form.requestSubmit(); }));
+
+// 附件按钮状态
+fileInput.addEventListener('change', () => {
+  const f = fileInput.files[0];
+  attachLabel.textContent = f ? f.name.slice(0, 18) + (f.name.length > 18 ? '…' : '') : 'Attach';
+  attach.classList.toggle('hasfile', !!f);
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  // 在途守卫：Enter 与建议芯片走 requestSubmit()，不受按钮 disabled 约束——
+  // 无此守卫可并发两条流，conversation 历史会分叉（审查确认）
+  if (send.disabled) return;
+  const text = msg.value.trim(); if (!text) return;
+  const turn = document.createElement('div'); turn.className = 'turn';
+  turn.innerHTML = `<div class="q"><div>${esc(text)}</div></div>` +
+    `<div class="a"><span class="dots"><span></span><span></span><span></span></span></div>`;
+  log.appendChild(turn); turn.scrollIntoView({behavior:'smooth', block:'end'});
+  send.disabled = true;
+
+  const fd = new FormData();
+  fd.append('message', text);
+  if (conversationId) fd.append('conversation_id', conversationId);
+  if (fileInput.files[0]) fd.append('file', fileInput.files[0]);
+  msg.value = ''; fileInput.value = '';
+  fileInput.dispatchEvent(new Event('change'));
+
+  try {
+    const r = await fetch('/api/chat', {method:'POST', body:fd});
+    const ct = r.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {   // 早期校验错误（空消息/不支持的文件类型）
+      const d0 = await r.json();
+      turn.querySelector('.a').innerHTML = `<span class="err">${esc(d0.error || 'Unexpected response')}</span>`;
+      return;
+    }
+
+    // SSE 流：进度状态行 + 答案增量实时渲染；终帧到达后替换为完整后处理版本
+    const area = turn.querySelector('.a');
+    area.innerHTML = `<div class="live"></div><div class="status">` +
+      `<span class="dots"><span></span><span></span><span></span></span> ` +
+      `<span class="st">Thinking…</span></div>`;
+    const live = area.querySelector('.live');
+    const st = area.querySelector('.st');
+    let acc = '', finalD = null, errText = null, firstDelta = true;
+
+    const handle = (e) => {
+      if (e.type === 'round') { acc = ''; live.innerHTML = ''; st.textContent = `Thinking (round ${e.round})…`; }
+      else if (e.type === 'tool') {
+        st.textContent = e.name === 'search_pages'
+          ? `Searching pages: “${(e.args && e.args.query) || ''}”…`
+          : `Listing reports${e.args && (e.args.broker || e.args.ticker)
+              ? ` (${[e.args.broker, e.args.ticker].filter(Boolean).join(', ')})` : ''}…`;
+      }
+      else if (e.type === 'tool_result')
+        st.textContent = `Read ${e.n_results} result${e.n_results === 1 ? '' : 's'} — deciding next step…`;
+      else if (e.type === 'stage') st.textContent = e.text;
+      else if (e.type === 'delta') {
+        acc += e.text; st.textContent = 'Writing answer…';
+        live.innerHTML = md(splitCompound(acc));
+        if (firstDelta) { firstDelta = false; turn.scrollIntoView({behavior:'smooth', block:'end'}); }
+      }
+      else if (e.type === 'final') finalD = e.payload;
+      else if (e.type === 'error') errText = e.error;
+    };
+
+    const reader = r.body.getReader(); const dec = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream:true});
+      let i;
+      while ((i = buf.indexOf('\n\n')) >= 0) {
+        const frame = buf.slice(0, i); buf = buf.slice(i + 2);
+        const dl = frame.split('\n').filter(l => l.startsWith('data: ')).map(l => l.slice(6)).join('\n');
+        if (dl) { try { handle(JSON.parse(dl)); } catch (_) {} }
+      }
+    }
+    if (errText) { area.innerHTML = `<span class="err">${esc(errText)}</span>`; return; }
+    if (!finalD) { area.innerHTML = `<span class="err">Stream ended without a final answer.</span>`; return; }
+    const d = finalD;
+    conversationId = d.conversation_id;
+
+    let html = inlineCitations(md(splitCompound(d.answer)), d.citations);
+    // 底部只留去重后的缩略图 Sources 条（同一页只出现一次）
+    const uniq = []; const seenKeys = new Set();
+    d.citations.forEach(c => {
+      if (!c.document_id) return;
+      const k = c.document_id + '_' + c.page_number;
+      if (!seenKeys.has(k)) { seenKeys.add(k); uniq.push(c); }
+    });
+    if (uniq.length){
+      html += '<div class="src-label">Sources</div><div class="cites">' + uniq.map(c => {
+        const img = c.png_path ? `<img src="/page-image/${c.document_id}/${c.page_number}" alt="">` : '';
+        const susp = (c.suspect_numbers||[]).length ? ` <span class="badge-warn" title="Suspect numbers flagged at ingestion: ${c.suspect_numbers.join(', ')}">⚑</span>` : '';
+        return `<a class="cite" href="/pdf/${c.document_id}#page=${c.page_number}" target="_blank" title="${esc(c.citation)}">${img}<span>${esc(c.citation.replace(/^\[|\]$/g,''))}</span>${susp}</a>`;
+      }).join('') + '</div>';
+    }
+    (d.recency||[]).forEach(rc => html += `<div class="recency">⏱ ${esc(rc.note)} — cited ${esc(rc.citation)}</div>`);
+    const f = d.footer;
+    html += `<div class="footer">$${f.cost_usd} · ${f.seconds}s · ${f.tool_calls} tool calls · ${(f.input_tokens+f.output_tokens).toLocaleString()} tokens${f.cached_tokens ? ` (${f.cached_tokens.toLocaleString()} cached)` : ''}</div>`;
+    if (d.trace.length) html += `<details class="trace"><summary>Retrieval trace</summary><pre>${esc(JSON.stringify(d.trace, null, 2))}</pre></details>`;
+    turn.querySelector('.a').innerHTML = html;
+    embedFigures(turn.querySelector('.a'), d.citations);   // 先插图（依赖表内锚点定位）
+    dedupeTableCitations(turn.querySelector('.a'));        // 后折叠（会移除表内锚点）
+  } catch (err) {
+    turn.querySelector('.a').innerHTML = `<span class="err">${esc(String(err))}</span>`;
+  } finally {
+    send.disabled = false; turn.scrollIntoView({behavior:'smooth', block:'end'});
+  }
+});
+
+// Enter 发送、Shift+Enter 换行
+msg.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+});
+</script>
+</body>
+</html>

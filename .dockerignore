@@ -1,0 +1,13 @@
+.venv/
+.env
+.git/
+case_study/
+__pycache__/
+*.pyc
+.DS_Store
+page_assets/
+bench/out/
+bench/out_tiers/
+*.docx
+ARCHITECTURE.md
+DECISION-LOG.md

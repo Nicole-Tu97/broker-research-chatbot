@@ -1,0 +1,21 @@
+# secrets — never commit
+.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# macOS
+.DS_Store
+
+# runtime page assets (re-rendered locally via make render)
+page_assets/
+
+# bench outputs (rendered pages, model outputs)
+bench/out/
+bench/out_tiers/
+
+# index fixture — embeds transcribed licensed content; ships in the private
+# submission package, not in the public repo
+fixtures/

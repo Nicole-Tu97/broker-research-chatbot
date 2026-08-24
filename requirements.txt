@@ -1,0 +1,5 @@
+Django>=5.2,<6
+psycopg[binary]>=3.2
+pgvector>=0.4
+PyMuPDF>=1.26
+uvicorn>=0.30
