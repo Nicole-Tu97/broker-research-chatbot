@@ -1,5 +1,5 @@
 {
-  "description": "Golden set for retrieval and behavior evaluation. expected_pages entries are [filename fragment, page number], all verified against the corpus. expected_facts are normalized numbers/keywords the answer must contain; forbidden_facts fail on sight.",
+  "description": "Retrieval and behavior evaluation golden set — 9 answer-location/capability types × 4 cross-cutting tags (zh, cross_ticker, rephrase, crop). expected_pages = [filename fragment, page]; expected_facts = canonical numbers/keywords the answer must contain ('a|b' = accepted aliases); abstention items carry a forbidden_facts_pattern that a hallucinated answer would match.",
   "items": [
     {
       "id": "CT1",
@@ -26,7 +26,8 @@
         "175"
       ],
       "must_declare_boundary": true,
-      "notes": "Flagship question. Reference answer: Barclays 170→200→240; UBS single point 175, no prior value"
+      "notes": "Flagship question. Reference answer: Barclays 170→200→240; UBS single point 175, no prior value",
+      "tags": []
     },
     {
       "id": "CT2",
@@ -46,7 +47,8 @@
         "170",
         "200",
         "240"
-      ]
+      ],
+      "tags": []
     },
     {
       "id": "CT3",
@@ -70,7 +72,10 @@
         "240",
         "175"
       ],
-      "notes": "Chinese question; the FTS english config fails on the raw sentence, exercising the cross-lingual path"
+      "notes": "Chinese question; the FTS english config fails on the raw sentence, exercising the cross-lingual path",
+      "tags": [
+        "zh"
+      ]
     },
     {
       "id": "PC1",
@@ -85,7 +90,8 @@
       "expected_facts": [
         "100T|100 trillion|100万亿"
       ],
-      "notes": "$100T exists only in pixels (zero-text-layer page) — a text-only pipeline is blind here"
+      "notes": "$100T exists only in pixels (zero-text-layer page) — a text-only pipeline is blind here",
+      "tags": []
     },
     {
       "id": "PC2",
@@ -99,6 +105,9 @@
       ],
       "expected_facts": [
         "2 Trillion|2万亿|2 万亿"
+      ],
+      "tags": [
+        "zh"
       ]
     },
     {
@@ -116,7 +125,8 @@
         "Generative",
         "Agentic",
         "Physical"
-      ]
+      ],
+      "tags": []
     },
     {
       "id": "TN1",
@@ -130,7 +140,8 @@
       ],
       "expected_facts": [
         "131,651|131.651"
-      ]
+      ],
+      "tags": []
     },
     {
       "id": "TN2",
@@ -144,6 +155,9 @@
       ],
       "expected_facts": [
         "6.93"
+      ],
+      "tags": [
+        "zh"
       ]
     },
     {
@@ -158,7 +172,8 @@
       ],
       "expected_facts": [
         "281,411|281.411"
-      ]
+      ],
+      "tags": []
     },
     {
       "id": "TN4",
@@ -173,11 +188,14 @@
       "expected_facts": [
         "192",
         "Outperform"
+      ],
+      "tags": [
+        "zh"
       ]
     },
     {
       "id": "RQ1",
-      "cat": "rephrased",
+      "cat": "comparison_timeseries",
       "question": "过去两年里，UBS 和巴克莱对英伟达目标价的调整轨迹有什么不同？",
       "expected_pages": [
         [
@@ -201,11 +219,16 @@
       ],
       "must_declare_boundary": true,
       "base_id": "CT1",
-      "notes": "Chinese rephrasing of CT1 — used for the robustness dimension"
+      "notes": "Chinese rephrasing of CT1 — used for the robustness dimension",
+      "tags": [
+        "rephrase",
+        "zh"
+      ],
+      "rephrase_of": "CT1"
     },
     {
       "id": "RQ2",
-      "cat": "rephrased",
+      "cat": "simple_qa",
       "question": "Has Barclays been getting more bullish on Nvidia lately? What do their target revisions show?",
       "expected_pages": [
         [
@@ -221,11 +244,14 @@
         "200",
         "240"
       ],
-      "base_id": "CT2"
+      "base_id": "CT2",
+      "tags": [
+        "rephrase"
+      ]
     },
     {
       "id": "RQ3",
-      "cat": "rephrased",
+      "cat": "simple_qa",
       "question": "英伟达现在值多少钱？巴克莱最新怎么看？",
       "expected_pages": [
         [
@@ -237,11 +263,15 @@
         "240"
       ],
       "base_id": "CT2",
-      "notes": "Colloquial rephrasing"
+      "notes": "Colloquial rephrasing",
+      "tags": [
+        "rephrase",
+        "zh"
+      ]
     },
     {
       "id": "XT1",
-      "cat": "cross_ticker_recall",
+      "cat": "simple_qa",
       "question": "1H25 数据中心 colocation 公司的资本募集总额有多大？",
       "expected_pages": [
         [
@@ -252,11 +282,15 @@
       "expected_facts": [
         "41,810|418.1|41.81"
       ],
-      "notes": "Multi-industry report that says NVIDIA throughout, never NVDA — key test of alias-dictionary recall"
+      "notes": "Multi-industry report that says NVIDIA throughout, never NVDA — key test of alias-dictionary recall",
+      "tags": [
+        "cross_ticker",
+        "zh"
+      ]
     },
     {
       "id": "XT2",
-      "cat": "cross_ticker_recall",
+      "cat": "simple_qa",
       "question": "Which report tracks US data center construction starts in 1H25, and what was the total?",
       "expected_pages": [
         [
@@ -266,11 +300,14 @@
       ],
       "expected_facts": [
         "25,707|257.07|25.707"
+      ],
+      "tags": [
+        "cross_ticker"
       ]
     },
     {
       "id": "NF1",
-      "cat": "pt_not_on_page1",
+      "cat": "deep_page_recovery",
       "question": "What is Wells Fargo's price target for NVDA?",
       "expected_pages": [
         [
@@ -281,11 +318,12 @@
       "expected_facts": [
         "220"
       ],
-      "notes": "PT is on p3, not the first page — direct test of the list_reports recovery path"
+      "notes": "PT is on p3, not the first page — direct test of the list_reports recovery path",
+      "tags": []
     },
     {
       "id": "NF2",
-      "cat": "pt_not_on_page1",
+      "cat": "deep_page_recovery",
       "question": "BofA 8 月 25 日 Trading Catalysts 报告在哪里说明 price objective 的依据？",
       "expected_pages": [
         [
@@ -295,6 +333,9 @@
       ],
       "expected_facts": [
         "Price objective"
+      ],
+      "tags": [
+        "zh"
       ]
     },
     {
@@ -303,7 +344,10 @@
       "question": "NVDA 在 2023 年的目标价走势是怎样的？",
       "expect_abstain": true,
       "forbidden_facts_pattern": "\\$\\s?\\d{2,3}(?!\\d)",
-      "notes": "Corpus window starts 2025-06; must not fabricate a 2023 PT"
+      "notes": "Corpus window starts 2025-06; must not fabricate a 2023 PT",
+      "tags": [
+        "zh"
+      ]
     },
     {
       "id": "AB2",
@@ -316,7 +360,8 @@
         "Sell",
         "Overweight"
       ],
-      "notes": "No Goldman in the corpus — must declare the gap rather than invent a rating"
+      "notes": "No Goldman in the corpus — must declare the gap rather than invent a rating",
+      "tags": []
     },
     {
       "id": "AB3",
@@ -324,7 +369,10 @@
       "question": "苹果公司（AAPL）的最新目标价是多少？",
       "expect_abstain": true,
       "forbidden_facts_pattern": "\\$\\s?\\d{2,3}(?!\\d)",
-      "notes": "AAPL is only mentioned as a peer; the corpus has no price target for it"
+      "notes": "AAPL is only mentioned as a peer; the corpus has no price target for it",
+      "tags": [
+        "zh"
+      ]
     },
     {
       "id": "AB4",
@@ -332,7 +380,1640 @@
       "question": "what's NVDA 2023's target price movement",
       "expect_abstain": true,
       "forbidden_facts_pattern": "\\$\\s?\\d{2,3}(?!\\d)",
-      "notes": "Scope substitution caught in live user testing (asked about 2023, got a 2025 data table); Rule 1 now has a NO SCOPE SUBSTITUTION clause. Forbidden pattern: any price-target dollar figure"
+      "notes": "Scope substitution caught in live user testing (asked about 2023, got a 2025 data table); Rule 1 now has a NO SCOPE SUBSTITUTION clause. Forbidden pattern: any price-target dollar figure",
+      "tags": []
+    },
+    {
+      "id": "RQ4",
+      "cat": "pure_chart",
+      "question": "黄仁勋在巴黎 GTC 主题演讲里，把 AI 工厂描绘成一个多大规模的市场机会？",
+      "expected_pages": [
+        [
+          "GTC-Paris",
+          16
+        ]
+      ],
+      "expected_facts": [
+        "100T|100 trillion|100万亿"
+      ],
+      "notes": "Chinese colloquial rephrasing of PC1 (base_id: PC1). Answer lives only in the visual layer of GTC-Paris keynote p16 ($100T AI factories slide, zero text layer); tests cross-lingual robustness on a pure-chart fact.",
+      "tags": [
+        "rephrase",
+        "zh"
+      ],
+      "rephrase_of": "PC1"
+    },
+    {
+      "id": "RQ5",
+      "cat": "table_numeric",
+      "question": "Digging through the UBS model on Nvidia — what number do they pencil in for EBITDA in the 01/26E fiscal year?",
+      "expected_pages": [
+        [
+          "20250708 - UBS Research",
+          5
+        ]
+      ],
+      "expected_facts": [
+        "131,651|131.651"
+      ],
+      "notes": "Colloquial English rephrasing of TN1 (base_id: TN1) using 'pencil in' phrasing instead of 'forecast'. Answer is in the financials table on p5 of the 20250708 UBS report.",
+      "tags": [
+        "rephrase"
+      ],
+      "rephrase_of": "TN1"
+    },
+    {
+      "id": "RQ6",
+      "cat": "table_numeric",
+      "question": "Where does Mizuho stand on Nvidia after their early-August note — what rating and how high a target?",
+      "expected_pages": [
+        [
+          "20250803 - Mizuho Securities USA",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "192",
+        "Outperform"
+      ],
+      "notes": "English colloquial rephrasing of the Chinese base item TN2's sibling TN4 (base_id: TN4); flips language direction (ZH base -> EN rephrase). Answer on p1 of the 20250803 Mizuho report: $192 PT, Outperform.",
+      "tags": [
+        "rephrase"
+      ],
+      "rephrase_of": "TN2"
+    },
+    {
+      "id": "RQ7",
+      "cat": "simple_qa",
+      "question": "2025 年上半年美国数据中心新开工项目加起来的体量有多大？是哪份研报统计的？",
+      "expected_pages": [
+        [
+          "20250617 - BofA Global Research - Industrials",
+          4
+        ]
+      ],
+      "expected_facts": [
+        "25,707|257.07|25.707"
+      ],
+      "notes": "Chinese rephrasing of XT2 (base_id: XT2). Answer is the 1H25 US data center construction starts total ($25,707mn) on p4 of the BofA Industrials multi-industry report; also stresses the alias/cross-ticker recall path in Chinese.",
+      "tags": [
+        "rephrase",
+        "zh",
+        "cross_ticker"
+      ],
+      "rephrase_of": "XT2"
+    },
+    {
+      "id": "RQ8",
+      "cat": "deep_page_recovery",
+      "question": "How high does Wells Fargo think NVDA can go — what target do they have on the stock?",
+      "expected_pages": [
+        [
+          "20250826 - Wells Fargo Securities",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "220"
+      ],
+      "notes": "Colloquial English rephrasing of NF1 (base_id: NF1). The $220 PT sits on p3 of the 20250826 Wells Fargo note, not on page 1, so the rephrase still exercises the list_reports recovery path.",
+      "tags": [
+        "rephrase"
+      ],
+      "rephrase_of": "NF1"
+    },
+    {
+      "id": "RQ9",
+      "cat": "table_numeric",
+      "question": "Looking at JPM's estimates, how big do they see Nvidia's top line getting by fiscal 2027?",
+      "expected_pages": [
+        [
+          "20250828 - JPMorgan Research",
+          7
+        ]
+      ],
+      "expected_facts": [
+        "281,411|281.411"
+      ],
+      "notes": "Colloquial English rephrasing of TN3 (base_id: TN3): 'JPM' for JPMorgan, 'top line' for total revenue, 'fiscal 2027' for F27E. Answer is the $281,411mn F27E revenue line in the model table on p7 of the 20250828 JPMorgan report.",
+      "tags": [
+        "rephrase"
+      ],
+      "rephrase_of": "TN3"
+    },
+    {
+      "id": "RQ10",
+      "cat": "pure_chart",
+      "question": "Jensen's keynote had that slide with the rising arrow tracing AI's evolution — which waves of AI did it call out?",
+      "expected_pages": [
+        [
+          "GTC-Paris",
+          6
+        ]
+      ],
+      "expected_facts": [
+        "Perception",
+        "Generative",
+        "Agentic",
+        "Physical"
+      ],
+      "notes": "Colloquial English rephrasing of PC3 (base_id: PC3), swapping 'stages'/'timeline slide' for 'waves'/'rising arrow'. Answer is the visual-only progression slide on GTC-Paris p6 (PERCEPTION/GENERATIVE/AGENTIC/PHYSICAL AI, uppercase on the page).",
+      "tags": [
+        "rephrase"
+      ],
+      "rephrase_of": "PC3"
+    },
+    {
+      "id": "SQ1",
+      "cat": "simple_qa",
+      "question": "According to Citi's August 27 flash note on NVIDIA's Jul-Q results, what revenue did the company guide for the October quarter?",
+      "expected_pages": [
+        [
+          "20250827 - Citi",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "54"
+      ],
+      "notes": "Single headline number on p1 of Citi 2025-08-27 flash: 'NVDA guided Oct-Q revenue to $54B'. Plain single-page fact in raw_text, baseline control.",
+      "tags": []
+    },
+    {
+      "id": "SQ2",
+      "cat": "simple_qa",
+      "question": "How large is the equity stake Bernstein says NVIDIA is taking in Intel, and at what price per share?",
+      "expected_pages": [
+        [
+          "20250919 - Bernstein",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "5B|5 billion",
+        "23.28"
+      ],
+      "notes": "Both facts sit in one sentence on p1 of Bernstein 2025-09-19: '$5B stake in their rival (at $23.28/share)'. Named deal fact, no aggregation.",
+      "tags": []
+    },
+    {
+      "id": "SQ3",
+      "cat": "simple_qa",
+      "question": "What price objective did BofA reiterate on NVDA in its September 22 note about the OpenAI investment?",
+      "expected_pages": [
+        [
+          "20250922 - BofA",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "235"
+      ],
+      "notes": "PO stated plainly in the p1 header of BofA 2025-09-22: 'Reiterate Rating: BUY | PO: 235.00 USD'. Simple rating/PO lookup on one page.",
+      "tags": []
+    },
+    {
+      "id": "SQ4",
+      "cat": "simple_qa",
+      "question": "What is JPMorgan's December 2026 price target for NVIDIA, and what rating does the September 4 lead-times note reiterate?",
+      "expected_pages": [
+        [
+          "20250904 - JPMorgan",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "215",
+        "Overweight"
+      ],
+      "notes": "Header block on p1 of JPM 2025-09-04: 'Overweight ... Price Target (Dec-26): $215.00'. Distinct from golden-set JPM item (TN3 uses the 08-28 model page).",
+      "tags": []
+    },
+    {
+      "id": "SQ5",
+      "cat": "simple_qa",
+      "question": "Per Wells Fargo's September 9 flash comment, how much faster is NVIDIA's new Rubin CPX at attention processing than the GB300, and when are the Vera-Rubin NVL144 systems expected to be generally available?",
+      "expected_pages": [
+        [
+          "20250909 - Wells Fargo",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "3x",
+        "late-2026|late 2026"
+      ],
+      "notes": "Product fact on p1 of WF 2025-09-09: Rubin CPX delivers '3x the attention processing speeds' of GB300, GA 'late-2026'. Different WF doc from golden-set NF1.",
+      "tags": []
+    },
+    {
+      "id": "SQ6",
+      "cat": "simple_qa",
+      "question": "法巴（BNP Paribas Exane）8 月 1 日的 AI Factory 报告把英伟达目标价从多少上调到了多少？",
+      "expected_pages": [
+        [
+          "20250801 - BNP Paribas Exane",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "220",
+        "170"
+      ],
+      "notes": "Chinese question; p1 of BNP 2025-08-01 states 'TP of $220 (from $170 prior)' plus header 'TARGET PRICE USD220'. Single-page PT revision fact.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "SQ7",
+      "cat": "simple_qa",
+      "question": "Bernstein 7 月 15 日关于 H20 的报告里提到，英伟达此前计提的库存准备金规模是多少？",
+      "expected_pages": [
+        [
+          "20250715 - Bernstein",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "4.5"
+      ],
+      "notes": "Chinese question; p1 of Bernstein 2025-07-15 'Fine China?' states the '($4.5B) inventory reserve' NVDA took. Plain named number on one page.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "SQ8",
+      "cat": "simple_qa",
+      "question": "根据法巴 9 月 23 日的快评，OpenAI 与英伟达的合作将部署至少多少吉瓦的 AI 数据中心？英伟达最多投资多少？",
+      "expected_pages": [
+        [
+          "20250923 - BNP Paribas Exane",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "10",
+        "100bn|100 billion|1000亿"
+      ],
+      "notes": "Chinese question; p1 of BNP 2025-09-23 flash lists 'at least 10 gigawatts (GW)' and 'NVIDIA will invest up to $100bn'. Both terms sit in the same bullet list on one page.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "XT3",
+      "cat": "simple_qa",
+      "question": "What is Meta's 2025 capex outlook at the midpoint according to Barclays' data-center read-through note, and what year-over-year growth does that represent?",
+      "expected_pages": [
+        [
+          "20250731 - Barclays - MSFT",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "69",
+        "85"
+      ],
+      "notes": "Answer on p1 of the Barclays 2025-07-31 META/MSFT/VRT data centers note: META raised its 2025 capex outlook by $1b to $69b at the midpoint (+85% y/y). Targets META in a non-NVDA document filed under MSFT — tests recall outside the NVDA ticker.",
+      "tags": [
+        "cross_ticker"
+      ]
+    },
+    {
+      "id": "XT4",
+      "cat": "simple_qa",
+      "question": "Per Barclays' July 2025 data centers note, what did Microsoft Azure's FY25 revenue total and how fast did it grow year over year?",
+      "expected_pages": [
+        [
+          "20250731 - Barclays - MSFT",
+          2
+        ]
+      ],
+      "expected_facts": [
+        "75",
+        "34"
+      ],
+      "notes": "Answer on p2 of the Barclays 2025-07-31 data centers note: Azure FY25 revenue totaled $75b, +34% y/y. MSFT-targeted question; the fact sits on an interior page of a non-NVDA report.",
+      "tags": [
+        "cross_ticker"
+      ]
+    },
+    {
+      "id": "XT5",
+      "cat": "simple_qa",
+      "question": "At what price per share did NVIDIA take its $5 billion stake in Intel, and roughly how many Intel shares will it own, according to Bernstein?",
+      "expected_pages": [
+        [
+          "20250919 - Bernstein Research",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "23.28",
+        "215"
+      ],
+      "notes": "Answer on p1 of Bernstein's 2025-09-19 'Break out the cognac?' note: $5B stake at $23.28/share, ~215M Intel shares (~4%). INTC-targeted recall; the page writes 'Intel' throughout, INTC appears only as a ticker tag.",
+      "tags": [
+        "cross_ticker"
+      ]
+    },
+    {
+      "id": "XT6",
+      "cat": "simple_qa",
+      "question": "Bernstein 报告里，英伟达入股消息公布当天英特尔股价涨了多少？AMD 的股价反应又如何？",
+      "expected_pages": [
+        [
+          "20250919 - Bernstein Research",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "23",
+        "0.8"
+      ],
+      "notes": "Answer on p1 of Bernstein 2025-09-19: Intel rose 23% during the session while AMD fell ~0.8% (NVDA +3.5%). Chinese cross-lingual phrasing targeting INTC/AMD price reactions, not NVDA.",
+      "tags": [
+        "cross_ticker",
+        "zh"
+      ]
+    },
+    {
+      "id": "XT7",
+      "cat": "table_numeric",
+      "question": "What does Morgan Stanley's gigawatt deep dive estimate for Alphabet's 2026 capex, and what total data center capex across the hyperscalers does it show for that year?",
+      "expected_pages": [
+        [
+          "20250929 - Morgan Stanley - GOOG",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "105",
+        "510|500"
+      ],
+      "notes": "Answer in Exhibit 2 on p3 of Morgan Stanley's 2025-09-29 GOOG video note: GOOGL 2026 capex $105bn, stacked total $510bn ($500bn+ in the exhibit title). GOOG-targeted item on a table page transcribed partly in Chinese.",
+      "tags": [
+        "cross_ticker"
+      ]
+    },
+    {
+      "id": "XT8",
+      "cat": "simple_qa",
+      "question": "Morgan Stanley 给 Alphabet 的目标价用的是什么估值方法？隐含多少倍的 2025 年调整后 EBITDA？",
+      "expected_pages": [
+        [
+          "20250929 - Morgan Stanley - GOOG",
+          4
+        ]
+      ],
+      "expected_facts": [
+        "discounted cash flow|DCF|贴现现金流|折现现金流",
+        "14"
+      ],
+      "notes": "Answer on p4 (Valuation Methodology and Risks) of the 2025-09-29 Morgan Stanley GOOG note: DCF/discount to long-term EBITDA multiple, implies ~14X 2025e adjusted EBITDA. Chinese question targeting GOOGL valuation, a page NVDA never appears on.",
+      "tags": [
+        "cross_ticker",
+        "zh"
+      ]
+    },
+    {
+      "id": "XT9",
+      "cat": "simple_qa",
+      "question": "Mizuho 8 月 3 日的报告提到 AMD MI350 的定价可能发生什么变化？",
+      "expected_pages": [
+        [
+          "20250803 - Mizuho Securities USA",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "15",
+        "25"
+      ],
+      "notes": "Answer on p3 of Mizuho's 2025-08-03 hyperscaler note: reports of AMD potentially raising MI350 prices from $15k to $25k. Chinese question targeting AMD product pricing buried inside an NVDA-flagged report.",
+      "tags": [
+        "cross_ticker",
+        "zh"
+      ]
+    },
+    {
+      "id": "XT10",
+      "cat": "simple_qa",
+      "question": "Which chip vendors does BofA say face higher competitive stakes as a result of NVIDIA's OpenAI investment?",
+      "expected_pages": [
+        [
+          "20250922 - BofA Global Research",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "AVGO|Broadcom",
+        "AMD"
+      ],
+      "notes": "Answer on p1 of BofA's 2025-09-22 OpenAI-investment note: the deal 'could raise competitive stakes for other vendors such as AVGO and AMD'. Tests recall of AVGO/AMD read-throughs inside an NVDA headline report.",
+      "tags": [
+        "cross_ticker"
+      ]
+    },
+    {
+      "id": "TS1",
+      "cat": "temporal",
+      "question": "How did Citi's price target on NVDA evolve between its late-August and early-September 2025 notes?",
+      "expected_pages": [
+        [
+          "20250827 - Citi",
+          1
+        ],
+        [
+          "20250909 - Citi",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "190",
+        "200"
+      ],
+      "notes": "Single-broker PT evolution: Citi p1 shows 'Target price US$190.00' (2025-08-27) raised to 'US$200.00' (2025-09-09). Tests ordering two dated reports from the same broker.",
+      "tags": []
+    },
+    {
+      "id": "TS2",
+      "cat": "temporal",
+      "question": "How did Mizuho's NVDA price target change between its late-June and early-August 2025 reports?",
+      "expected_pages": [
+        [
+          "20250629 - Mizuho",
+          1
+        ],
+        [
+          "20250803 - Mizuho",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "170",
+        "192"
+      ],
+      "notes": "PT evolution inside one broker: 6/29 p1 rating table shows 'NVDA | $170.00 | Outperform'; 8/03 p1 table shows '$192.00'. Distinct from TN4 which asks only the 8/03 point value.",
+      "tags": []
+    },
+    {
+      "id": "TS3",
+      "cat": "temporal",
+      "question": "BNP Paribas Exane 对英伟达的目标价从 2025 年 8 月到 9 月是怎么一步步调整的？",
+      "expected_pages": [
+        [
+          "20250801 - BNP",
+          1
+        ],
+        [
+          "20250923 - BNP",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "220",
+        "240"
+      ],
+      "notes": "Chinese evolution question on one broker: BNP p1 headers show TARGET PRICE USD220 (8/01) then USD240 (9/23). Exercises cross-lingual retrieval plus temporal ordering.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "TS4",
+      "cat": "temporal",
+      "question": "When JPMorgan rolled its NVDA price target forward after the July-quarter results, what did the target move from and to?",
+      "expected_pages": [
+        [
+          "20250828 - JPMorgan",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "170",
+        "215"
+      ],
+      "notes": "Old-vs-new revision on a single page: 8/28 p1 states 'Dec-26 PT of $215 (from our prior Dec-25 PT of $170)'. Tests extracting a within-document temporal change.",
+      "tags": []
+    },
+    {
+      "id": "TS5",
+      "cat": "temporal",
+      "question": "英伟达数据中心收入从 FY26 第一季度到第二季度发生了什么变化？",
+      "expected_pages": [
+        [
+          "F1Q26",
+          5
+        ],
+        [
+          "F2Q26",
+          5
+        ]
+      ],
+      "expected_facts": [
+        "39.1",
+        "41.1"
+      ],
+      "notes": "Non-PT temporal on the company itself: Data Center revenue $39.1B (F1Q26 deck p5, up 73% Y/Y) grew to $41.1B (F2Q26 deck p5, up 56% Y/Y). Chinese phrasing; the two quarterly decks have no published_date, so retrieval must key off fiscal-quarter labels.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "TS6",
+      "cat": "temporal",
+      "question": "As of mid-July 2025, what were Bernstein's rating and price target on NVDA?",
+      "expected_pages": [
+        [
+          "20250715 - Bernstein",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "Outperform",
+        "185"
+      ],
+      "notes": "Date-anchored single point: 7/15 p1 says 'We rate NVDA Outperform ($185 PT)'. The later 9/19 Bernstein note repeats the rating but no PT number, so the mid-July anchor must resolve to the 7/15 report.",
+      "tags": []
+    },
+    {
+      "id": "TS7",
+      "cat": "temporal",
+      "question": "What 12-month price target did UBS have on NVDA as of early July 2025?",
+      "expected_pages": [
+        [
+          "20250708 - UBS",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "175"
+      ],
+      "notes": "Date-anchored: UBS appears exactly once in the window (2025-07-08); p1 shows '12m price target US$175.00'. Single-entity variant, distinct from the CT1/CT3 multi-broker comparisons.",
+      "tags": []
+    },
+    {
+      "id": "TS8",
+      "cat": "temporal",
+      "question": "What is Citi's latest price target for NVDA?",
+      "expect_latest": true,
+      "expected_pages": [
+        [
+          "20250909 - Citi",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "200"
+      ],
+      "notes": "Latest item: two Citi docs in DB (2025-08-27 PT $190, 2025-09-09 PT $200); most recent by published_date is 9/09, p1 'Target price US$200.00'. Answering 190 means stale retrieval.",
+      "tags": []
+    },
+    {
+      "id": "TS9",
+      "cat": "temporal",
+      "question": "美银（BofA）目前对英伟达最新的 price objective 是多少？",
+      "expect_latest": true,
+      "expected_pages": [
+        [
+          "20250922 - BofA",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "235"
+      ],
+      "notes": "Latest item, Chinese: BofA NVDA PO was $220 on 8/11 (p2) and 8/25 (p9) but the most recent BofA doc (2025-09-22, latest of five BofA docs by published_date) shows 'PO: 235.00 USD' on p1. Answering 220 means the recency ranking failed.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "TS10",
+      "cat": "temporal",
+      "question": "What is BNP Paribas Exane's current target price on NVDA?",
+      "expect_latest": true,
+      "expected_pages": [
+        [
+          "20250929 - BNP",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "240"
+      ],
+      "notes": "Latest item: BNP docs are 8/01 (USD220), 9/23 (USD240), 9/29; the most recent (2025-09-29) states 'Nvidia: Outperform TP $240' on p1. Verifies the answer is sourced from the newest document, not the 8/01 report.",
+      "tags": []
+    },
+    {
+      "id": "PC4",
+      "cat": "pure_chart",
+      "question": "In BNP Paribas Exane's 1GW datacenter teardown, the Hopper-generation cost breakdown pie chart shows what shares of capex going to GPU and to power?",
+      "expected_pages": [
+        [
+          "Bluesky scenario",
+          4
+        ]
+      ],
+      "expected_facts": [
+        "40",
+        "27"
+      ],
+      "notes": "Crop-discrimination item: page 4 of BNP's Bluesky note carries FOUR figures (Hopper pie, Rubin pie, gen/gen value-capture table, NVL72 bottom-up table); question targets the Hopper pie ('Hopper Generation: NVDA capture 50%'). Slice values (GPU 40%, Power 27%) exist only in the chart labels — raw text layer has just the bullet headers.",
+      "tags": []
+    },
+    {
+      "id": "PC5",
+      "cat": "pure_chart",
+      "question": "Wells Fargo's September 9 note on the Rubin CPX launch reprints an NVIDIA radar chart comparing the Context GPU and the Generation GPU — which three axes does that chart plot?",
+      "expected_pages": [
+        [
+          "20250909 - Wells Fargo",
+          4
+        ]
+      ],
+      "expected_facts": [
+        "Compute",
+        "Memory Bandwidth",
+        "NVLink Bandwidth"
+      ],
+      "notes": "Crop-discrimination item: page 4 has TWO figures — a disaggregated-inference-serving flow diagram and the Context/Generation GPU radar chart; question targets the radar chart. Axis names absent from the sparse raw text layer (headers/source only).",
+      "tags": []
+    },
+    {
+      "id": "PC6",
+      "cat": "pure_chart",
+      "question": "In the annotated Vera Rubin NVL144 CPX announcement graphic shown by Wells Fargo, how much revenue does NVIDIA claim per $100M invested, and how much fast memory does the system carry?",
+      "expected_pages": [
+        [
+          "20250909 - Wells Fargo",
+          2
+        ]
+      ],
+      "expected_facts": [
+        "5B|5 billion",
+        "100 TB|100TB"
+      ],
+      "notes": "Crop-discrimination item: page 2 pairs the annotated spec graphic ('$5B Revenue per $100M invested', '100 TB Fast Memory') with a separate device close-up photo; question targets the annotated graphic. No numbers in the PDF text layer at all.",
+      "tags": []
+    },
+    {
+      "id": "PC7",
+      "cat": "pure_chart",
+      "question": "GTC Paris keynote 的 DeepL 幻灯片分成训练和推理两张流程图，推理那张图里汇入 LLM 模型的优化功能模块有哪些？",
+      "expected_pages": [
+        [
+          "GTC-Paris",
+          44
+        ]
+      ],
+      "expected_facts": [
+        "LoRA",
+        "Inflight Batching",
+        "Optimized KV Cache"
+      ],
+      "notes": "Crop-discrimination item (Chinese): keynote page 44 holds TWO flow diagrams (Training vs Inference); question targets the Inference diagram (LoRA / Inflight Batching / Optimized KV Cache). Zero-text-layer page — answer exists only in pixels.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "PC8",
+      "cat": "pure_chart",
+      "question": "On the Schaeffler digital-twin slide in the GTC Paris keynote, which robotics platform does the architecture diagram show connecting to the real robot?",
+      "expected_pages": [
+        [
+          "GTC-Paris",
+          56
+        ]
+      ],
+      "expected_facts": [
+        "Wandelbots"
+      ],
+      "notes": "Crop-discrimination item: page 56 pairs a humanoid-robot photo with the Schaeffler system architecture diagram; question targets the diagram (Wandelbots Nova Robotics → Real Robot). Text layer holds only the words 'Omniverse Digital Twin'.",
+      "tags": []
+    },
+    {
+      "id": "PC9",
+      "cat": "pure_chart",
+      "question": "In Morgan Stanley's late-September Chart of the Day on capex, which group stands out with the strongest acceleration in NTM capex forecasts?",
+      "expected_pages": [
+        [
+          "20250925 - Morgan Stanley",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "Hyperscalers"
+      ],
+      "notes": "Exhibit 3 vertical bar chart; the category labels (Hyperscalers is the tallest bar) live only in the chart — the raw text layer contains just the exhibit title and y-axis tick values.",
+      "tags": []
+    },
+    {
+      "id": "PC10",
+      "cat": "pure_chart",
+      "question": "美银 'Who Makes the Data Center' 2025 图解里，服务器和网络设备的每兆瓦成本分别标注为多少？",
+      "expected_pages": [
+        [
+          "20250915 - BofA",
+          2
+        ]
+      ],
+      "expected_facts": [
+        "25.0|25",
+        "4.3"
+      ],
+      "notes": "Chinese item on BofA Industrials Exhibit 1 schematic: per-item $/MW labels (Servers $25.0mn/MW, Networking $4.3mn/MW) exist only in the figure; only the $39mn/MW headline survives in the text layer.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "PC11",
+      "cat": "pure_chart",
+      "question": "NVIDIA NDR 路演材料中 DeepSeek R1 的吞吐量—交互性曲线图里，GB200 相对 H200 的优势标注是多少？",
+      "expected_pages": [
+        [
+          "NDR",
+          13
+        ]
+      ],
+      "expected_facts": [
+        "15X|15x"
+      ],
+      "notes": "Chinese item: the '15X TPS/GPU VS. H200' callout exists only inside the throughput-vs-interactivity line chart on NDR deck page 13; the text layer holds slide titles only.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "PC12",
+      "cat": "pure_chart",
+      "question": "In the Cisco AI Defense architecture slide from the GTC Paris keynote, what are the three Cisco safety-model NIMs?",
+      "expected_pages": [
+        [
+          "GTC-Paris",
+          38
+        ]
+      ],
+      "expected_facts": [
+        "Safety",
+        "Security",
+        "Privacy"
+      ],
+      "notes": "Zero-text-layer keynote page 38: the Cisco Safety / Security / Privacy NVIDIA NIM boxes are diagram module labels only — a text pipeline sees nothing on this page.",
+      "tags": []
+    },
+    {
+      "id": "PC13",
+      "cat": "pure_chart",
+      "question": "GTC Paris keynote 上 Perplexity 那一页显示，法语 Nemotron 模型是哪家机构做的？",
+      "expected_pages": [
+        [
+          "GTC-Paris",
+          35
+        ]
+      ],
+      "expected_facts": [
+        "LightOn"
+      ],
+      "notes": "Chinese item: the Perplexity interface mock on page 35 lists regional Nemotron providers (LightOn = French Nemotron); text layer carries only the slide title, so the mapping exists solely in the slide figure.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "PC14",
+      "cat": "pure_chart",
+      "question": "Which two healthcare-related libraries appear on the CUDA-X portfolio slide near the start of the GTC Paris keynote?",
+      "expected_pages": [
+        [
+          "GTC-Paris",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "MONAI",
+        "Parabricks"
+      ],
+      "notes": "Zero-text-layer page 3: the CUDA-X product wall labels (MONAI for medical imaging, Parabricks for genomics) exist only in pixels.",
+      "tags": []
+    },
+    {
+      "id": "CT4",
+      "cat": "comparison_timeseries",
+      "question": "Give me a complete rundown of every broker in the knowledge base and its most recent NVDA price target — all houses, not just the big three.",
+      "expected_pages": [
+        [
+          "20250925 - Barclays - NVDA",
+          1
+        ],
+        [
+          "20250923 - BNP Paribas Exane",
+          1
+        ],
+        [
+          "20250922 - BofA Global Research",
+          1
+        ],
+        [
+          "20250919 - Bernstein Research",
+          3
+        ],
+        [
+          "20250909 - Wells Fargo Securities",
+          1
+        ],
+        [
+          "20250904 - JPMorgan Research",
+          1
+        ],
+        [
+          "20250909 - Citi",
+          1
+        ],
+        [
+          "20250803 - Mizuho Securities USA",
+          1
+        ],
+        [
+          "20250708 - UBS Research",
+          1
+        ],
+        [
+          "20250612 - Morgan Stanley",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "240",
+        "235",
+        "225",
+        "220",
+        "215",
+        "200",
+        "192",
+        "175",
+        "170"
+      ],
+      "notes": "Whole-KB enumeration #1 (English). Latest PT per broker, each verified on its page: Barclays 240 (0925 p1), BNP 240 (0923 p1), BofA 235 (0922 p1), Bernstein 225 (0919 p3 ticker table), Wells Fargo 220 (0909 p1), JPMorgan 215 Dec-26 (0904 p1), Citi 200 (0909 p1), Mizuho 192 (0803 p1 table), UBS 175 (0708 p1), Morgan Stanley 170 (0612 p1).",
+      "tags": []
+    },
+    {
+      "id": "CT5",
+      "cat": "comparison_timeseries",
+      "question": "请把知识库里每一家券商对英伟达（NVDA）的最新股票评级完整列一遍，一家都不要漏。",
+      "expected_pages": [
+        [
+          "20250612 - Morgan Stanley",
+          1
+        ],
+        [
+          "20250925 - Barclays - NVDA",
+          2
+        ],
+        [
+          "20250708 - UBS Research",
+          1
+        ],
+        [
+          "20250919 - Bernstein Research",
+          2
+        ],
+        [
+          "20250803 - Mizuho Securities USA",
+          1
+        ],
+        [
+          "20250923 - BNP Paribas Exane",
+          1
+        ],
+        [
+          "20250922 - BofA Global Research",
+          1
+        ],
+        [
+          "20250909 - Wells Fargo Securities",
+          1
+        ],
+        [
+          "20250909 - Citi",
+          1
+        ],
+        [
+          "20250904 - JPMorgan Research",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "Overweight|增持|超配",
+        "Buy|买入",
+        "Outperform|跑赢|优于大市"
+      ],
+      "notes": "Whole-KB enumeration #2 (Chinese). Ratings verified per page: Overweight — MS 0612 p1, Barclays 0925 p2 ('Why OVERWEIGHT?'), Wells Fargo 0909 p1, JPM 0904 p1; Buy — UBS 0708 p1, BofA 0922 p1 ('Reiterate Rating: BUY'), Citi 0909 p1; Outperform — Bernstein 0919 p2, Mizuho 0803 p1 table, BNP 0923 p1. Values repeat across brokers, so facts are the three distinct rating labels.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "CT6",
+      "cat": "comparison_timeseries",
+      "question": "Among all brokers covering NVDA in the corpus, who holds the street-high price target and who has the lowest, and what are the two numbers?",
+      "expected_pages": [
+        [
+          "20250925 - Barclays - NVDA",
+          1
+        ],
+        [
+          "20250923 - BNP Paribas Exane",
+          1
+        ],
+        [
+          "20250612 - Morgan Stanley",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "240",
+        "170"
+      ],
+      "notes": "Cross-broker min/max aggregation. Street-high $240 is shared by Barclays (0925 p1) and BNP Paribas Exane (0923 p1); lowest is Morgan Stanley's $170 (0612 p1, the only MS NVDA PT in the window).",
+      "tags": []
+    },
+    {
+      "id": "CT7",
+      "cat": "comparison_timeseries",
+      "question": "Barclays, BofA, and Citi all value NVDA off a CY26 earnings multiple — compare the P/E multiples each uses to derive its latest price target.",
+      "expected_pages": [
+        [
+          "20250925 - Barclays - NVDA",
+          6
+        ],
+        [
+          "20250922 - BofA Global Research",
+          2
+        ],
+        [
+          "20250909 - Citi",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "35",
+        "37",
+        "30"
+      ],
+      "notes": "Valuation-methodology comparison across three brokers: Barclays $240 = 35x CY26E non-GAAP EPS of $6.93 (0925 p6), BofA $235 PO = 37x CY26E (0922 p2), Citi $200 = ~30x P/E on C26E EPS (0909 p3).",
+      "tags": []
+    },
+    {
+      "id": "CT8",
+      "cat": "comparison_timeseries",
+      "question": "How did Citi's and BofA's NVDA price targets move between mid-August and late September 2025?",
+      "expected_pages": [
+        [
+          "20250827 - Citi",
+          1
+        ],
+        [
+          "20250909 - Citi",
+          1
+        ],
+        [
+          "20250811 - BofA Global Research",
+          2
+        ],
+        [
+          "20250922 - BofA Global Research",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "190",
+        "200",
+        "220",
+        "235"
+      ],
+      "notes": "Cross-broker time series requiring four documents: Citi $190 (0827 p1) -> $200 (0909 p1); BofA PO $220 (0811 p2 companies-mentioned table) -> $235 (0922 p1, established 27-Aug-2025).",
+      "tags": []
+    },
+    {
+      "id": "CT9",
+      "cat": "comparison_timeseries",
+      "question": "英伟达向 OpenAI 投资的规模有多大？美银和法巴 Exane 各自是怎么解读这笔交易的？",
+      "expected_pages": [
+        [
+          "20250922 - BofA Global Research",
+          1
+        ],
+        [
+          "20250923 - BNP Paribas Exane",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "100bn|$100bn|100 billion|1000亿|1,000亿",
+        "10 GW|10GW|10 gigawatts|10吉瓦",
+        "3x-5x|3x–5x|3-5x|3到5倍"
+      ],
+      "notes": "Chinese cross-broker event comparison: both pages state the up-to-$100bn OpenAI investment and at-least-10 GW LOI; BofA (0922 p1) frames it as 3x-5x ROI ($300-500bn revenue) with financing-optics caveats, BNP (0923 p1) calls it supportive of mid/long-term demand.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "CT10",
+      "cat": "comparison_timeseries",
+      "question": "Both Wells Fargo and Citi published notes on NVIDIA's Rubin CPX unveiling on September 9, 2025 — what did each highlight, and where do their price targets stand?",
+      "expected_pages": [
+        [
+          "20250909 - Wells Fargo Securities",
+          1
+        ],
+        [
+          "20250909 - Citi",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "Rubin CPX",
+        "220",
+        "200"
+      ],
+      "notes": "Same-day dual coverage of one event: Wells Fargo (0909 p1, Overweight, PT $220) details Rubin CPX specs (30 PFLOPs, 128GB GDDR7, late-2026 GA); Citi (0909 p1, Buy, TP $200) highlights the ~50x ROI / $5B token-revenue-per-$100M claim. Answer must draw on both brokers.",
+      "tags": []
+    },
+    {
+      "id": "CT11",
+      "cat": "comparison_timeseries",
+      "question": "摩根士丹利和巴克莱给英伟达设定的牛市/熊市（上行/下行）情景价位分别是多少？对比一下两家的区间。",
+      "expected_pages": [
+        [
+          "20250612 - Morgan Stanley",
+          4
+        ],
+        [
+          "20250925 - Barclays - NVDA",
+          2
+        ]
+      ],
+      "expected_facts": [
+        "215",
+        "100",
+        "300",
+        "140"
+      ],
+      "notes": "Chinese scenario-range comparison across two brokers: Morgan Stanley bull $215 / bear $100 around a $170 base (0612 p4 chart transcription); Barclays upside $300 / downside $140 around the $240 target (0925 p2 chart transcription).",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "CT12",
+      "cat": "comparison_timeseries",
+      "question": "How do Mizuho and BNP Paribas Exane each size the AI capex wave — what headline figures does each report put on it?",
+      "expected_pages": [
+        [
+          "20250803 - Mizuho Securities USA",
+          1
+        ],
+        [
+          "20250801 - BNP Paribas Exane",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "51",
+        "2Tr|$2 trillion|2 trillion|2万亿",
+        "53GW|53 GW|53吉瓦"
+      ],
+      "notes": "Cross-broker macro aggregation: Mizuho (0803 p1) says 2025 hyperscaler capex is now up 51% y/y (vs prior +38%); BNP (0801 p1) frames the buildout as $2Tr of capex, $1Tr in compute, 53GW of power. Answer needs both documents' headline numbers.",
+      "tags": []
+    },
+    {
+      "id": "TN5",
+      "cat": "table_numeric",
+      "question": "In Barclays' June 17 income statement model for NVDA, what total revenue is projected for fiscal year 2027?",
+      "expected_pages": [
+        [
+          "20250617 - Barclays - NVDA",
+          5
+        ]
+      ],
+      "expected_facts": [
+        "284,818|284.818"
+      ],
+      "notes": "Figure 2 NVDA Income Statement on p5 of Barclays 2025-06-17; 2027 (FYE) revenue column reads $284,818mn. Dense quarterly+annual P&L table; June model distinct from the later 290,276 revision.",
+      "tags": []
+    },
+    {
+      "id": "TN6",
+      "cat": "table_numeric",
+      "question": "巴克莱 9 月 25 日修订报告中，对 NVDA 2027 财年收入的预测是多少（百万美元）？",
+      "expected_pages": [
+        [
+          "20250925 - Barclays - NVDA",
+          2
+        ]
+      ],
+      "expected_facts": [
+        "290,276|290.276"
+      ],
+      "notes": "Chinese item. Income statement table on p2 of Barclays 2025-09-25 revision note: 2027E revenue 290,276 $mn. Different metric from existing TN2 (EPS 6.93, p1).",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "TN7",
+      "cat": "table_numeric",
+      "question": "What FY26E revenue does JPMorgan's Summary of Financials show for NVIDIA in its September lead-times note?",
+      "expected_pages": [
+        [
+          "20250904 - JPMorgan",
+          5
+        ]
+      ],
+      "expected_facts": [
+        "206,829|206.829"
+      ],
+      "notes": "Summary of Financials annual income statement on p5 of JPM 2025-09-04: FY26E revenue 206,829. Different document and figure from existing TN3 (F27E 281,411 in the 08-28 note).",
+      "tags": []
+    },
+    {
+      "id": "TN8",
+      "cat": "table_numeric",
+      "question": "摩根大通 8 月 28 日报告的现金流量表里，2Q26（Jul'25）季度的经营现金流（cash flow from operations）是多少？",
+      "expected_pages": [
+        [
+          "20250828 - JPMorgan",
+          8
+        ]
+      ],
+      "expected_facts": [
+        "15,365|15.365"
+      ],
+      "notes": "Chinese item. Table 7 NVIDIA Cash Flow Statement on p8 of JPM 2025-08-28: Cash Flow from operations for Jul'25 2Q26 is $15,365mn. Deep-in-table quarterly cash-flow row.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "TN9",
+      "cat": "table_numeric",
+      "question": "In JPMorgan's semiconductor comp and group valuation table, what calendar 2025 revenue estimate is listed for NVDA?",
+      "expected_pages": [
+        [
+          "20250828 - JPMorgan",
+          6
+        ]
+      ],
+      "expected_facts": [
+        "196,571|196.571"
+      ],
+      "notes": "Table 4 comp table on p6 of JPM 2025-08-28: NVDA Revenues C25E $196,571. Tests picking one cell out of a 29-row, 19-column comp sheet.",
+      "tags": []
+    },
+    {
+      "id": "TN10",
+      "cat": "table_numeric",
+      "question": "What restated EBITDA does BNP Paribas Exane's company model forecast for NVIDIA in fiscal Jan. 27e?",
+      "expected_pages": [
+        [
+          "20250801 - BNP Paribas Exane",
+          2
+        ]
+      ],
+      "expected_facts": [
+        "147,613.4|147,613|147.613"
+      ],
+      "notes": "P&L HIGHLIGHTS table on p2 of BNP 2025-08-01 AI Factory report: Restated EBITDA Jan. 27e = 147,613.4 USDm. 14-column historical+forecast model page.",
+      "tags": []
+    },
+    {
+      "id": "TN11",
+      "cat": "table_numeric",
+      "question": "法巴 8 月 1 日报告上调估计后，NVDA FY28 数据中心（Datacenter）收入的新预测是多少？",
+      "expected_pages": [
+        [
+          "20250801 - BNP Paribas Exane",
+          7
+        ]
+      ],
+      "expected_facts": [
+        "269,034|269.034"
+      ],
+      "notes": "Chinese item. Figure 6 change-to-estimates table on p7 of BNP 2025-08-01: New FY28 Datacenter 269,034 (raised 7% from 251,134). Requires reading the New vs Old columns correctly.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "TN12",
+      "cat": "table_numeric",
+      "question": "Citi's flash note on NVDA's Jul-Q results shows what market cap for the company in its rating box?",
+      "expected_pages": [
+        [
+          "20250827 - Citi",
+          1
+        ]
+      ],
+      "expected_facts": [
+        "4,428,844|4.43"
+      ],
+      "notes": "Rating/target box table on p1 of Citi 2025-08-27 flash: Market Cap US$4,428,844M (~$4.43tn). Covers Citi, a broker absent from existing table_numeric items.",
+      "tags": []
+    },
+    {
+      "id": "TN13",
+      "cat": "table_numeric",
+      "question": "In BNP Paribas Exane's bluesky scenario table, what total datacenter revenue would NVDA generate at 50% AI-server penetration?",
+      "expected_pages": [
+        [
+          "20250929 - BNP Paribas Exane",
+          2
+        ]
+      ],
+      "expected_facts": [
+        "462,353|462.353"
+      ],
+      "notes": "Bluesky sensitivity table on p2 of BNP 2025-09-29: Total Datacenter revenues at the 50% adoption column = $462,353mn. Number exists in markdown transcription only (raw_text lacks it), stressing the table pipeline.",
+      "tags": []
+    },
+    {
+      "id": "TN14",
+      "cat": "table_numeric",
+      "question": "On UBS's valuation page for NVDA, what EV/EBITDA (UBS core) multiple applies to fiscal 01/27E?",
+      "expected_pages": [
+        [
+          "20250708 - UBS Research",
+          6
+        ]
+      ],
+      "expected_facts": [
+        "21.8"
+      ],
+      "notes": "Valuation (x) table on p6 of UBS 2025-07-08: EV/EBITDA (UBS core) 01/27E = 21.8x. Different page and metric from existing TN1 (p5 EBITDA level).",
+      "tags": []
+    },
+    {
+      "id": "TN15",
+      "cat": "table_numeric",
+      "question": "伯恩斯坦在测算中国禁令放松的情景时，假设英伟达的增量中国收入是多少、对应的 EPS 提升是多少美元？",
+      "expected_pages": [
+        [
+          "20250715 - Bernstein",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "17,500|17.5",
+        "0.45"
+      ],
+      "notes": "Chinese item. Exhibit 2 on p3 of Bernstein 2025-07-15 'Fine China': Incremental China Revenue $17,500M and EPS Impact $0.45. Two cells from the same scenario table.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "TN16",
+      "cat": "table_numeric",
+      "question": "In Bernstein's September note on the Intel stake, what 2026E adjusted EPS does the ticker table show for NVDA?",
+      "expected_pages": [
+        [
+          "20250919 - Bernstein",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "5.84"
+      ],
+      "notes": "Bernstein ticker table on p3 of the 2025-09-19 'Intel NVDA Break out' note: NVDA Adjusted EPS 2026E = 5.84 (next to the $225 PT). Tests row/column selection among five tickers.",
+      "tags": []
+    },
+    {
+      "id": "TN17",
+      "cat": "table_numeric",
+      "question": "Ahead of NVDA's Q2 2026 earnings release, what EPS did BofA's analyst estimate versus the Bloomberg consensus in the Trading Catalysts earnings schedule?",
+      "expected_pages": [
+        [
+          "20250825 - BofA Global Research - NVDA - Trading",
+          7
+        ]
+      ],
+      "expected_facts": [
+        "0.98",
+        "1.01"
+      ],
+      "notes": "Exhibit 6 earnings schedule on p7 of BofA 2025-08-25 Trading Catalysts: NVDA row shows BBG consensus 1.01 vs BofA analyst estimate 0.98. NVDA row buried among 15 S&P reporters.",
+      "tags": []
+    },
+    {
+      "id": "TN18",
+      "cat": "table_numeric",
+      "question": "美银示例的批发托管（wholesale colocation）项目经济模型中，第 1 年每 MW 的租金假设是多少（百万美元）？",
+      "expected_pages": [
+        [
+          "20250915 - BofA Global Research - Industrials",
+          8
+        ]
+      ],
+      "expected_facts": [
+        "2.50|2.5"
+      ],
+      "notes": "Chinese item. Exhibit 12 on p8 of BofA 2025-09-15 Industrials report: Rent/MW year 1 = 2.50 $mn in a 20-year project economics table. Also exercises cross-ticker recall (industrials doc).",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "TN19",
+      "cat": "table_numeric",
+      "question": "According to Mizuho's GPU rental pricing comparison, what hourly rate does Microsoft charge for the H100?",
+      "expected_pages": [
+        [
+          "20250629 - Mizuho",
+          4
+        ]
+      ],
+      "expected_facts": [
+        "15.1"
+      ],
+      "notes": "Exhibit 5 on p4 of Mizuho 2025-06-29 Data Center and AI note: Microsoft H100 rental price $15.1/hr, the highest among CSPs. Chart-derived table cell; distinct from existing TN4 (PT/rating on p1 of the Aug note).",
+      "tags": []
+    },
+    {
+      "id": "TN20",
+      "cat": "table_numeric",
+      "question": "摩根士丹利 Risk Reward 页面中，对英伟达 2027e 的 GAAP 收入预测是多少？",
+      "expected_pages": [
+        [
+          "20250612 - Morgan Stanley",
+          5
+        ]
+      ],
+      "expected_facts": [
+        "264,648|264.648"
+      ],
+      "notes": "Chinese item. KEY EARNINGS INPUTS table on the Risk Reward page (p5) of Morgan Stanley 2025-06-12 GTC Paris note: GAAP Revenue 2027e = 264,648 $mm.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "AB5",
+      "cat": "abstention",
+      "question": "What is Jefferies' price target on NVDA, and when did they last revise it?",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "Jefferies[^.\\n]{0,120}(\\$\\s?\\d{2,3}(?!\\d)|\\b(Buy|Hold|Underperform|Outperform)\\b)",
+      "notes": "Absent broker: 'Jefferies' has zero occurrences in raw_text and markdown across all 30 docs. Pattern fails a dollar PT or rating word placed in the same sentence as the broker name.",
+      "tags": []
+    },
+    {
+      "id": "AB6",
+      "cat": "abstention",
+      "question": "汇丰（HSBC）目前给英伟达的评级和目标价分别是什么？",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "(HSBC|汇丰)[^。.\\n]{0,100}(买入|增持|持有|减持|卖出|\\$\\s?\\d{2,3}(?!\\d)|\\d{2,3}\\s?美元)",
+      "notes": "Absent broker, Chinese phrasing: 'HSBC' has zero corpus occurrences. Pattern fails a Chinese rating word or price figure attributed to HSBC in the same sentence.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "AB7",
+      "cat": "abstention",
+      "question": "Summarize Evercore ISI's latest investment thesis on NVIDIA.",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "Evercore[^.\\n]{0,120}(\\$\\s?\\d{2,3}(?!\\d)|\\b(Outperform|In[- ]?Line|Underperform|Buy|Overweight)\\b)",
+      "notes": "Absent broker, open-ended summary form (not a PT lookup): 'Evercore' has zero corpus occurrences. A fabricated thesis would attach a rating or PT to Evercore; abstention text will not.",
+      "tags": []
+    },
+    {
+      "id": "AB8",
+      "cat": "abstention",
+      "question": "Did TD Cowen raise or cut its NVDA estimates after the July-quarter results?",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "Cowen[^.\\n]{0,120}(\\$\\s?\\d{2,3}(?!\\d)|\\b\\d\\.\\d{2}\\b)",
+      "notes": "Absent broker, estimate-revision angle: 'Cowen' has zero corpus occurrences. Pattern targets a fabricated PT or EPS-style number near 'Cowen'; deliberately excludes the words raise/cut, which an honest abstention echoing the question would contain.",
+      "tags": []
+    },
+    {
+      "id": "AB9",
+      "cat": "abstention",
+      "question": "What was the Street's average price target for NVDA as of January 2024?",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "(2024[^.\\n]{0,120}\\$\\s?\\d{2,3}(?!\\d))|(\\$\\s?\\d{2,3}(?!\\d)[^.\\n]{0,120}2024)|((average|mean|consensus)[^.\\n]{0,80}\\$\\s?\\d{2,3}(?!\\d))",
+      "notes": "Out-of-window (corpus starts 2025-06-12, verified via published_date min/max). Distinct from AB1/AB4 (2023, single-broker trend): asks for a consensus figure at a 2024 point. Pattern fails a dollar figure tied to 2024, or any average/mean/consensus PT quoted at all — quoting Morgan Stanley's June-2025 $174.71 mean would be scope substitution.",
+      "tags": []
+    },
+    {
+      "id": "AB10",
+      "cat": "abstention",
+      "question": "英伟达 2025 年 11 月发布 FY26 第三季度财报之后，巴克莱把目标价上调到了多少？",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "(巴克莱|Barclays)[^。.\\n]{0,100}(\\$\\s?\\d{2,3}(?!\\d)|\\d{2,3}\\s?美元)",
+      "notes": "Out-of-window future, Chinese: corpus ends 2025-09-29 and the latest Barclays note is 2025-09-25, so no post-November-earnings update exists. Pattern anchors the number to $ or 美元 so date strings like 2025年9月 in an honest boundary declaration do not trip it; quoting the Sept $240 as the answer (scope substitution) does.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "AB11",
+      "cat": "abstention",
+      "question": "What's the latest price target for ASML in these reports?",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "ASML[^.\\n]{0,120}((\\$|€)\\s?\\d{2,4}(?!\\d)|\\b(Buy|Outperform|Overweight|Neutral|Hold)\\b)",
+      "notes": "Zero-coverage ticker: 'ASML' has zero occurrences in raw_text and markdown (unlike AAPL in AB3, which appears as a peer). Pattern fails a USD/EUR price or rating attached to ASML.",
+      "tags": []
+    },
+    {
+      "id": "AB12",
+      "cat": "abstention",
+      "question": "研报里对 Palantir（PLTR）的最新评级和目标价是什么？",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "(PLTR|Palantir)[^。.\\n]{0,100}(\\$\\s?\\d{1,3}(?!\\d)|\\d{1,3}\\s?美元|买入|增持|\\b(Buy|Outperform|Overweight)\\b)",
+      "notes": "Zero-coverage ticker, Chinese: 'PLTR' and 'Palantir' have zero corpus occurrences despite being an obvious AI-adjacent name. Pattern fails a price or rating attributed to Palantir in the same sentence.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "AB13",
+      "cat": "abstention",
+      "question": "When did Deutsche Bank initiate coverage on NVIDIA, and at what target price?",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "Deutsche\\s?Bank[^.\\n]{0,120}(\\$\\s?\\d{2,3}(?!\\d)|\\b(Buy|Hold|Sell)\\b|\\b(19|20)\\d{2}\\b)",
+      "notes": "Absent broker, initiation-history angle: 'Deutsche Bank' has zero corpus occurrences (the only 'Deutsche' hit is Deutsche Telekom on a GTC Paris partner-logo slide). Pattern fails a PT, rating, or initiation year placed next to the broker name.",
+      "tags": []
+    },
+    {
+      "id": "AB14",
+      "cat": "abstention",
+      "question": "What credit ratings do Moody's and S&P assign to NVIDIA's debt, according to the research?",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "(Moody'?s|S&P|NVIDIA|NVDA)[^.\\n]{0,80}\\b(Aaa|Aa[123]|A[123]|Baa[123]|AAA|AA[+-]?|A\\+|A-|BBB[+-]?)\\b",
+      "notes": "Metric no report gives: 'Moody' and 'credit rating' have zero relevant occurrences ('credit' hits are only regulatory boilerplate in BNP/Barclays disclaimers). Pattern fails any agency-style rating token near the agencies or the company.",
+      "tags": []
+    },
+    {
+      "id": "AB15",
+      "cat": "abstention",
+      "question": "根据这些研报，英伟达高管最近一次内部减持（insider selling）的金额是多少？",
+      "expect_abstain": true,
+      "forbidden_facts_pattern": "(减持|insider|抛售)[^。.\\n]{0,100}\\d[\\d,\\.]*\\s?(万|亿|百万|美元|million|billion)",
+      "notes": "Metric no report gives, Chinese: no corpus page mentions insider selling in any phrasing ('insider', '10b5', 'sold shares', 'share/stock sale' all zero occurrences). Pattern fails a monetary amount with a currency/scale unit near the insider-selling terms; digit-free abstention text passes.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "NF3",
+      "cat": "deep_page_recovery",
+      "question": "How many AI factory projects does BNP Paribas Exane's AI Factory census identify, and how are they split between data center operators and campus developers?",
+      "expected_pages": [
+        [
+          "20250801 - BNP Paribas Exane",
+          16
+        ]
+      ],
+      "expected_facts": [
+        "24",
+        "13",
+        "11"
+      ],
+      "notes": "Answer lives in the census section on p16 of the 39-page AI Factory race report (24 projects = 13 operators + 11 campus developers). Page 1 names the census but carries none of the counts, so the agent must navigate deep.",
+      "tags": []
+    },
+    {
+      "id": "NF4",
+      "cat": "deep_page_recovery",
+      "question": "According to Barclays' Powering AI data center report, how fast did Google's and Microsoft's global electricity use grow in 2024?",
+      "expected_pages": [
+        [
+          "20250813 - Barclays",
+          16
+        ]
+      ],
+      "expected_facts": [
+        "27"
+      ],
+      "notes": "The 27% y/y global electricity growth figure for Google/Microsoft appears only on p16 of the 32-page thematic report; p1 is a title/signature page with no such number. Verified unique to p16.",
+      "tags": []
+    },
+    {
+      "id": "NF5",
+      "cat": "deep_page_recovery",
+      "question": "What share of data centers are actually AI-ready according to the global survey cited in BofA's 'Who Makes the Data Center' primer?",
+      "expected_pages": [
+        [
+          "20250915 - BofA Global Research",
+          18
+        ]
+      ],
+      "expected_facts": [
+        "5%",
+        "700",
+        "30 kW|30kW"
+      ],
+      "notes": "Uptime Institute survey (700+ data centers, <5% AI-ready, defined as rack density above 30 kW) sits on p18 of the 43-page primer; p1 summarizes market size only — none of these figures are on it.",
+      "tags": []
+    },
+    {
+      "id": "NF6",
+      "cat": "deep_page_recovery",
+      "question": "Bernstein 9月19日那篇关于 Intel 与 NVDA 合作的报告里，给英伟达的目标价和评级分别是多少？",
+      "expected_pages": [
+        [
+          "20250919 - Bernstein Research",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "225",
+        "Outperform"
+      ],
+      "notes": "Bernstein's NVDA PT ($225, Outperform) appears only in the ticker table / investment implications on p3; p1-p2 discuss the Intel deal with no PT (verified '225' absent from both). Chinese for the cross-lingual dimension.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "NF7",
+      "cat": "deep_page_recovery",
+      "question": "In UBS's NVDA note, what forecast stock return does the rating framework show, and what excess return does that imply over the market return assumption?",
+      "expected_pages": [
+        [
+          "20250708 - UBS Research",
+          7
+        ]
+      ],
+      "expected_facts": [
+        "10.6",
+        "8.9",
+        "1.7"
+      ],
+      "notes": "Forecast returns table (10.6% stock return, 8.9% market return assumption, 1.7% excess return) is on p7; p1 covers Taiwan export data and none of these figures. Distinct from TN1 which targets p5 of the same doc.",
+      "tags": []
+    },
+    {
+      "id": "NF8",
+      "cat": "deep_page_recovery",
+      "question": "Mizuho 6月底 AI 服务器产业电话会纪要中，定制芯片（Custom Si）每颗的启动成本估计是多少？GPU 的单颗成本区间又是多少？",
+      "expected_pages": [
+        [
+          "20250629 - Mizuho Securities USA",
+          3
+        ]
+      ],
+      "expected_facts": [
+        "50M|50 million|5000万",
+        "25,000|25000",
+        "40,000|40000|25,000-40,000"
+      ],
+      "notes": "The ~$50M per-chip startup cost and $25,000-40,000/chip GPU cost range are on p3 only; p1's industry-commentary summary omits all of them (verified). Chinese question.",
+      "tags": [
+        "zh"
+      ]
+    },
+    {
+      "id": "NF9",
+      "cat": "deep_page_recovery",
+      "question": "What P/E multiple underpins Wells Fargo's $220 price target in its September note on NVIDIA's Rubin CPX announcement?",
+      "expected_pages": [
+        [
+          "20250909 - Wells Fargo Securities",
+          5
+        ]
+      ],
+      "expected_facts": [
+        "29",
+        "2027"
+      ],
+      "notes": "The PT itself ($220) is on p1, but the valuation basis (~29x P/E on C2027E) appears only in the thesis section on p5 — tests recovery of the reasoning behind the headline number.",
+      "tags": []
+    },
+    {
+      "id": "NF10",
+      "cat": "deep_page_recovery",
+      "question": "BNP Paribas Exane 9月29日的 Bluesky 报告统计，已公布的 AI 数据中心容量总计多少 GW？对应的 Compute 隐含市场规模（SAM）有多大？",
+      "expected_pages": [
+        [
+          "20250929 - BNP Paribas Exane",
+          5
+        ]
+      ],
+      "expected_facts": [
+        "76",
+        "1.5"
+      ],
+      "notes": "76GW of announced AI datacenter capacity and $1.5Tr implied compute SAM sit in the p5 project table; p1 is an 84-character summary slide (TP $240 + three bullets) with neither figure. Chinese question.",
+      "tags": [
+        "zh"
+      ]
     }
   ],
   "behavior_plan": {

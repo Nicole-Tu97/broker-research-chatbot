@@ -1,24 +1,24 @@
 # Validation Report (deterministic scoring against the preregistered thresholds in DESIGN.md Appendix A)
 
-Generated: 2026-08-18 04:23 · zero LLM-judge scoring throughout
+Generated: 2026-08-25 18:59 · zero LLM-judge scoring throughout
 
 ## Retrieval ablation (recall@10, raw question text as query)
 
 | Category | dense | fts | hybrid |
 |---|---|---|---|
-| comparison_timeseries | 0.667 | 0.0 | 0.667 |
-| cross_ticker_recall | 1.0 | 1.0 | 1.0 |
-| pt_not_on_page1 | 1.0 | 0.5 | 1.0 |
-| pure_chart | 0.667 | 0.0 | 0.667 |
-| rephrased | 0.889 | 0.111 | 0.889 |
-| table_numeric | 0.75 | 0.0 | 0.75 |
-| **Mean** | **0.804** | **0.196** | **0.804** |
+| comparison_timeseries | 0.587 | 0.064 | 0.58 |
+| deep_page_recovery | 1.0 | 0.091 | 1.0 |
+| pure_chart | 0.812 | 0.062 | 0.812 |
+| simple_qa | 0.95 | 0.1 | 0.95 |
+| table_numeric | 0.708 | 0.125 | 0.708 |
+| temporal | 0.5 | 0.1 | 0.4 |
+| **Mean** | **0.773** | **0.094** | **0.761** |
 
-- P1 hybrid ≥ 0.85: **FAIL** (0.804)
-- P2 hybrid ≥ both single modes: **PASS**
-- P3 Chinese items FTS-only ≤ 0.2: **PASS** (0.167)
-- P4 table_numeric dense < fts: **FAIL** (0.75 vs 0.0)
-- P5 pure_chart hybrid ≥ 0.67: **PASS** (0.667)
+- P1 hybrid ≥ 0.85: **FAIL** (0.761)
+- P2 hybrid ≥ both single modes: **FAIL**
+- P3 Chinese items FTS-only ≤ 0.2: **PASS** (0.195)
+- P4 table_numeric dense < fts: **FAIL** (0.708 vs 0.125)
+- P5 pure_chart hybrid ≥ 0.67: **PASS** (0.812)
 - P6 reranker: hybrid below threshold → triggers reranker evaluation
 
 ## Behavior validation (end-to-end)

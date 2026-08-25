@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18 04:23",
+  "generated_at": "2026-08-25 18:59",
   "retrieval": {
     "per_item": [
       {
@@ -78,9 +78,9 @@
         "id": "TN3",
         "cat": "table_numeric",
         "recall": {
-          "dense": 1.0,
+          "dense": 0.0,
           "fts": 0.0,
-          "hybrid": 1.0
+          "hybrid": 0.0
         }
       },
       {
@@ -94,7 +94,7 @@
       },
       {
         "id": "RQ1",
-        "cat": "rephrased",
+        "cat": "comparison_timeseries",
         "recall": {
           "dense": 0.667,
           "fts": 0.333,
@@ -103,7 +103,7 @@
       },
       {
         "id": "RQ2",
-        "cat": "rephrased",
+        "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
           "fts": 0.0,
@@ -112,7 +112,7 @@
       },
       {
         "id": "RQ3",
-        "cat": "rephrased",
+        "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
           "fts": 0.0,
@@ -121,7 +121,7 @@
       },
       {
         "id": "XT1",
-        "cat": "cross_ticker_recall",
+        "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
           "fts": 1.0,
@@ -130,7 +130,7 @@
       },
       {
         "id": "XT2",
-        "cat": "cross_ticker_recall",
+        "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
           "fts": 1.0,
@@ -139,7 +139,7 @@
       },
       {
         "id": "NF1",
-        "cat": "pt_not_on_page1",
+        "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
           "fts": 1.0,
@@ -148,7 +148,700 @@
       },
       {
         "id": "NF2",
-        "cat": "pt_not_on_page1",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ4",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "RQ5",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ6",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ7",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ8",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ9",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "RQ10",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ1",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ2",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ3",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ4",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ5",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ6",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ7",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ8",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT3",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT4",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT5",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT6",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT7",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT8",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT9",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "XT10",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS1",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.5,
+          "fts": 0.0,
+          "hybrid": 0.5
+        }
+      },
+      {
+        "id": "TS2",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TS3",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.5,
+          "fts": 0.0,
+          "hybrid": 0.5
+        }
+      },
+      {
+        "id": "TS4",
+        "cat": "temporal",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS5",
+        "cat": "temporal",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TS6",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TS7",
+        "cat": "temporal",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS8",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TS9",
+        "cat": "temporal",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS10",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "PC4",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC5",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "PC6",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC7",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC8",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC9",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC10",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC11",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC12",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC13",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC14",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT4",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.1,
+          "fts": 0.0,
+          "hybrid": 0.1
+        }
+      },
+      {
+        "id": "CT5",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.2,
+          "fts": 0.0,
+          "hybrid": 0.1
+        }
+      },
+      {
+        "id": "CT6",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "CT7",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.667,
+          "fts": 0.0,
+          "hybrid": 0.667
+        }
+      },
+      {
+        "id": "CT8",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.5,
+          "fts": 0.0,
+          "hybrid": 0.5
+        }
+      },
+      {
+        "id": "CT9",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.5,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT10",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT11",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT12",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.5,
+          "fts": 0.0,
+          "hybrid": 0.5
+        }
+      },
+      {
+        "id": "TN5",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN6",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TN7",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN8",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN9",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN10",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TN11",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN12",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN13",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN14",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN15",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN16",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN17",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TN18",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TN19",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN20",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF3",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF4",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF5",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF6",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF7",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF8",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF9",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF10",
+        "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
           "fts": 0.0,
@@ -157,43 +850,43 @@
       }
     ],
     "by_mode": {
-      "dense": 0.804,
-      "fts": 0.196,
-      "hybrid": 0.804
+      "dense": 0.773,
+      "fts": 0.094,
+      "hybrid": 0.761
     },
     "by_cat_mode": {
-      "rephrased": {
-        "dense": 0.889,
-        "fts": 0.111,
-        "hybrid": 0.889
+      "temporal": {
+        "dense": 0.5,
+        "fts": 0.1,
+        "hybrid": 0.4
       },
-      "table_numeric": {
-        "dense": 0.75,
-        "fts": 0.0,
-        "hybrid": 0.75
+      "deep_page_recovery": {
+        "dense": 1.0,
+        "fts": 0.091,
+        "hybrid": 1.0
+      },
+      "simple_qa": {
+        "dense": 0.95,
+        "fts": 0.1,
+        "hybrid": 0.95
       },
       "comparison_timeseries": {
-        "dense": 0.667,
-        "fts": 0.0,
-        "hybrid": 0.667
-      },
-      "cross_ticker_recall": {
-        "dense": 1.0,
-        "fts": 1.0,
-        "hybrid": 1.0
+        "dense": 0.587,
+        "fts": 0.064,
+        "hybrid": 0.58
       },
       "pure_chart": {
-        "dense": 0.667,
-        "fts": 0.0,
-        "hybrid": 0.667
+        "dense": 0.812,
+        "fts": 0.062,
+        "hybrid": 0.812
       },
-      "pt_not_on_page1": {
-        "dense": 1.0,
-        "fts": 0.5,
-        "hybrid": 1.0
+      "table_numeric": {
+        "dense": 0.708,
+        "fts": 0.125,
+        "hybrid": 0.708
       }
     },
-    "cn_items_fts_recall": 0.167
+    "cn_items_fts_recall": 0.195
   },
   "behavior": {
     "cost_usd": 7.17,
