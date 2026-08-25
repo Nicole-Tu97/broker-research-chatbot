@@ -52,16 +52,40 @@ BEHAVIOR_ITEMS = ["CT1", "CT2", "RQ1", "RQ2", "RQ3", "TN1", "TN4",
                   "PC1", "NF1", "XT1", "AB1", "AB2", "AB3", "AB4"]
 
 
+_CJK_UNIT_RE = re.compile(r"(\d[\d,]*(?:\.\d+)?)\s*(万亿|亿|万)")
+_CJK_SCALE = {"万": 1e4, "亿": 1e8, "万亿": 1e12}
+
+
+def _cjk_unit_numbers(answer: str) -> set[str]:
+    """Numbers written with Chinese scale words, expanded to the surface forms an English
+    answer key uses: '175亿' → 17,500 (millions), 17.5 (billions), 175 (raw). Answer keys
+    quote table values in millions or headline values in billions, so both are offered."""
+    out: set[str] = set()
+    for num, unit in _CJK_UNIT_RE.findall(answer):
+        try:
+            val = float(num.replace(",", "")) * _CJK_SCALE[unit]
+        except ValueError:
+            continue
+        for scaled in (val, val / 1e3, val / 1e6, val / 1e9, val / 1e12):
+            c = canon(f"{scaled:.6f}".rstrip("0").rstrip("."))
+            if c is not None:
+                out.add(c)
+    return out
+
+
 def fact_in_answer(fact: str, answer: str) -> bool:
     """Numbers compare via canon (170 == 170.00 == $170); keywords via
     case-insensitive substring. A fact containing '|' passes if any alias
-    hits (e.g. "100T|100 trillion")."""
+    hits (e.g. "100T|100 trillion"). Chinese scale words (万/亿/万亿) and the
+    multiplication sign × are normalized, so a Chinese-language answer scores
+    against an English answer key without per-item aliases."""
     if "|" in fact:
         return any(fact_in_answer(f, answer) for f in fact.split("|"))
+    norm = answer.replace("×", "x")
     c = canon(fact)
     if c is not None:
-        return c in numbers_in(answer)
-    return fact.lower() in answer.lower()
+        return c in numbers_in(norm) or c in _cjk_unit_numbers(answer)
+    return fact.lower() in norm.lower()
 
 
 def iou(a, b) -> float:

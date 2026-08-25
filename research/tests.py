@@ -253,6 +253,17 @@ class ToolTests(TestCase):
 class EvaluateScoringTests(SimpleTestCase):
     """Pure scoring helpers of the evaluation harness — no DB, no API."""
 
+    def test_fact_in_answer_cjk_units_and_times_sign(self):
+        # Chinese-language answers use 亿/万 scale words and × — the scorer must not
+        # penalize a correct answer for its surface form (the 131,651 vs 131.651 lesson)
+        from .management.commands.evaluate import fact_in_answer
+        self.assertTrue(fact_in_answer("17,500", "增量中国收入 **175亿美元**"))   # millions key
+        self.assertTrue(fact_in_answer("17.5", "增量中国收入 175 亿美元"))        # billions key
+        self.assertTrue(fact_in_answer("15", "价格从 1.5 万美元上调"))            # thousands key
+        self.assertTrue(fact_in_answer("100", "最高 1,000 亿美元"))               # 1,000亿 = 100bn
+        self.assertTrue(fact_in_answer("3x", "delivers **3×** the speed"))
+        self.assertFalse(fact_in_answer("17,500", "收入 17 亿美元"))
+
     def test_iou_basic(self):
         from .management.commands.evaluate import iou
         self.assertAlmostEqual(iou([0, 0, 50, 50], [0, 0, 50, 50]), 1.0)
@@ -369,6 +380,14 @@ class ChatPureTests(TestCase):
         pages = {("Barclays", "2025-06-17", 1): self.p1}
         badges = grounding_badges("PT $200 [Barclays, 2025-06-17, p.1]", pages)
         self.assertIn("has_visual", badges[0])
+
+    def test_badge_ignores_numbers_inside_citation_labels(self):
+        # A text-only answer must not be flagged just because its citation says "p.35":
+        # page numbers and dates inside [ ... ] are not numeric claims about the page
+        from .chat import grounding_badges
+        pages = {("Barclays", "2025-06-17", 1): self.p1}
+        badges = grounding_badges("The library is LightOn. [Barclays, 2025-06-17, p.1]", pages)
+        self.assertEqual(badges[0]["status"], "grounded")
 
     def test_recency_label_flags_superseded_citation(self):
         from .chat import grounding_badges, recency_labels

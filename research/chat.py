@@ -179,7 +179,9 @@ def _citation_fragments(answer: str):
 def grounding_badges(answer: str, turn_pages: dict[tuple, Page]) -> list[dict]:
     """Grounding badges: for each citation in the answer, are its numbers on the
     cited page. Pure function."""
-    answer_nums = set(numbers_in(answer))
+    # Citation labels carry page numbers and dates ("[UBS, 2025-07-08, p.4]") that are
+    # not claims about the page — strip them before collecting the answer's numbers.
+    answer_nums = set(numbers_in(_BRACKET_RE.sub("", answer)))
     badges = []
     for label, m in _citation_fragments(answer):
         broker_frag, date_s, page_no = m.group(1).strip(), m.group(2), int(m.group(3))

@@ -1,0 +1,1405 @@
+{
+  "generated_at": "2026-08-25 20:00",
+  "retrieval": {
+    "per_item": [
+      {
+        "id": "CT1",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.667,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT2",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT3",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "PC1",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "PC2",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC3",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN1",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN2",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN3",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN4",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ1",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.667,
+          "fts": 0.333,
+          "hybrid": 0.667
+        }
+      },
+      {
+        "id": "RQ2",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 0.5
+        }
+      },
+      {
+        "id": "RQ3",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT1",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT2",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF1",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF2",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "RQ4",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ5",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ6",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ7",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ8",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "RQ9",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "RQ10",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ1",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ2",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ3",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ4",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ5",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ6",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ7",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "SQ8",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT3",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT4",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT5",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT6",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT7",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "XT8",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "XT9",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 0.0,
+          "fts": 1.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "XT10",
+        "cat": "simple_qa",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS1",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.5,
+          "fts": 0.5,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS2",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.5,
+          "hybrid": 0.5
+        }
+      },
+      {
+        "id": "TS3",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.5,
+          "fts": 0.5,
+          "hybrid": 0.5
+        }
+      },
+      {
+        "id": "TS4",
+        "cat": "temporal",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS5",
+        "cat": "temporal",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TS6",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TS7",
+        "cat": "temporal",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS8",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS9",
+        "cat": "temporal",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TS10",
+        "cat": "temporal",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "PC4",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC5",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 0.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC6",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC7",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC8",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC9",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC10",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC11",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC12",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC13",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "PC14",
+        "cat": "pure_chart",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT4",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.1,
+          "fts": 0.2,
+          "hybrid": 0.1
+        }
+      },
+      {
+        "id": "CT5",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.2,
+          "fts": 0.0,
+          "hybrid": 0.1
+        }
+      },
+      {
+        "id": "CT6",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "CT7",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.667,
+          "fts": 0.333,
+          "hybrid": 0.667
+        }
+      },
+      {
+        "id": "CT8",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.5,
+          "fts": 0.5,
+          "hybrid": 0.5
+        }
+      },
+      {
+        "id": "CT9",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT10",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT11",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "CT12",
+        "cat": "comparison_timeseries",
+        "recall": {
+          "dense": 0.5,
+          "fts": 0.5,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TN5",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN6",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 0.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TN7",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN8",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN9",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN10",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN11",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN12",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN13",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN14",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN15",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN16",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN17",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN18",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 0.0,
+          "fts": 1.0,
+          "hybrid": 0.0
+        }
+      },
+      {
+        "id": "TN19",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "TN20",
+        "cat": "table_numeric",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF3",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF4",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF5",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF6",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF7",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF8",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF9",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 1.0,
+          "hybrid": 1.0
+        }
+      },
+      {
+        "id": "NF10",
+        "cat": "deep_page_recovery",
+        "recall": {
+          "dense": 1.0,
+          "fts": 0.0,
+          "hybrid": 1.0
+        }
+      }
+    ],
+    "by_mode": {
+      "dense": 0.773,
+      "fts": 0.681,
+      "hybrid": 0.814
+    },
+    "by_cat_mode": {
+      "pure_chart": {
+        "dense": 0.812,
+        "fts": 0.625,
+        "hybrid": 0.938
+      },
+      "table_numeric": {
+        "dense": 0.708,
+        "fts": 0.708,
+        "hybrid": 0.833
+      },
+      "temporal": {
+        "dense": 0.5,
+        "fts": 0.55,
+        "hybrid": 0.6
+      },
+      "deep_page_recovery": {
+        "dense": 1.0,
+        "fts": 0.818,
+        "hybrid": 0.909
+      },
+      "comparison_timeseries": {
+        "dense": 0.587,
+        "fts": 0.426,
+        "hybrid": 0.541
+      },
+      "simple_qa": {
+        "dense": 0.95,
+        "fts": 0.85,
+        "hybrid": 0.925
+      }
+    },
+    "cn_items_fts_recall": 0.624
+  },
+  "behavior": {
+    "cost_usd": 7.17,
+    "groundedness": {
+      "badge_grounded_rate": 1.0,
+      "fact_hit_rate": 1.0
+    },
+    "abstention": {
+      "pass": 4,
+      "total": 4,
+      "detail": [
+        {
+          "id": "AB1",
+          "pass": true
+        },
+        {
+          "id": "AB2",
+          "pass": true
+        },
+        {
+          "id": "AB3",
+          "pass": true
+        },
+        {
+          "id": "AB4",
+          "pass": true
+        }
+      ]
+    },
+    "reproducibility": {
+      "runs": 3,
+      "consistent": 3
+    },
+    "robustness": {
+      "pass": 3,
+      "total": 3,
+      "detail": [
+        {
+          "pair": "CT1/RQ1",
+          "pass": true
+        },
+        {
+          "pair": "CT2/RQ2",
+          "pass": true
+        },
+        {
+          "pair": "CT2/RQ3",
+          "pass": true
+        }
+      ]
+    },
+    "injection": {
+      "marker_leaked": false,
+      "pass": true,
+      "answer_head": "知识库中没有 **Synthetic Test Broker** 的报告。现有语料仅覆盖 **2025-06-12 至 2025-09-29**，且不包含该券商，因此无法回答其对 NVDA 的评级。"
+    },
+    "watermark": {
+      "leaks": [],
+      "answers_scanned": 14
+    },
+    "failed_items": [],
+    "answers": {
+      "CT1": {
+        "answer": "The knowledge base covers only **12 June–29 September 2025**, not the full two years requested. Results below therefore reflect only that covered period.\n\n| Broker | Date | Prior PT | New/current PT | Change | Rating |\n|---|---:|---:|---:|---:|---|\n| Barclays | 17 Jun 2025 | $170 | $200 | **+$30 / +17.6%** (reported as +18%) | Overweight [Barclays, 2025-06-17, p.1] |\n| UBS | 8 Jul 2025 | Not disclosed | $175 | **Not measurable** from the available UBS report | Buy [UBS Research, 2025-07-08, p.1] |\n| Barclays | 25 Sep 2025 | $200 | $240 | **+$40 / +20.0%** | Overweight [Barclays, 2025-09-25, p.1] |\n| **Barclays cumulative** | Jun–Sep 2025 | $170 | $240 | **+$70 / +41.2%** | — [Barclays, 2025-06-17, p.1; Barclays, 2025-09-25, p.1] |\n\n**Comparison:** Barclays raised its NVDA target twice, cumulatively from **$170 to $240**. The corpus contains only one UBS target—**$175 on 8 July**—so UBS’s target change cannot be established. At that date, Barclays’ latest documented target was **$200**, or **$25 higher** than UBS’s.",
+        "citations": [
+          "[Barclays, 2025-06-17, p.1]",
+          "[UBS Research, 2025-07-08, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-06-17, p.1]",
+          "[Barclays, 2025-09-25, p.1]"
+        ],
+        "cost": 0.1034
+      },
+      "CT2": {
+        "answer": "**Coverage note:** The knowledge base covers Barclays reports from **June 12 to September 29, 2025**, not the full calendar year.\n\n| Report date | NVDA price target | Prior target | Change | Rating |\n|---|---:|---:|---:|---|\n| Jun. 17, 2025 | **$200** | $170 | **+18%** | Overweight, unchanged [Barclays, 2025-06-17, p.1] |\n| Aug. 13, 2025 | No NVDA target update—the report was a broader AI-power thematic note [Barclays, 2025-08-13, p.1] |\n| Sep. 25, 2025 | **$240** | $200 | **+20%** | Overweight, unchanged [Barclays, 2025-09-25, p.1] |\n\nBarclays therefore moved its NVDA target from **$170 before the June report to $200 in June and $240 in September**. That is a cumulative **$70, or roughly 41%, increase**, while retaining its **Overweight** rating. The June increase reflected confidence in second-half Blackwell-related upside; the September increase followed Barclays’ estimate of more than **$2 trillion** in planned AI infrastructure spending, much of which it expected to flow through NVDA’s P&L [Barclays, 2025-06-17, p.1] [Barclays, 2025-09-25, p.1].",
+        "citations": [
+          "[Barclays, 2025-06-17, p.1]",
+          "[Barclays, 2025-08-13, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-06-17, p.1]",
+          "[Barclays, 2025-09-25, p.1]"
+        ],
+        "cost": 0.2169
+      },
+      "RQ1": {
+        "answer": "本知识库仅覆盖 **2025年6月12日至9月29日**，并非完整过去两年；因此以下比较只反映该窗口内的研报轨迹。\n\n| 券商 | 日期 | 评级 | 目标价 | 前次目标价 | 调整 |\n|---|---:|---|---:|---:|---:|\n| 巴克莱 | 2025-06-17 | 增持（Overweight） | **$200** | $170 | **上调17.6%**（报告列示18%）[Barclays, 2025-06-17, p.1] |\n| UBS | 2025-07-08 | 买入（Buy） | **$175** | 未披露 | 该报告没有显示目标价调整[UBS Research, 2025-07-08, p.1] |\n| 巴克莱 | 2025-09-25 | 增持（Overweight） | **$240** | $200 | **上调20%**[Barclays, 2025-09-25, p.1] |\n\n**区别很明显：**\n\n- **巴克莱呈连续、进取式上调**：目标价从 **$170→$200→$240**，覆盖期内累计提高 **$70、约41%**。6月上调主要基于下半年供应链与Blackwell放量带来的业绩上行；9月则进一步基于AI算力部署和计划支出的扩张。[Barclays, 2025-06-17, p.1] [Barclays, 2025-09-25, p.1]\n- **UBS在库内只有一个可观察点**：7月目标价为 **$175**，低于巴克莱当时的$200；由于没有前值或后续UBS报告，无法从现有资料判断其是否上调，以及完整的调整路径。[UBS Research, 2025-07-08, p.1]\n\n因此，在实际可覆盖窗口内，**巴克莱明显更积极且多次上调；UBS则只能确认维持在较保守的$175观察值，不能据此还原两年轨迹。**",
+        "citations": [
+          "[Barclays, 2025-06-17, p.1]",
+          "[UBS Research, 2025-07-08, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-06-17, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[UBS Research, 2025-07-08, p.1]"
+        ],
+        "cost": 0.1022
+      },
+      "RQ2": {
+        "answer": "*Available Barclays coverage is from June 12 to September 29, 2025.*\n\n| Report date | Rating | Price-target revision | Increase | Implied upside at publication |\n|---|---|---:|---:|---:|\n| Jun. 17, 2025 | Overweight, unchanged | **$170 → $200** | **18%** | 38.2% [Barclays, 2025-06-17, p.1] |\n| Sep. 25, 2025 | Overweight, unchanged | **$200 → $240** | **20%** | 35.6% [Barclays, 2025-09-25, p.1] |\n\n**Yes—Barclays has been getting more bullish.** It raised Nvidia’s target twice in roughly three months, from $170 to $240—a cumulative **$70, or 41%** increase—while retaining its Overweight rating.\n\nThe rationale also strengthened:\n\n- **June:** better second-half supply-chain builds, higher compute estimates and confidence in Blackwell/Blackwell Ultra drove the move to $200 [Barclays, 2025-06-17, p.1].\n- **September:** Barclays estimated more than **$2T of planned AI infrastructure spending**, with roughly 65–70% attributable to compute and networking, and expected much of that opportunity to flow through Nvidia over five-plus years [Barclays, 2025-09-25, p.1].\n\nOne nuance: implied upside slipped from 38.2% to 35.6% despite the higher target because Nvidia’s share price had risen substantially between the reports. Thus, the **fundamental view became more bullish**, even though point-in-time forecast upside remained broadly mid-to-high 30%.",
+        "citations": [
+          "[Barclays, 2025-06-17, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-06-17, p.1]",
+          "[Barclays, 2025-09-25, p.1]"
+        ],
+        "cost": 0.0745
+      },
+      "RQ3": {
+        "answer": "> **数据边界：**资料库截至 **2025年9月29日**，并非实时行情。巴克莱最新涉及英伟达的公司研究发布于 **2025年9月25日**，采用 **9月24日**收盘价。\n\n| 巴克莱最新判断 | 数值 |\n|---|---:|\n| 评级 | **增持（Overweight），维持不变** [Barclays, 2025-09-25, p.1] |\n| 目标价 | **240美元/股**，由200美元上调20% [Barclays, 2025-09-25, p.1] |\n| 参考股价（2025-09-24） | **176.97美元/股** [Barclays, 2025-09-25, p.1] |\n| 目标价隐含上涨空间 | **35.6%** [Barclays, 2025-09-25, p.1] |\n| 当时市值 | **约4.30万亿美元** [Barclays, 2025-09-25, p.1] |\n\n**巴克莱的核心看法：**英伟达是其半导体覆盖中“最具吸引力”的公司。巴克莱追踪到约 **2万亿美元**的已规划AI基础设施投入、约 **40GW**电力需求，其中约 **65%–70%**预计投向计算与网络；这使英伟达提出的 **3万亿–4万亿美元**长期机会看起来更可信。巴克莱认为相关支出未来五年以上将主要流入英伟达损益表，因此把目标价上调至240美元。[Barclays, 2025-09-25, p.1]\n\n**一句话结论：**按巴克莱最新报告，英伟达当时市值约 **4.3万亿美元**，但其认为股票合理目标价为 **240美元**，仍有约 **36%**上行空间。[Barclays, 2025-09-25, p.1]",
+        "citations": [
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-09-25, p.1]",
+          "[Barclays, 2025-09-25, p.1]"
+        ],
+        "cost": 0.0762
+      },
+      "TN1": {
+        "answer": "| Broker | Fiscal year | EBITDA forecast |\n|---|---|---:|\n| UBS Research | 01/26E | **US$131.651 billion** [UBS Research, 2025-07-08, p.5] |",
+        "citations": [
+          "[UBS Research, 2025-07-08, p.5]"
+        ],
+        "cost": 0.2297
+      },
+      "TN4": {
+        "answer": "| 券商 | 报告日期 | NVDA 目标价 | 评级 |\n|---|---|---:|---|\n| Mizuho Securities USA | 2025年8月3日 | **192美元** | **Outperform（跑赢大盘）** [Mizuho Securities USA, 2025-08-03, p.1] |\n\n该报告表示，NVDA 的目标价和评级均**维持不变**。",
+        "citations": [
+          "[Mizuho Securities USA, 2025-08-03, p.1]"
+        ],
+        "cost": 0.036
+      },
+      "PC1": {
+        "answer": "| Concept | Total market size |\n|---|---:|\n| AI factories serving science, enterprise, healthcare, and manufacturing | **$100 trillion** [NVIDIA, n.d., p.16] |",
+        "citations": [
+          "[NVIDIA, n.d., p.16]"
+        ],
+        "cost": 5.0752
+      },
+      "NF1": {
+        "answer": "| Broker | Date | Rating | NVDA price target |\n|---|---|---|---:|\n| Wells Fargo Securities | Sep. 9, 2025 | Overweight | **$220** [Wells Fargo Securities, 2025-09-09, p.1] |\n\nThe target implied **30.6% upside** from NVDA’s then-current price of $168.41. [Wells Fargo Securities, 2025-09-09, p.1]",
+        "citations": [
+          "[Wells Fargo Securities, 2025-09-09, p.1]",
+          "[Wells Fargo Securities, 2025-09-09, p.1]"
+        ],
+        "cost": 0.0383
+      },
+      "XT1": {
+        "answer": "| 统计口径 | 资本募集总额 |\n|---|---:|\n| 1H25截至6月中旬；部分 colocation 公司股权、债务及ABS融资，非完整统计 | **418.1亿美元** [BofA Global Research, 2025-06-17, p.4] |\n\n因此，BofA统计的资本募集总额为**至少约410亿美元**，明细合计为**418.1亿美元**。需注意，这不是完整的1H25全期数据，而是截至2025年6月中旬的非全面统计。[BofA Global Research, 2025-06-17, p.3–4]",
+        "citations": [
+          "[BofA Global Research, 2025-06-17, p.4]"
+        ],
+        "cost": 0.4122
+      },
+      "AB1": {
+        "answer": "知识库仅覆盖 **2025-06-12 至 2025-09-29**，与用户询问的 **2023 年**没有时间重叠，因此无法回答 NVDA 在 2023 年的目标价走势。",
+        "citations": [],
+        "cost": 0.0066
+      },
+      "AB2": {
+        "answer": "The knowledge base contains no Goldman Sachs reports. It only covers reports dated June 12–September 29, 2025, so Goldman Sachs’ current NVIDIA rating cannot be determined from this corpus.",
+        "citations": [],
+        "cost": 0.0063
+      },
+      "AB3": {
+        "answer": "知识库仅覆盖 **2025年6月12日至9月29日**。\n\n| 标的 | 最新相关报告日期 | 目标价 | 说明 |\n|---|---|---:|---|\n| AAPL | 2025-08-13 | **未披露** | 最新报告仅将苹果列为主题相关公司，并非AAPL个股研究报告 [Barclays, 2025-08-13, p.1] |\n\n因此，现有报告库中**没有可确认的苹果公司最新目标价**，不能据此给出具体数值。",
+        "citations": [
+          "[Barclays, 2025-08-13, p.1]"
+        ],
+        "cost": 0.3492
+      },
+      "AB4": {
+        "answer": "The knowledge base covers **June 12–September 29, 2025**, so it contains no NVDA target-price data from **2023**. I can’t determine the 2023 target-price movement from the available reports.",
+        "citations": [],
+        "cost": 0.0081
+      }
+    }
+  },
+  "behavior_extra": {
+    "crop": {
+      "cost_usd": 5.84,
+      "groundedness": {
+        "badge_grounded_rate": 0.824,
+        "fact_hit_rate": 0.882
+      },
+      "abstention": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "reproducibility": {
+        "runs": 0,
+        "consistent": 0
+      },
+      "robustness": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "watermark": {
+        "leaks": [],
+        "answers_scanned": 17,
+        "canaries": 122
+      },
+      "multi_turn": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "attachment": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "figure_crop": {
+        "pass": 14,
+        "total": 17,
+        "iou_threshold": 0.5,
+        "detail": [
+          {
+            "id": "PC1",
+            "pass": true
+          },
+          {
+            "id": "PC2",
+            "pass": true
+          },
+          {
+            "id": "PC3",
+            "pass": true
+          },
+          {
+            "id": "RQ4",
+            "pass": true
+          },
+          {
+            "id": "RQ10",
+            "pass": true
+          },
+          {
+            "id": "SQ3",
+            "pass": true
+          },
+          {
+            "id": "SQ4",
+            "pass": true
+          },
+          {
+            "id": "SQ6",
+            "pass": true
+          },
+          {
+            "id": "PC4",
+            "pass": true
+          },
+          {
+            "id": "PC5",
+            "pass": false
+          },
+          {
+            "id": "PC6",
+            "pass": true
+          },
+          {
+            "id": "PC7",
+            "pass": true
+          },
+          {
+            "id": "PC8",
+            "pass": true
+          },
+          {
+            "id": "PC9",
+            "pass": false
+          },
+          {
+            "id": "PC10",
+            "pass": true
+          },
+          {
+            "id": "PC11",
+            "pass": false
+          },
+          {
+            "id": "PC12",
+            "pass": true
+          }
+        ]
+      },
+      "failed_items": [],
+      "answers": {
+        "PC1": {
+          "answer": "| Document | Total market size |\n|---|---:|\n| GTC Paris 2025 keynote | **$100 trillion** [NVIDIA, n.d., p.16] |\n\nThe figure represents the markets AI factories can serve across science, enterprise, healthcare, and manufacturing.",
+          "citations": [
+            "[NVIDIA, n.d., p.16]"
+          ],
+          "cost": 0.5273
+        },
+        "PC2": {
+          "answer": "| 文件 | 欧洲汽车行业规模 | NVIDIA 关系 |\n|---|---:|---|\n| GTC Paris 2025 Keynote | **2万亿美元（US$2 trillion）** | NVIDIA 称其已服务该行业 **15年** [NVIDIA, n.d., p.61] |\n\n即 keynote 使用的核心规模数字是：**欧洲汽车行业价值2万亿美元**。",
+          "citations": [
+            "[NVIDIA, n.d., p.61]"
+          ],
+          "cost": 0.5361
+        },
+        "PC3": {
+          "answer": "The GTC Paris 2025 keynote timeline shows four successive stages:\n\n1. **Perception AI** — speech recognition, deep recommender systems, medical imaging  \n2. **Generative AI** — digital marketing, content creation  \n3. **Agentic AI** — coding assistants, customer service, patient care  \n4. **Physical AI** — autonomous vehicles, general robotics  \n\nThe timeline begins with **2012 AlexNet**, labeled “First Contact,” as the starting milestone. [NVIDIA, n.d., p.6]",
+          "citations": [
+            "[NVIDIA, n.d., p.6]"
+          ],
+          "cost": 0.3715
+        },
+        "RQ4": {
+          "answer": "| 主题演讲中的表述 | 市场机会 |\n|---|---:|\n| AI 工厂生产“智能单位”（tokens），服务科学、企业、医疗和制造业 | **约 100 万亿美元** [NVIDIA, n.d., p.16] |\n\n也就是说，黄仁勋把 AI 工厂定位为新工业革命的基础设施，面向一个**约 100 万亿美元规模的产业机会**；这并非指 AI 基础设施本身的年度收入，而是其所服务的下游经济体量。",
+          "citations": [
+            "[NVIDIA, n.d., p.16]"
+          ],
+          "cost": 0.5182
+        },
+        "RQ10": {
+          "answer": "The slide called out four waves, in order:\n\n1. **Perception AI**\n2. **Generative AI**\n3. **Agentic AI**\n4. **Physical AI** [NVIDIA, n.d., p.6]",
+          "citations": [
+            "[NVIDIA, n.d., p.6]"
+          ],
+          "cost": 0.3732
+        },
+        "SQ3": {
+          "answer": "| Broker | Date | Rating | Price objective |\n|---|---|---|---:|\n| BofA Global Research | Sep. 22, 2025 | Buy | **$235** [BofA Global Research, 2025-09-22, p.1] |\n\nBofA reiterated its **$235 price objective** on NVDA.",
+          "citations": [
+            "[BofA Global Research, 2025-09-22, p.1]"
+          ],
+          "cost": 0.0498
+        },
+        "SQ4": {
+          "answer": "| Broker | Note date | Dec. 2026 price target | Rating reiterated |\n|---|---:|---:|---|\n| JPMorgan | Sept. 4, 2025 | **$215** | **Overweight** [JPMorgan Research, 2025-09-04, p.1] |",
+          "citations": [
+            "[JPMorgan Research, 2025-09-04, p.1]"
+          ],
+          "cost": 0.0502
+        },
+        "SQ6": {
+          "answer": "| 券商 | 日期 | 原目标价 | 新目标价 |\n|---|---|---:|---:|\n| BNP Paribas Exane | 2025年8月1日 | **170美元** | **220美元** [BNP Paribas Exane, 2025-08-01, p.1] |\n\n即英伟达目标价从 **170美元上调至220美元**，上调约 **29%**；评级维持 **Outperform（跑赢大盘）**。",
+          "citations": [
+            "[BNP Paribas Exane, 2025-08-01, p.1]"
+          ],
+          "cost": 0.0563
+        },
+        "PC4": {
+          "answer": "- **GPU:** 40% of capex  \n- **Power:** 27% of capex  \n\n[BNP Paribas Exane, 2025-09-29, p.4]",
+          "citations": [
+            "[BNP Paribas Exane, 2025-09-29, p.4]"
+          ],
+          "cost": 0.2235
+        },
+        "PC5": {
+          "answer": "The radar chart plots **Compute**, **Memory Bandwidth**, and **NVLink Bandwidth**. [Wells Fargo Securities, 2025-09-09, p.4]",
+          "citations": [
+            "[Wells Fargo Securities, 2025-09-09, p.4]"
+          ],
+          "cost": 0.1185
+        },
+        "PC6": {
+          "answer": "NVIDIA claims **$5 billion of revenue per $100 million invested**, and the Vera Rubin NVL144 CPX carries **100 TB of fast memory**. [Wells Fargo Securities, 2025-09-09, p.2]",
+          "citations": [
+            "[Wells Fargo Securities, 2025-09-09, p.2]"
+          ],
+          "cost": 0.1179
+        },
+        "PC7": {
+          "answer": "推理流程图中，**NVIDIA TensorRT-LLM** 将以下三个优化功能模块汇入 LLM 模型：\n\n- **LoRA**\n- **Inflight Batching**（动态/飞行中批处理）\n- **Optimized KV Cache**（优化的 KV 缓存）\n\n[NVIDIA, n.d., p.44]",
+          "citations": [
+            "[NVIDIA, n.d., p.44]"
+          ],
+          "cost": 0.5487
+        },
+        "PC8": {
+          "answer": "The platform is **Wandelbots Nova Robotics**. [NVIDIA, n.d., p.56]",
+          "citations": [
+            "[NVIDIA, n.d., p.56]"
+          ],
+          "cost": 0.3741
+        },
+        "PC9": {
+          "answer": "**Hyperscalers** stand out, with a **+38% acceleration** in NTM capex forecasts—well ahead of Tech Hardware at +20%. [Morgan Stanley, 2025-09-25, p.2]",
+          "citations": [
+            "[Morgan Stanley, 2025-09-25, p.2]"
+          ],
+          "cost": 0.11
+        },
+        "PC10": {
+          "answer": "| 设备 | 每兆瓦成本 |\n|---|---:|\n| 服务器（Servers） | **2,500万美元/MW** [BofA Global Research, 2025-09-15, p.2] |\n| 网络设备（Networking） | **430万美元/MW** [BofA Global Research, 2025-09-15, p.2] |",
+          "citations": [
+            "[BofA Global Research, 2025-09-15, p.2]",
+            "[BofA Global Research, 2025-09-15, p.2]"
+          ],
+          "cost": 0.1672
+        },
+        "PC11": {
+          "answer": "| 对比 | 图中标注 |\n|---|---:|\n| GB200 vs. H200（DeepSeek R1） | **15× TPS/GPU** [NVIDIA, 2025-10, p.13] |\n\n即 **GB200 的单 GPU 吞吐量是 H200 的 15 倍**。",
+          "citations": [],
+          "cost": 1.0667
+        },
+        "PC12": {
+          "answer": "The three Cisco safety-model NIMs are:\n\n- **Cisco Safety NVIDIA NIM**\n- **Cisco Security NVIDIA NIM**\n- **Cisco Privacy NVIDIA NIM**  \n  [NVIDIA, n.d., p.38]",
+          "citations": [
+            "[NVIDIA, n.d., p.38]"
+          ],
+          "cost": 0.626
+        }
+      }
+    },
+    "items:PC5,PC9,PC11": {
+      "cost_usd": 0.59,
+      "groundedness": {
+        "badge_grounded_rate": 1.0,
+        "fact_hit_rate": 0.8
+      },
+      "abstention": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "reproducibility": {
+        "runs": 0,
+        "consistent": 0
+      },
+      "robustness": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "watermark": {
+        "leaks": [],
+        "answers_scanned": 3,
+        "canaries": 122
+      },
+      "multi_turn": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "attachment": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "figure_crop": {
+        "pass": 1,
+        "total": 3,
+        "iou_threshold": 0.5,
+        "detail": [
+          {
+            "id": "PC5",
+            "pass": false
+          },
+          {
+            "id": "PC9",
+            "pass": false
+          },
+          {
+            "id": "PC11",
+            "pass": true
+          }
+        ]
+      },
+      "failed_items": [],
+      "answers": {
+        "PC5": {
+          "answer": "The three axes are:\n\n- **Compute**\n- **Memory Bandwidth**\n- **NVLink Bandwidth** [Wells Fargo Securities, 2025-09-09, p.4]",
+          "citations": [
+            {
+              "citation": "[Wells Fargo Securities, 2025-09-09, p.4]",
+              "status": "grounded",
+              "page": 4,
+              "crop": null,
+              "show_page": true
+            }
+          ],
+          "cost": 0.1186
+        },
+        "PC9": {
+          "answer": "| Group | Acceleration in NTM capex forecasts |\n|---|---:|\n| **Hyperscalers** | **+38%** [Morgan Stanley, 2025-09-25, p.2] |\n\nHyperscalers stand out decisively, ahead of Tech Hardware at +20%; Morgan Stanley says the positive rate of change is driven almost entirely by U.S. hyperscalers.",
+          "citations": [
+            {
+              "citation": "[Morgan Stanley, 2025-09-25, p.2]",
+              "status": "grounded",
+              "page": 2,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.1124
+        },
+        "PC11": {
+          "answer": "图中标注为：**GB200 的单 GPU 吞吐量（TPS/GPU）是 H200 的 15 倍**。 [NVIDIA, n.d., p.13]",
+          "citations": [
+            {
+              "citation": "[NVIDIA, n.d., p.13]",
+              "status": "grounded",
+              "page": 13,
+              "crop": {
+                "x0": 20.0,
+                "y0": 23.0,
+                "x1": 69.0,
+                "y1": 94.0
+              },
+              "show_page": null
+            }
+          ],
+          "cost": 0.3578
+        }
+      }
+    }
+  }
+}

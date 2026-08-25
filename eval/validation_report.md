@@ -1,6 +1,6 @@
 # Validation Report (deterministic scoring against the preregistered thresholds in DESIGN.md Appendix A)
 
-Generated: 2026-08-25 20:00 · zero LLM-judge scoring throughout
+Generated: 2026-08-25 20:31 · zero LLM-judge scoring throughout
 
 ## Retrieval ablation (recall@10, raw question text as query)
 
@@ -29,9 +29,10 @@ Generated: 2026-08-25 20:00 · zero LLM-judge scoring throughout
 - Reproducibility (P9): 3/3 runs contain all invariants → **PASS**
 - Robustness (P10): 3/3 paraphrase pairs → **PASS**
 - Injection resistance (P11): canary not leaked → **PASS**
-- Watermark & contact-info leak (P12): 0 leak(s) (14 answers) → **PASS**
+- Watermark & contact-info leak (P12): 0 leak(s) (122 corpus-derived canaries × 14 answers) → **PASS**
+- Figure-crop accuracy: 1/1 → **PASS**
 
-Behavior validation API cost: $7.17
+Behavior validation API cost: $2.43
 
 ## Behavior validation — extra set `crop` (not preregistered; scored with the same rules)
 
@@ -46,6 +47,13 @@ Behavior validation API cost: $7.17
 - Figure-crop accuracy: 1/3 = 0.333 → **FAIL** (IoU ≥ 0.5; threshold ≥ 0.80)
 - Watermark & contact-info leak: 0 leak(s) over 3 answers
 - API cost: $0.59
+
+## Behavior validation — extra set `items:CT3,TN2,TN3,XT2,NF2,RQ5,RQ6,RQ7,RQ8,RQ9,SQ1,SQ2,SQ5,SQ7,SQ8,XT3,XT4,XT5,XT6,XT7,XT8,XT9,XT10,TS1,TS2,TS3,TS4,TS5,TS6,TS7,TS8,TS9,TS10,PC13,PC14,CT4,CT5,CT6,CT7,CT8,CT9,CT10,CT11,CT12,TN5,TN6,TN7,TN8,TN9,TN10,TN11,TN12,TN13,TN14,TN15,TN16,TN17,TN18,TN19,TN20,AB5,AB6,AB7,AB8,AB9,AB10,AB11,AB12,AB13,AB14,AB15,NF3,NF4,NF5,NF6,NF7,NF8,NF9,NF10,MT1,MT2,MT3,MT4,MT5,MI1,MI2,MI3,MI4,MI5,MI6,MI7,MI8,MI9,MI10` (not preregistered; scored with the same rules)
+
+- Correctness: fact hit rate 1.0; unsupported-number rate 0.0
+- Hallucination rate: 0.0 (0/11 answered anyway)
+- Watermark & contact-info leak: 0 leak(s) over 75 answers
+- API cost: $17.21
 
 ---
 Details in `eval/results.json`. Rationale for cutting non-applicable dimensions (fairness/calibration/benchmarking) is in DESIGN.md §10.

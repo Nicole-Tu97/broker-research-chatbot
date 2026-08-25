@@ -127,13 +127,16 @@ known bound rather than tuned away on n=2.
 **Retrieval ablation** (recall@10, raw questions as queries — a conservative proxy,
 declared in advance): hybrid 0.804 vs FTS-only 0.196 on the original 17 retrieval
 items. After the golden set grew to 109 items (94 with expected pages), the same
-ablation re-ran: hybrid **0.761**, dense-only 0.773, FTS-only 0.094 — the larger
-sample corrected the small-sample optimism by ~4 points and surfaced a signal the
-n=17 run could not: on raw long sentences the near-dead FTS leg feeds noise into
-RRF and *slightly* hurts fusion (clearest on temporal questions, 0.5 → 0.4). This
-is a component-level finding; the production path — where the agent writes short
-keyword queries and retries — recovered every miss (agentic recall 0.9 strict on the
-10 end-to-end items, 10/10 once an equally valid newer source is credited). Two
+ablation re-ran: hybrid 0.761, dense-only 0.773, FTS-only 0.094 — the larger sample
+corrected the small-sample optimism by ~4 points and surfaced a signal the n=17 run
+could not: with websearch (AND) semantics the lexical leg died on long natural-language
+questions and its noise votes *slightly hurt* fusion. Root-caused and fixed: the lexical
+leg now uses OR semantics ranked by `ts_rank_cd` — FTS-only 0.094 → 0.681, hybrid
+**0.814** (> dense 0.773; pure_chart 0.81 → 0.94, table 0.71 → 0.83). The preregistered
+core behavior round was re-run after the change: all six dimensions still pass, at a
+third of the previous cost ($2.43 vs $7.17) because the agent now lands on the right
+page in fewer rounds. Agentic recall on the production path: 0.9 strict on the 10
+end-to-end items, 10/10 once an equally valid newer source is credited. Two
 original predictions were falsified, and we kept the receipts: FTS dies on
 natural-language sentences (websearch AND-semantics) long before term precision can
 matter — its value is on model-written keyword queries. The reranker decision closed with data: every miss
@@ -200,10 +203,14 @@ didn't work.
 Corpus window is 3.5 months — the system says so rather than extrapolating. The
 numeric validator cannot see same-value collisions or zero-count-neutral column
 shifts (compensated by original-image feedback and grounding badges). The golden set
-is 109 items (94 retrieval, 15 abstention), but end-to-end behavior scoring still
-runs on 14 of them — each behavior item costs ~$0.5 per run, so its denominators are
-small; multi-turn and attachment-input items and figure-crop ground-truth boxes are
-authored next. Pricing for the chat model is assumed
+is 124 items (9 answer-location types × 4 cross-cutting tags); end-to-end behavior
+scoring has run on 106 of them (14 preregistered core, 17 figure-crop, 75 of the 94
+new items — correctness 116/116, unsupported numbers 0/144, hallucination 0/11,
+figure-crop accuracy 0.82). The remaining 19 (deep-page, multi-turn, attachment items)
+are checkpointed and resume when API credits are topped up. Two scorer blind spots
+surfaced only at this scale and were fixed: Chinese scale words (亿/万) and the
+multiplication sign in answers, and page numbers inside citation labels being
+counted as numeric claims. Pricing for the chat model is assumed
 ($5/$30 per 1M) pending the official price page. The 52-DPI tier for the quarterly
 decks rests on a dominance argument (the harder keynote passes at 52), not direct
 sampling.
@@ -234,7 +241,10 @@ Pre-declared caveats that mattered: the ablation feeds raw question sentences to
 writes its own queries; the original n=17 retrieval set had limited statistical power.
 
 **Re-evaluation after expansion (n=94 retrieval items, same thresholds, not
-re-registered):** P1 FAIL (0.761); **P2 now falsified** (dense 0.773 > hybrid 0.761 —
-noise votes from the near-dead FTS leg); P3 PASS (0.195); P4 still falsified
-(0.708 vs 0.125); P5 PASS (0.812). The original outcomes above are kept as the
-preregistered record; this paragraph is the honest update.
+re-registered):** under the original AND-semantics FTS leg — P1 FAIL (0.761), **P2
+falsified** (dense 0.773 > hybrid 0.761), P3 PASS (0.195), P4 falsified (0.708 vs
+0.125), P5 PASS (0.812). After switching the lexical leg to OR semantics — P1 FAIL
+(0.814), P2 PASS, **P3 falsified** (0.624: Chinese questions still contain English
+tokens such as NVDA/UBS that OR matching finds), P4 dense = fts (0.708), P5 PASS
+(0.938). The original outcomes above are kept as the preregistered record; this
+paragraph is the honest update.

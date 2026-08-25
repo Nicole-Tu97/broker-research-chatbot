@@ -523,7 +523,7 @@
         ]
       ],
       "expected_facts": [
-        "281,411|281.411"
+        "281,411|281.411|281.4"
       ],
       "notes": "Colloquial English rephrasing of TN3 (base_id: TN3): 'JPM' for JPMorgan, 'top line' for total revenue, 'fiscal 2027' for F27E. Answer is the $281,411mn F27E revenue line in the model table on p7 of the 20250828 JPMorgan report.",
       "tags": [
@@ -644,7 +644,7 @@
         ]
       ],
       "expected_facts": [
-        "3x",
+        "3x|3×",
         "late-2026|late 2026"
       ],
       "notes": "Product fact on p1 of WF 2025-09-09: Rubin CPX delivers '3x the attention processing speeds' of GB300, GA 'late-2026'. Different WF doc from golden-set NF1.",
@@ -703,7 +703,7 @@
       ],
       "expected_facts": [
         "10",
-        "100bn|100 billion|1000亿"
+        "100bn|100 billion|1000亿|1,000亿|1,000 亿|1000 亿"
       ],
       "notes": "Chinese question; p1 of BNP 2025-09-23 flash lists 'at least 10 gigawatts (GW)' and 'NVIDIA will invest up to $100bn'. Both terms sit in the same bullet list on one page.",
       "tags": [
@@ -962,8 +962,8 @@
         ]
       ],
       "expected_facts": [
-        "39.1",
-        "41.1"
+        "39.1|39,112|39.112",
+        "41.1|41,096|41.096"
       ],
       "notes": "Non-PT temporal on the company itself: Data Center revenue $39.1B (F1Q26 deck p5, up 73% Y/Y) grew to $41.1B (F2Q26 deck p5, up 56% Y/Y). Chinese phrasing; the two quarterly decks have no published_date, so retrieval must key off fiscal-quarter labels.",
       "tags": [
@@ -1543,7 +1543,7 @@
       "expected_facts": [
         "100bn|$100bn|100 billion|1000亿|1,000亿",
         "10 GW|10GW|10 gigawatts|10吉瓦",
-        "3x-5x|3x–5x|3-5x|3到5倍"
+        "3x-5x|3x–5x|3-5x|3到5倍|3—5倍|3–5倍|3-5倍"
       ],
       "notes": "Chinese cross-broker event comparison: both pages state the up-to-$100bn OpenAI investment and at-least-10 GW LOI; BofA (0922 p1) frames it as 3x-5x ROI ($300-500bn revenue) with financing-optics caveats, BNP (0923 p1) calls it supportive of mid/long-term demand.",
       "tags": [
@@ -1613,7 +1613,7 @@
       ],
       "expected_facts": [
         "51",
-        "2Tr|$2 trillion|2 trillion|2万亿",
+        "2Tr|$2 trillion|2 trillion|2万亿|$2tn|2tn|2 tn",
         "53GW|53 GW|53吉瓦"
       ],
       "notes": "Cross-broker macro aggregation: Mizuho (0803 p1) says 2025 hyperscaler capex is now up 51% y/y (vs prior +38%); BNP (0801 p1) frames the buildout as $2Tr of capex, $1Tr in compute, 53GW of power. Answer needs both documents' headline numbers.",
