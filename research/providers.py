@@ -179,7 +179,8 @@ Return STRICT JSON only, one of:
   the element's own title only if it sits directly above it; never slice a line of
   text in half — if a title spans the whole page, exclude it.
 - {{"whole_page": true}} — the page AS A WHOLE is the relevant visual (e.g. a slide
-  that is one big chart).
+  that is one big chart). Do NOT use this when the relevant figure occupies only part
+  of the page (e.g. a graphic in the top third of a report page) — return its box.
 - {{"no_figure": true}} — the page's contribution to the answer is textual (prose,
   a rating paragraph, plain body text); no visual element adds value beyond the text.
   When in doubt, choose this."""

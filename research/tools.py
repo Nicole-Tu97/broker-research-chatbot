@@ -22,6 +22,14 @@ from .models import Document, Page
 
 LEG_DEPTH = 50   # candidate depth per leg (>=50 per leg before fusion)
 RRF_K = 10       # small constant: a strong single-leg hit is not diluted
+# Fusion knobs (defaults = shipped behavior; the retrieval ablation measures alternatives):
+#   FTS_SEARCH_TYPE: "websearch" (AND semantics — every term must match; dies on long
+#     natural-language questions) | "or" (any term may match, ranked by ts_rank_cd)
+#   FTS_MAX_QUERY_WORDS: skip the lexical leg for queries longer than this (None = never skip)
+#   FTS_WEIGHT: multiplier on the lexical leg's RRF votes
+FTS_SEARCH_TYPE = "or"  # measured on 94 items: OR 0.814 vs AND 0.761 hybrid recall@10 (dense-only 0.773)
+FTS_MAX_QUERY_WORDS = None
+FTS_WEIGHT = 1.0
 
 
 def _doc_filters(tickers=None, brokers=None, date_from=None, date_to=None) -> Q:
@@ -106,8 +114,15 @@ def search_pages(query: str, tickers=None, brokers=None,
 
     # Full-text leg (websearch syntax: tolerates analysts' natural phrasing)
     fts_ids = []
-    if mode in ("hybrid", "fts"):
-        sq = SearchQuery(query, config="english", search_type="websearch")
+    use_fts = mode in ("hybrid", "fts") and (
+        FTS_MAX_QUERY_WORDS is None or len(query.split()) <= FTS_MAX_QUERY_WORDS)
+    if use_fts:
+        if FTS_SEARCH_TYPE == "or":
+            import re as _re
+            terms = [t.replace("'", "''") for t in _re.findall(r"[A-Za-z0-9][A-Za-z0-9.%$-]*", query) if len(t) > 1]
+            sq = SearchQuery(" | ".join(f"'{t}'" for t in terms) or query, config="english", search_type="raw")
+        else:
+            sq = SearchQuery(query, config="english", search_type="websearch")
         fts_ids = list(
             base.filter(search_vector=sq)
             .annotate(rank=SearchRank(F("search_vector"), sq, normalization=1))
@@ -116,9 +131,9 @@ def search_pages(query: str, tickers=None, brokers=None,
 
     # RRF fusion
     scores: dict[int, float] = {}
-    for leg in (vec_ids, fts_ids):
+    for leg, w in ((vec_ids, 1.0), (fts_ids, FTS_WEIGHT)):
         for rank, pid in enumerate(leg, start=1):
-            scores[pid] = scores.get(pid, 0.0) + 1.0 / (RRF_K + rank)
+            scores[pid] = scores.get(pid, 0.0) + w / (RRF_K + rank)
     top = sorted(scores, key=scores.get, reverse=True)[:k]
 
     pages = {p.id: p for p in Page.objects.filter(id__in=top).select_related("document")}

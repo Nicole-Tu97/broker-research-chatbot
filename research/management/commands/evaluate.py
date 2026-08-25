@@ -154,6 +154,8 @@ class Command(BaseCommand):
                             choices=["core", "full", "crop", "new"],
                             help="core = the 14 preregistered items; full = every item; "
                                  "crop = only figure-annotated items; new = items outside core")
+        parser.add_argument("--items", default="",
+                            help="comma-separated item ids; overrides --behavior-set (stored as its own extra set)")
 
     def handle(self, *args, **opts):
         golden = json.loads((EVAL / "golden_set.json").read_text())
@@ -173,11 +175,14 @@ class Command(BaseCommand):
         if opts["retrieval"] or run_all:
             results["retrieval"] = self.run_retrieval(items)
         if opts["behavior"] or run_all:
-            b = self.run_behavior(items, plan, opts["skip_injection"], opts["behavior_set"])
-            if opts["behavior_set"] == "core":
+            set_name = opts["behavior_set"]
+            if opts["items"]:
+                set_name = "items:" + opts["items"]
+            b = self.run_behavior(items, plan, opts["skip_injection"], set_name)
+            if set_name == "core":
                 results["behavior"] = b          # the preregistered record
             else:
-                results["behavior_extra"][opts["behavior_set"]] = b  # never overwrites core
+                results["behavior_extra"][set_name] = b  # never overwrites core
 
         (EVAL / "results.json").write_text(
             json.dumps(results, ensure_ascii=False, indent=2))
@@ -190,7 +195,9 @@ class Command(BaseCommand):
 
     def run_retrieval(self, items) -> dict:
         out = {"per_item": [], "by_mode": {}, "by_cat_mode": {}}
-        retrievable = [i for i in items.values() if i.get("expected_pages")]
+        # Multi-turn items have no single question; attachment items need the attachment.
+        retrievable = [i for i in items.values() if i.get("expected_pages") and i.get("question")
+                       and i.get("cat") not in ("multi_turn", "attachment_input")]
         for it in retrievable:
             row = {"id": it["id"], "cat": it["cat"], "recall": {}}
             for mode in ("dense", "fts", "hybrid"):
@@ -241,6 +248,8 @@ class Command(BaseCommand):
                                  pdf_b64=pdf_b64, pdf_name=name)
 
     def select_behavior_items(self, items, behavior_set: str) -> list[str]:
+        if behavior_set.startswith("items:"):
+            return [i.strip() for i in behavior_set[6:].split(",") if i.strip() in items]
         if behavior_set == "core":
             return [i for i in BEHAVIOR_ITEMS if i in items]
         if behavior_set == "full":
@@ -403,15 +412,22 @@ class Command(BaseCommand):
         out["attachment"] = {"pass": sum(1 for x in mi if x["pass"]), "total": len(mi), "detail": mi}
 
         # Figure-crop accuracy: the locator's three-way decision vs the annotation
-        fc = []
+        fc, na = [], []
         thr = (plan.get("figure_crop") or {}).get("iou_threshold", 0.5)
         for iid, r in answers.items():
             it = items.get(iid)
             if not it or not it.get("expected_figure"):
                 continue
+            # The annotation describes the figure on the annotated page(s). If the agent
+            # answered from a different, equally valid page, the crop decision is not
+            # applicable — scored N/A, not FAIL (same lesson as the NF1 alternative-source case).
+            exp_pages = it.get("expected_pages") or []
+            if exp_pages and not expected_page_hit(exp_pages, cited_pages(r["citations"])):
+                na.append(iid)
+                continue
             fc.append({"id": iid, "pass": figure_decision_ok(it["expected_figure"], r["citations"], thr)})
         out["figure_crop"] = {"pass": sum(1 for x in fc if x["pass"]), "total": len(fc),
-                              "iou_threshold": thr, "detail": fc}
+                              "not_applicable": na, "iou_threshold": thr, "detail": fc}
 
         out["failed_items"] = failed
         if not failed and partial_path.exists():

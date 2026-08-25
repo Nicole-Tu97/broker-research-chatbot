@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25 19:39",
+  "generated_at": "2026-08-25 20:00",
   "retrieval": {
     "per_item": [
       {
@@ -7,7 +7,7 @@
         "cat": "comparison_timeseries",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 0.667,
           "hybrid": 1.0
         }
       },
@@ -16,7 +16,7 @@
         "cat": "comparison_timeseries",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -80,7 +80,7 @@
         "recall": {
           "dense": 0.0,
           "fts": 0.0,
-          "hybrid": 0.0
+          "hybrid": 1.0
         }
       },
       {
@@ -88,8 +88,8 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 0.0,
-          "fts": 0.0,
-          "hybrid": 0.0
+          "fts": 1.0,
+          "hybrid": 1.0
         }
       },
       {
@@ -107,7 +107,7 @@
         "recall": {
           "dense": 1.0,
           "fts": 0.0,
-          "hybrid": 1.0
+          "hybrid": 0.5
         }
       },
       {
@@ -152,7 +152,7 @@
         "recall": {
           "dense": 1.0,
           "fts": 0.0,
-          "hybrid": 1.0
+          "hybrid": 0.0
         }
       },
       {
@@ -161,7 +161,7 @@
         "recall": {
           "dense": 0.0,
           "fts": 0.0,
-          "hybrid": 0.0
+          "hybrid": 1.0
         }
       },
       {
@@ -178,7 +178,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -196,7 +196,7 @@
         "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -223,7 +223,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -232,7 +232,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -241,7 +241,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -250,7 +250,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -259,7 +259,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -268,7 +268,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -277,7 +277,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -286,7 +286,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -295,7 +295,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -304,7 +304,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -313,7 +313,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -322,7 +322,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -332,7 +332,7 @@
         "recall": {
           "dense": 1.0,
           "fts": 0.0,
-          "hybrid": 1.0
+          "hybrid": 0.0
         }
       },
       {
@@ -340,7 +340,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -349,7 +349,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 0.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 0.0
         }
       },
@@ -358,7 +358,7 @@
         "cat": "simple_qa",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -367,8 +367,8 @@
         "cat": "temporal",
         "recall": {
           "dense": 0.5,
-          "fts": 0.0,
-          "hybrid": 0.5
+          "fts": 0.5,
+          "hybrid": 1.0
         }
       },
       {
@@ -376,8 +376,8 @@
         "cat": "temporal",
         "recall": {
           "dense": 0.0,
-          "fts": 0.0,
-          "hybrid": 0.0
+          "fts": 0.5,
+          "hybrid": 0.5
         }
       },
       {
@@ -385,7 +385,7 @@
         "cat": "temporal",
         "recall": {
           "dense": 0.5,
-          "fts": 0.0,
+          "fts": 0.5,
           "hybrid": 0.5
         }
       },
@@ -394,7 +394,7 @@
         "cat": "temporal",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -421,7 +421,7 @@
         "cat": "temporal",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -430,8 +430,8 @@
         "cat": "temporal",
         "recall": {
           "dense": 0.0,
-          "fts": 0.0,
-          "hybrid": 0.0
+          "fts": 1.0,
+          "hybrid": 1.0
         }
       },
       {
@@ -457,7 +457,7 @@
         "cat": "pure_chart",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -466,8 +466,8 @@
         "cat": "pure_chart",
         "recall": {
           "dense": 0.0,
-          "fts": 0.0,
-          "hybrid": 0.0
+          "fts": 1.0,
+          "hybrid": 1.0
         }
       },
       {
@@ -475,7 +475,7 @@
         "cat": "pure_chart",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -484,7 +484,7 @@
         "cat": "pure_chart",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -493,7 +493,7 @@
         "cat": "pure_chart",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -502,7 +502,7 @@
         "cat": "pure_chart",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -520,7 +520,7 @@
         "cat": "pure_chart",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -529,7 +529,7 @@
         "cat": "pure_chart",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -538,7 +538,7 @@
         "cat": "pure_chart",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -556,7 +556,7 @@
         "cat": "comparison_timeseries",
         "recall": {
           "dense": 0.1,
-          "fts": 0.0,
+          "fts": 0.2,
           "hybrid": 0.1
         }
       },
@@ -583,7 +583,7 @@
         "cat": "comparison_timeseries",
         "recall": {
           "dense": 0.667,
-          "fts": 0.0,
+          "fts": 0.333,
           "hybrid": 0.667
         }
       },
@@ -592,7 +592,7 @@
         "cat": "comparison_timeseries",
         "recall": {
           "dense": 0.5,
-          "fts": 0.0,
+          "fts": 0.5,
           "hybrid": 0.5
         }
       },
@@ -601,7 +601,7 @@
         "cat": "comparison_timeseries",
         "recall": {
           "dense": 1.0,
-          "fts": 0.5,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -610,7 +610,7 @@
         "cat": "comparison_timeseries",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -628,8 +628,8 @@
         "cat": "comparison_timeseries",
         "recall": {
           "dense": 0.5,
-          "fts": 0.0,
-          "hybrid": 0.5
+          "fts": 0.5,
+          "hybrid": 0.0
         }
       },
       {
@@ -637,7 +637,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -655,7 +655,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -664,7 +664,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -673,7 +673,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -682,8 +682,8 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 0.0,
-          "fts": 0.0,
-          "hybrid": 0.0
+          "fts": 1.0,
+          "hybrid": 1.0
         }
       },
       {
@@ -700,7 +700,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -709,7 +709,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -718,7 +718,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -736,7 +736,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -745,8 +745,8 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 0.0,
-          "fts": 0.0,
-          "hybrid": 0.0
+          "fts": 1.0,
+          "hybrid": 1.0
         }
       },
       {
@@ -754,7 +754,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 0.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 0.0
         }
       },
@@ -763,7 +763,7 @@
         "cat": "table_numeric",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -781,7 +781,7 @@
         "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -790,7 +790,7 @@
         "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -799,7 +799,7 @@
         "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -808,7 +808,7 @@
         "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -817,7 +817,7 @@
         "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -826,7 +826,7 @@
         "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -835,7 +835,7 @@
         "cat": "deep_page_recovery",
         "recall": {
           "dense": 1.0,
-          "fts": 0.0,
+          "fts": 1.0,
           "hybrid": 1.0
         }
       },
@@ -851,42 +851,42 @@
     ],
     "by_mode": {
       "dense": 0.773,
-      "fts": 0.094,
-      "hybrid": 0.761
+      "fts": 0.681,
+      "hybrid": 0.814
     },
     "by_cat_mode": {
-      "temporal": {
-        "dense": 0.5,
-        "fts": 0.1,
-        "hybrid": 0.4
-      },
-      "deep_page_recovery": {
-        "dense": 1.0,
-        "fts": 0.091,
-        "hybrid": 1.0
-      },
-      "simple_qa": {
-        "dense": 0.95,
-        "fts": 0.1,
-        "hybrid": 0.95
-      },
-      "comparison_timeseries": {
-        "dense": 0.587,
-        "fts": 0.064,
-        "hybrid": 0.58
-      },
       "pure_chart": {
         "dense": 0.812,
-        "fts": 0.062,
-        "hybrid": 0.812
+        "fts": 0.625,
+        "hybrid": 0.938
       },
       "table_numeric": {
         "dense": 0.708,
-        "fts": 0.125,
-        "hybrid": 0.708
+        "fts": 0.708,
+        "hybrid": 0.833
+      },
+      "temporal": {
+        "dense": 0.5,
+        "fts": 0.55,
+        "hybrid": 0.6
+      },
+      "deep_page_recovery": {
+        "dense": 1.0,
+        "fts": 0.818,
+        "hybrid": 0.909
+      },
+      "comparison_timeseries": {
+        "dense": 0.587,
+        "fts": 0.426,
+        "hybrid": 0.541
+      },
+      "simple_qa": {
+        "dense": 0.95,
+        "fts": 0.85,
+        "hybrid": 0.925
       }
     },
-    "cn_items_fts_recall": 0.195
+    "cn_items_fts_recall": 0.624
   },
   "behavior": {
     "cost_usd": 7.17,
@@ -1296,6 +1296,108 @@
             "[NVIDIA, n.d., p.38]"
           ],
           "cost": 0.626
+        }
+      }
+    },
+    "items:PC5,PC9,PC11": {
+      "cost_usd": 0.59,
+      "groundedness": {
+        "badge_grounded_rate": 1.0,
+        "fact_hit_rate": 0.8
+      },
+      "abstention": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "reproducibility": {
+        "runs": 0,
+        "consistent": 0
+      },
+      "robustness": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "watermark": {
+        "leaks": [],
+        "answers_scanned": 3,
+        "canaries": 122
+      },
+      "multi_turn": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "attachment": {
+        "pass": 0,
+        "total": 0,
+        "detail": []
+      },
+      "figure_crop": {
+        "pass": 1,
+        "total": 3,
+        "iou_threshold": 0.5,
+        "detail": [
+          {
+            "id": "PC5",
+            "pass": false
+          },
+          {
+            "id": "PC9",
+            "pass": false
+          },
+          {
+            "id": "PC11",
+            "pass": true
+          }
+        ]
+      },
+      "failed_items": [],
+      "answers": {
+        "PC5": {
+          "answer": "The three axes are:\n\n- **Compute**\n- **Memory Bandwidth**\n- **NVLink Bandwidth** [Wells Fargo Securities, 2025-09-09, p.4]",
+          "citations": [
+            {
+              "citation": "[Wells Fargo Securities, 2025-09-09, p.4]",
+              "status": "grounded",
+              "page": 4,
+              "crop": null,
+              "show_page": true
+            }
+          ],
+          "cost": 0.1186
+        },
+        "PC9": {
+          "answer": "| Group | Acceleration in NTM capex forecasts |\n|---|---:|\n| **Hyperscalers** | **+38%** [Morgan Stanley, 2025-09-25, p.2] |\n\nHyperscalers stand out decisively, ahead of Tech Hardware at +20%; Morgan Stanley says the positive rate of change is driven almost entirely by U.S. hyperscalers.",
+          "citations": [
+            {
+              "citation": "[Morgan Stanley, 2025-09-25, p.2]",
+              "status": "grounded",
+              "page": 2,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.1124
+        },
+        "PC11": {
+          "answer": "图中标注为：**GB200 的单 GPU 吞吐量（TPS/GPU）是 H200 的 15 倍**。 [NVIDIA, n.d., p.13]",
+          "citations": [
+            {
+              "citation": "[NVIDIA, n.d., p.13]",
+              "status": "grounded",
+              "page": 13,
+              "crop": {
+                "x0": 20.0,
+                "y0": 23.0,
+                "x1": 69.0,
+                "y1": 94.0
+              },
+              "show_page": null
+            }
+          ],
+          "cost": 0.3578
         }
       }
     }
