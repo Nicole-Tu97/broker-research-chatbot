@@ -315,7 +315,8 @@ def recency_labels(badges: list[dict]) -> list[dict]:
 
 def run_turn(conversation: Conversation, text: str,
              image_b64: str | None = None, pdf_b64: str | None = None,
-             pdf_name: str = "upload.pdf", emit=None) -> dict:
+             pdf_name: str = "upload.pdf", emit=None,
+             figure_crops: bool | None = None) -> dict:
     """One full conversation turn. When emit is given, sends progress events (for
     SSE): round / tool / tool_result / delta; without it (offline paths such as
     evaluate) behavior matches the old non-streaming version exactly."""
@@ -415,7 +416,7 @@ def run_turn(conversation: Conversation, text: str,
                           "content": [{"type": "output_text", "text": answer}]})
 
     badges = grounding_badges(answer, turn_pages)
-    if streaming:  # figure locating is UI-path only; evaluate skips it, so eval cost is zero
+    if (figure_crops if figure_crops is not None else streaming):  # default: UI path only; evaluate opts in per item
         ci, co, cc = _figure_crops(text, badges, emit)
         usage_in += ci
         usage_out += co

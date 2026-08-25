@@ -64,6 +64,77 @@ def fact_in_answer(fact: str, answer: str) -> bool:
     return fact.lower() in answer.lower()
 
 
+def iou(a, b) -> float:
+    """Intersection-over-union of two [x0, y0, x1, y1] boxes (page percentages)."""
+    ix0, iy0 = max(a[0], b[0]), max(a[1], b[1])
+    ix1, iy1 = min(a[2], b[2]), min(a[3], b[3])
+    inter = max(0.0, ix1 - ix0) * max(0.0, iy1 - iy0)
+    area = lambda r: max(0.0, r[2] - r[0]) * max(0.0, r[3] - r[1])
+    union = area(a) + area(b) - inter
+    return inter / union if union else 0.0
+
+
+def figure_decision_ok(expected: dict, citations: list[dict], iou_threshold: float) -> bool:
+    """Score the locator's three-way decision against the annotation.
+
+    no_figure → nothing may be embedded. box → a crop must overlap the box (IoU ≥ t),
+    or a full-page embed is accepted when whole_page_ok. whole_page_ok without a box →
+    any embed (crop or full page) counts."""
+    crops = [c["crop"] for c in citations if c.get("crop")]
+    full = any(c.get("show_page") for c in citations)
+    if expected.get("no_figure"):
+        return not crops and not full
+    box = expected.get("box")
+    if box:
+        if any(iou([c["x0"], c["y0"], c["x1"], c["y1"]], box) >= iou_threshold for c in crops):
+            return True
+        return bool(expected.get("whole_page_ok") and full)
+    return bool(crops or full)
+
+
+def build_attachment(spec: dict) -> tuple[str | None, str | None, str]:
+    """Materialize an attachment-input spec → (image_b64, pdf_b64, filename).
+
+    page_crop renders a region of a corpus page from the PDF (deterministic, no stored
+    screenshots); synthetic_pdf / synthetic_image are generated out-of-corpus documents."""
+    import base64
+    import pymupdf
+    from django.conf import settings
+    kind = spec["kind"]
+    if kind == "page_crop":
+        doc = Document.objects.filter(filename__contains=spec["document_fragment"]).get()
+        pdf = pymupdf.open(str(settings.CORPUS_DIR / doc.filename))
+        pg = pdf[spec["page"] - 1]
+        r = pg.rect
+        x0, y0, x1, y1 = spec.get("crop", [0, 0, 100, 100])
+        clip = pymupdf.Rect(r.width * x0 / 100, r.height * y0 / 100,
+                            r.width * x1 / 100, r.height * y1 / 100)
+        png = pg.get_pixmap(dpi=110, clip=clip).tobytes("png")
+        return base64.b64encode(png).decode(), None, "attachment.png"
+    if kind == "synthetic_pdf":
+        d = pymupdf.open()
+        d.new_page().insert_text((72, 100), spec["text"], fontsize=11)
+        return None, base64.b64encode(d.tobytes()).decode(), "external.pdf"
+    if kind == "synthetic_image":
+        d = pymupdf.open()
+        pg = d.new_page(width=600, height=300)
+        pg.insert_text((40, 120), spec["text"], fontsize=20)
+        return base64.b64encode(pg.get_pixmap(dpi=96).tobytes("png")).decode(), None, "photo.png"
+    raise ValueError(f"unknown attachment kind: {kind}")
+
+
+def cited_pages(citations: list[dict]) -> set[tuple[str, int]]:
+    """(filename, page) pairs the answer actually cited (resolved badges only)."""
+    ids = {c["document_id"] for c in citations if c.get("document_id")}
+    names = dict(Document.objects.filter(id__in=ids).values_list("id", "filename"))
+    return {(names[c["document_id"]], c["page_number"])
+            for c in citations if c.get("document_id") in names}
+
+
+def expected_page_hit(expected_pages, cited: set[tuple[str, int]]) -> bool:
+    return any(frag in fn and pno == p for frag, pno in expected_pages for fn, p in cited)
+
+
 class Command(BaseCommand):
     help = "Run retrieval ablation and behavior validation; generate validation_report.md"
 
@@ -71,6 +142,10 @@ class Command(BaseCommand):
         parser.add_argument("--retrieval", action="store_true")
         parser.add_argument("--behavior", action="store_true")
         parser.add_argument("--skip-injection", action="store_true")
+        parser.add_argument("--behavior-set", default="core",
+                            choices=["core", "full", "crop", "new"],
+                            help="core = the 14 preregistered items; full = every item; "
+                                 "crop = only figure-annotated items; new = items outside core")
 
     def handle(self, *args, **opts):
         golden = json.loads((EVAL / "golden_set.json").read_text())
@@ -89,7 +164,8 @@ class Command(BaseCommand):
         if opts["retrieval"] or run_all:
             results["retrieval"] = self.run_retrieval(items)
         if opts["behavior"] or run_all:
-            results["behavior"] = self.run_behavior(items, plan, opts["skip_injection"])
+            results["behavior"] = self.run_behavior(items, plan, opts["skip_injection"],
+                                                    opts["behavior_set"])
 
         (EVAL / "results.json").write_text(
             json.dumps(results, ensure_ascii=False, indent=2))
@@ -131,11 +207,38 @@ class Command(BaseCommand):
 
     # ---- Behavior validation ----
 
-    def _ask(self, question: str) -> dict:
+    def _ask(self, question: str, figure_crops: bool = False) -> dict:
         conv = Conversation.objects.create()
-        return chat_mod.run_turn(conv, question)
+        return chat_mod.run_turn(conv, question, figure_crops=figure_crops)
 
-    def run_behavior(self, items, plan, skip_injection) -> dict:
+    def _ask_multi(self, turns: list[str]) -> dict:
+        """Multi-turn item: every turn in ONE conversation; the last turn is scored."""
+        conv = Conversation.objects.create()
+        r = None
+        cost = 0.0
+        for q in turns:
+            r = chat_mod.run_turn(conv, q)
+            cost += r["footer"]["cost_usd"]
+        r["footer"]["cost_usd"] = round(cost, 4)
+        return r
+
+    def _ask_attachment(self, item: dict) -> dict:
+        image_b64, pdf_b64, name = build_attachment(item["attachment"])
+        conv = Conversation.objects.create()
+        return chat_mod.run_turn(conv, item["question"], image_b64=image_b64,
+                                 pdf_b64=pdf_b64, pdf_name=name)
+
+    def select_behavior_items(self, items, behavior_set: str) -> list[str]:
+        if behavior_set == "core":
+            return [i for i in BEHAVIOR_ITEMS if i in items]
+        if behavior_set == "full":
+            return list(items)
+        if behavior_set == "crop":
+            return [i for i, it in items.items() if it.get("expected_figure")]
+        return [i for i in items if i not in BEHAVIOR_ITEMS]  # new
+
+    def run_behavior(self, items, plan, skip_injection, behavior_set: str = "core") -> dict:
+        ids = self.select_behavior_items(items, behavior_set)
         answers: dict[str, dict] = {}
         cost = 0.0
         failed: list[str] = []
@@ -149,12 +252,17 @@ class Command(BaseCommand):
                     answers[iid] = r
                     self.stdout.write(f"  [B] {iid:4s} (cached from partial)")
 
-        for iid in BEHAVIOR_ITEMS:
+        for iid in ids:
             if iid in answers:
                 continue
             it = items[iid]
             try:
-                r = self._ask(it["question"])
+                if it.get("cat") == "multi_turn":
+                    r = self._ask_multi(it["turns"])
+                elif it.get("cat") == "attachment_input":
+                    r = self._ask_attachment(it)
+                else:
+                    r = self._ask(it["question"], figure_crops=bool(it.get("expected_figure")))
             except Exception as exc:  # one failed item must not kill the run (review lesson: outages, rate limits)
                 failed.append(iid)
                 self.stderr.write(f"  [B] {iid:4s} FAILED: {str(exc)[:150]}")
@@ -196,7 +304,7 @@ class Command(BaseCommand):
 
         # Abstention: forbidden patterns must not appear
         ab = []
-        for iid in [i for i in BEHAVIOR_ITEMS
+        for iid in [i for i in ids
                     if items[i].get("expect_abstain") and i in answers]:
             it, r = items[iid], answers[iid]
             bad = False
@@ -257,6 +365,41 @@ class Command(BaseCommand):
                     leaks.append({"id": iid, "string": w})
         out["watermark"] = {"leaks": leaks, "answers_scanned": len(answers),
                             "canaries": len(wm)}
+
+        # Multi-turn: the final turn must carry the facts AND cite an expected page
+        mt = []
+        for iid, r in answers.items():
+            it = items.get(iid)
+            if not it or it.get("cat") != "multi_turn":
+                continue
+            facts_ok = all(fact_in_answer(f, r["answer"]) for f in it.get("expected_facts", []))
+            page_ok = expected_page_hit(it.get("expected_pages", []), cited_pages(r["citations"]))
+            mt.append({"id": iid, "pass": facts_ok and page_ok})
+        out["multi_turn"] = {"pass": sum(1 for x in mt if x["pass"]), "total": len(mt), "detail": mt}
+
+        # Attachment input: in-corpus attachments must resolve to the source page;
+        # out-of-corpus attachments must be declared as such (keyword set in expected_facts)
+        mi = []
+        for iid, r in answers.items():
+            it = items.get(iid)
+            if not it or it.get("cat") != "attachment_input":
+                continue
+            ok = all(fact_in_answer(f, r["answer"]) for f in it.get("expected_facts", []))
+            if it.get("expected_pages"):
+                ok = ok and expected_page_hit(it["expected_pages"], cited_pages(r["citations"]))
+            mi.append({"id": iid, "pass": ok})
+        out["attachment"] = {"pass": sum(1 for x in mi if x["pass"]), "total": len(mi), "detail": mi}
+
+        # Figure-crop accuracy: the locator's three-way decision vs the annotation
+        fc = []
+        thr = (plan.get("figure_crop") or {}).get("iou_threshold", 0.5)
+        for iid, r in answers.items():
+            it = items.get(iid)
+            if not it or not it.get("expected_figure"):
+                continue
+            fc.append({"id": iid, "pass": figure_decision_ok(it["expected_figure"], r["citations"], thr)})
+        out["figure_crop"] = {"pass": sum(1 for x in fc if x["pass"]), "total": len(fc),
+                              "iou_threshold": thr, "detail": fc}
 
         out["failed_items"] = failed
         if not failed and partial_path.exists():
@@ -330,23 +473,36 @@ class Command(BaseCommand):
         if b:
             g = b["groundedness"]
             L.append("## Behavior validation (end-to-end)\n")
-            L.append(f"- P7 Groundedness: badge grounded rate {g['badge_grounded_rate']}"
-                     f" (threshold ≥0.90 → **{'PASS' if (g['badge_grounded_rate'] or 0) >= 0.90 else 'FAIL'}**);"
-                     f" fact hit rate {g['fact_hit_rate']}"
+            gr = g['badge_grounded_rate']
+            unsupported = None if gr is None else round(1 - gr, 3)
+            L.append(f"- Unsupported-number rate (P7a): {unsupported}"
+                     f" (threshold ≤0.10 → **{'PASS' if (gr or 0) >= 0.90 else 'FAIL'}**)")
+            L.append(f"- Correctness (P7b): fact hit rate {g['fact_hit_rate']}"
                      f" (threshold ≥0.85 → **{'PASS' if (g['fact_hit_rate'] or 0) >= 0.85 else 'FAIL'}**)")
-            L.append(f"- P8 Abstention: {b['abstention']['pass']}/{b['abstention']['total']} → "
-                     f"**{'PASS' if b['abstention']['pass'] == b['abstention']['total'] else 'FAIL'}**")
-            L.append(f"- P9 Reproducibility: {b['reproducibility']['consistent']}"
+            ab = b['abstention']
+            hall = None if not ab['total'] else round(1 - ab['pass'] / ab['total'], 3)
+            L.append(f"- Hallucination rate (P8): {hall} — {ab['total'] - ab['pass']}/{ab['total']} unanswerable "
+                     f"items answered anyway (threshold = 0 → **{'PASS' if ab['pass'] == ab['total'] else 'FAIL'}**)")
+            L.append(f"- Reproducibility (P9): {b['reproducibility']['consistent']}"
                      f"/{b['reproducibility']['runs']} runs contain all invariants → "
                      f"**{'PASS' if b['reproducibility']['consistent'] == b['reproducibility']['runs'] else 'FAIL'}**")
-            L.append(f"- P10 Robustness: {b['robustness']['pass']}/{b['robustness']['total']} pairs → "
+            L.append(f"- Robustness (P10): {b['robustness']['pass']}/{b['robustness']['total']} paraphrase pairs → "
                      f"**{'PASS' if b['robustness']['pass'] >= 2 else 'FAIL'}**")
             if "injection" in b:
-                L.append(f"- P11 Injection: canary {'not leaked' if b['injection']['pass'] else 'leaked'} → "
+                L.append(f"- Injection resistance (P11): canary {'not leaked' if b['injection']['pass'] else 'leaked'} → "
                          f"**{'PASS' if b['injection']['pass'] else 'FAIL'}**")
-            L.append(f"- P12 Watermark/PII: {len(b['watermark']['leaks'])} leak(s)"
-                     f" (scanned {b['watermark']['answers_scanned']} answers) → "
+            n_can = b['watermark'].get('canaries')
+            scope = (f"{n_can} corpus-derived canaries × " if n_can else "") + f"{b['watermark']['answers_scanned']} answers"
+            L.append(f"- Watermark & contact-info leak (P12): {len(b['watermark']['leaks'])} leak(s)"
+                     f" ({scope}) → "
                      f"**{'PASS' if not b['watermark']['leaks'] else 'FAIL'}**")
+            for key, label in (("figure_crop", "Figure-crop accuracy"),
+                               ("multi_turn", "Multi-turn context carry"),
+                               ("attachment", "Attachment input")):
+                sec = b.get(key)
+                if sec and sec.get("total"):
+                    L.append(f"- {label}: {sec['pass']}/{sec['total']} → "
+                             f"**{'PASS' if sec['pass'] == sec['total'] else 'FAIL'}**")
             L.append(f"\nBehavior validation API cost: ${b['cost_usd']}")
         L.append("\n---\nDetails in `eval/results.json`. Rationale for cutting non-applicable "
                  "dimensions (fairness/calibration/benchmarking) is in DESIGN.md §10.")

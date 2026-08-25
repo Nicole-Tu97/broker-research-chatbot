@@ -250,6 +250,52 @@ class ToolTests(TestCase):
             tools.dispatch("nope", {})
 
 
+class EvaluateScoringTests(SimpleTestCase):
+    """Pure scoring helpers of the evaluation harness — no DB, no API."""
+
+    def test_iou_basic(self):
+        from .management.commands.evaluate import iou
+        self.assertAlmostEqual(iou([0, 0, 50, 50], [0, 0, 50, 50]), 1.0)
+        self.assertAlmostEqual(iou([0, 0, 50, 50], [50, 50, 100, 100]), 0.0)
+        self.assertAlmostEqual(iou([0, 0, 50, 50], [25, 0, 75, 50]), 1 / 3)
+
+    def test_figure_decision_three_way(self):
+        from .management.commands.evaluate import figure_decision_ok
+        crop = {"crop": {"x0": 5, "y0": 10, "x1": 60, "y1": 40}}
+        full = {"show_page": True}
+        none = {}
+        # box annotation: overlapping crop passes, wrong crop fails, full page only if whole_page_ok
+        self.assertTrue(figure_decision_ok({"box": [5, 10, 60, 42]}, [crop], 0.5))
+        self.assertFalse(figure_decision_ok({"box": [50, 50, 90, 90]}, [crop], 0.5))
+        self.assertFalse(figure_decision_ok({"box": [5, 10, 60, 42]}, [full], 0.5))
+        self.assertTrue(figure_decision_ok({"box": [5, 10, 60, 42], "whole_page_ok": True}, [full], 0.5))
+        # no_figure: any embed is a failure
+        self.assertTrue(figure_decision_ok({"no_figure": True}, [none], 0.5))
+        self.assertFalse(figure_decision_ok({"no_figure": True}, [crop], 0.5))
+        self.assertFalse(figure_decision_ok({"no_figure": True}, [full], 0.5))
+        # whole_page_ok without box: any embed counts, nothing shown fails
+        self.assertTrue(figure_decision_ok({"whole_page_ok": True}, [crop], 0.5))
+        self.assertFalse(figure_decision_ok({"whole_page_ok": True}, [none], 0.5))
+
+    def test_expected_page_hit(self):
+        from .management.commands.evaluate import expected_page_hit
+        cited = {("20250925 - Barclays - NVDA - x.pdf", 1), ("NVDA-F2Q26-deck.pdf", 7)}
+        self.assertTrue(expected_page_hit([["NVDA-F2Q26", 7]], cited))
+        self.assertFalse(expected_page_hit([["NVDA-F2Q26", 8]], cited))
+        self.assertFalse(expected_page_hit([["UBS", 1]], cited))
+
+    def test_build_synthetic_attachments(self):
+        import base64
+        from .management.commands.evaluate import build_attachment
+        img, pdf, name = build_attachment({"kind": "synthetic_image", "text": "hello"})
+        self.assertIsNone(pdf)
+        self.assertEqual(base64.b64decode(img)[:8], b"\x89PNG\r\n\x1a\n")
+        img, pdf, name = build_attachment({"kind": "synthetic_pdf", "text": "ACME note"})
+        self.assertIsNone(img)
+        self.assertEqual(base64.b64decode(pdf)[:5], b"%PDF-")
+        self.assertEqual(name, "external.pdf")
+
+
 class ChatPureTests(TestCase):
     """Deterministic post-processing in the chat layer: no external API calls."""
 
