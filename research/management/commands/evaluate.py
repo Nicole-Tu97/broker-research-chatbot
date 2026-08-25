@@ -470,7 +470,8 @@ class Command(BaseCommand):
             # answered from a different, equally valid page, the crop decision is not
             # applicable — scored N/A, not FAIL (same lesson as the NF1 alternative-source case).
             exp_pages = it.get("expected_pages") or []
-            if exp_pages and not expected_page_hit(exp_pages, cited_pages(r["citations"])):
+            if exp_pages and not (expected_page_hit(exp_pages, cited_pages(r["citations"]))
+                                  or label_page_hit(exp_pages, r["citations"])):
                 na.append(iid)
                 continue
             fc.append({"id": iid, "pass": figure_decision_ok(it["expected_figure"], r["citations"], thr)})

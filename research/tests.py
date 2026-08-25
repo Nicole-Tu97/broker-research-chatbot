@@ -363,6 +363,7 @@ class ChatPureTests(TestCase):
         from .chat import grounding_badges
         pages = {("Barclays", "2025-06-17", 1): self.p1}
         for cite in ("[Barclays, June 2025, p.1]",
+                     "[Barclays, 2025-06, p.1]",   # YYYY-MM, seen on undated decks
                      "[Barclays, Jun 2025, p.1]",
                      "[Barclays, June 17, 2025, p.1]",
                      "[Barclays, 2025, p.1]",

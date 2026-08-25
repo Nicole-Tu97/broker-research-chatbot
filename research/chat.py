@@ -166,6 +166,7 @@ _MONTH = (r"Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|"
           r"Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|"
           r"Nov(?:ember)?|Dec(?:ember)?")
 _DATE = (r"\d{4}-\d{2}-\d{2}"
+         r"|\d{4}-\d{2}"                       # "2025-10" (seen in the wild on undated decks)
          rf"|(?:{_MONTH})\.?\s+\d{{1,2}},?\s+\d{{4}}"
          rf"|(?:{_MONTH})\.?\s+\d{{4}}"
          r"|n\.d\."
@@ -182,7 +183,7 @@ def _date_prefix(date_s: str) -> str | None:
     "n.d." or unparseable -> None (no date filtering — broker + page number +
     this turn's retrieved set remain the hard gate)."""
     s = date_s.strip()
-    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", s) or re.fullmatch(r"\d{4}", s):
+    if re.fullmatch(r"\d{4}(?:-\d{2}){0,2}", s):  # YYYY / YYYY-MM / YYYY-MM-DD → prefix as-is
         return s
     m = re.fullmatch(rf"({_MONTH})\.?\s+(?:(\d{{1,2}}),?\s+)?(\d{{4}})", s,
                      re.IGNORECASE)

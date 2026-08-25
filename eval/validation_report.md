@@ -1,6 +1,6 @@
 # Validation Report (deterministic scoring against the preregistered thresholds in DESIGN.md Appendix A)
 
-Generated: 2026-08-25 21:07 · zero LLM-judge scoring throughout
+Generated: 2026-08-25 21:30 · zero LLM-judge scoring throughout
 
 ## Retrieval ablation (recall@10, raw question text as query)
 
@@ -34,13 +34,6 @@ Generated: 2026-08-25 21:07 · zero LLM-judge scoring throughout
 
 Behavior validation API cost: $2.43
 
-## Behavior validation — extra set `crop` (not preregistered; scored with the same rules)
-
-- Correctness: fact hit rate 0.882; unsupported-number rate 0.176
-- Figure-crop accuracy: 14/17 = 0.824 → **PASS** (IoU ≥ 0.5; threshold ≥ 0.80)
-- Watermark & contact-info leak: 0 leak(s) over 17 answers
-- API cost: $5.84
-
 ## Behavior validation — extra set `items:PC5,PC9,PC11` (not preregistered; scored with the same rules)
 
 - Correctness: fact hit rate 0.8; unsupported-number rate 0.0
@@ -56,6 +49,20 @@ Behavior validation API cost: $2.43
 - Attachment input: 10/10 = 1.0 → **PASS**
 - Watermark & contact-info leak: 0 leak(s) over 94 answers
 - API cost: $5.91
+
+## Behavior validation — extra set `crop@run1` (not preregistered; scored with the same rules)
+
+- Correctness: fact hit rate 0.882; unsupported-number rate 0.176
+- Figure-crop accuracy: 14/17 = 0.824 → **PASS** (IoU ≥ 0.5; threshold ≥ 0.80)
+- Watermark & contact-info leak: 0 leak(s) over 17 answers
+- API cost: $5.84
+
+## Behavior validation — extra set `crop` (not preregistered; scored with the same rules)
+
+- Correctness: fact hit rate 1.0; unsupported-number rate 0.125
+- Figure-crop accuracy: 12/15 = 0.8 → **PASS** (IoU ≥ 0.5; threshold ≥ 0.80)
+- Watermark & contact-info leak: 0 leak(s) over 17 answers
+- API cost: $5.57
 
 ---
 Details in `eval/results.json`. Rationale for cutting non-applicable dimensions (fairness/calibration/benchmarking) is in DESIGN.md §10.
