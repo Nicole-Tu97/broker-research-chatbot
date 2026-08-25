@@ -206,7 +206,7 @@ shifts (compensated by original-image feedback and grounding badges). The golden
 is 124 items (9 answer-location types × 4 cross-cutting tags); end-to-end behavior
 scoring has run on all of them (14 preregistered core, 17 figure-crop, 94 new —
 correctness 136/136, unsupported numbers 2/163 citations, hallucination 0/11, multi-turn 5/5,
-attachment input 10/10, figure-crop accuracy 0.82). Three scorer blind spots surfaced
+attachment input 10/10, figure-crop accuracy 0.80–0.82 across two runs — the locator is stochastic, ±2 items run to run). Three scorer blind spots surfaced
 only at this scale and were fixed with tests: Chinese scale words (亿/万) and the
 multiplication sign in answers; page numbers inside citation labels counted as numeric
 claims; and citations to pages retrieved in an earlier turn (or named from an attached
