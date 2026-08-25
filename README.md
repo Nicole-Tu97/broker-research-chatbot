@@ -55,7 +55,7 @@ make migrate ingest
 ## Tests & evaluation
 
 ```bash
-make test                             # 40 tests; deterministic core needs no API key
+make test                             # 42 tests; deterministic core needs no API key
 .venv/bin/python manage.py evaluate   # retrieval ablation + 6-dimension behavior validation
 ```
 
