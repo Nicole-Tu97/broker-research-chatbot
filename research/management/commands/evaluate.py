@@ -167,6 +167,28 @@ def expected_page_hit(expected_pages, cited: set[tuple[str, int]]) -> bool:
     return any(frag in fn and pno == p for frag, pno in expected_pages for fn, p in cited)
 
 
+_LABEL_RE = re.compile(r"\[([^\[\]]+?),\s*[^,\[\]]+,\s*p\.?\s*(\d+)\]")
+
+
+def label_page_hit(expected_pages, citations: list[dict]) -> bool:
+    """Match expected pages against citation LABELS ("[Broker, date, p.N]") rather than
+    resolved badges. Used for identification tasks (attachment lookups) and follow-up
+    turns, where the model may correctly name a page it did not re-retrieve in this turn."""
+    labels = [(m.group(1).strip().lower(), int(m.group(2)))
+              for c in citations for m in _LABEL_RE.finditer(c.get("citation", ""))]
+    if not labels:
+        return False
+    for frag, pno in expected_pages:
+        doc = Document.objects.filter(filename__contains=frag).first()
+        if not doc:
+            continue
+        broker = doc.broker.lower()
+        for lb, lp in labels:
+            if lp == pno and (lb in broker or broker in lb or lb.split()[0] in broker):
+                return True
+    return False
+
+
 class Command(BaseCommand):
     help = "Run retrieval ablation and behavior validation; generate validation_report.md"
 
@@ -418,7 +440,8 @@ class Command(BaseCommand):
             if not it or it.get("cat") != "multi_turn":
                 continue
             facts_ok = all(fact_in_answer(f, r["answer"]) for f in it.get("expected_facts", []))
-            page_ok = expected_page_hit(it.get("expected_pages", []), cited_pages(r["citations"]))
+            exp = it.get("expected_pages", [])
+            page_ok = expected_page_hit(exp, cited_pages(r["citations"])) or label_page_hit(exp, r["citations"])
             mt.append({"id": iid, "pass": facts_ok and page_ok})
         out["multi_turn"] = {"pass": sum(1 for x in mt if x["pass"]), "total": len(mt), "detail": mt}
 
@@ -431,7 +454,8 @@ class Command(BaseCommand):
                 continue
             ok = all(fact_in_answer(f, r["answer"]) for f in it.get("expected_facts", []))
             if it.get("expected_pages"):
-                ok = ok and expected_page_hit(it["expected_pages"], cited_pages(r["citations"]))
+                ok = ok and (expected_page_hit(it["expected_pages"], cited_pages(r["citations"]))
+                             or label_page_hit(it["expected_pages"], r["citations"]))
             mi.append({"id": iid, "pass": ok})
         out["attachment"] = {"pass": sum(1 for x in mi if x["pass"]), "total": len(mi), "detail": mi}
 

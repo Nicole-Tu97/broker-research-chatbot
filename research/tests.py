@@ -288,6 +288,12 @@ class EvaluateScoringTests(SimpleTestCase):
         self.assertTrue(figure_decision_ok({"whole_page_ok": True}, [crop], 0.5))
         self.assertFalse(figure_decision_ok({"whole_page_ok": True}, [none], 0.5))
 
+    def test_label_page_hit_regex(self):
+        from .management.commands.evaluate import _LABEL_RE
+        m = _LABEL_RE.search("see [Bernstein Research, 2025-07-15, p.4] and [NVIDIA, n.d., p.16]")
+        self.assertEqual((m.group(1), m.group(2)), ("Bernstein Research", "4"))
+        self.assertEqual(len(_LABEL_RE.findall("[UBS Research, 2025-07-08, p.2]")), 1)
+
     def test_expected_page_hit(self):
         from .management.commands.evaluate import expected_page_hit
         cited = {("20250925 - Barclays - NVDA - x.pdf", 1), ("NVDA-F2Q26-deck.pdf", 7)}
@@ -388,6 +394,18 @@ class ChatPureTests(TestCase):
         pages = {("Barclays", "2025-06-17", 1): self.p1}
         badges = grounding_badges("The library is LightOn. [Barclays, 2025-06-17, p.1]", pages)
         self.assertEqual(badges[0]["status"], "grounded")
+
+    def test_prior_pages_rebuilt_from_stored_tool_outputs(self):
+        # Follow-up turns answered from memory must still verify citations against pages
+        # retrieved in earlier turns (otherwise every multi-turn answer gets an unknown badge)
+        import json as _json
+        from .chat import _prior_pages
+        msgs = [{"type": "function_call_output", "call_id": "c1",
+                 "output_text": _json.dumps({"results": [
+                     {"document_id": self.old.id, "page_number": 1}]}), "image_refs": []}]
+        pages = _prior_pages(msgs)
+        self.assertIn(("Barclays", "2025-06-17", 1), pages)
+        self.assertEqual(_prior_pages([{"role": "user", "content": []}]), {})
 
     def test_recency_label_flags_superseded_citation(self):
         from .chat import grounding_badges, recency_labels

@@ -119,6 +119,33 @@ def _tool_output_items(call_id: str, payload: dict,
     return api_item, store_item
 
 
+def _prior_pages(messages: list[dict]) -> dict[tuple, Page]:
+    """Pages retrieved in EARLIER turns of this conversation, keyed like turn_pages.
+
+    A follow-up ("and what was it before this revision?") is legitimately answered from
+    conversation memory without a new tool call; its citations must still verify against
+    the pages that were retrieved earlier, not be marked unknown. Rebuilt from the stored
+    tool outputs (each carries document_id / page_number)."""
+    keys: set[tuple[int, int]] = set()
+    for m in messages:
+        if m.get("type") != "function_call_output":
+            continue
+        try:
+            out = json.loads(m.get("output_text") or "{}")
+        except ValueError:
+            continue
+        rows = out.get("results", []) + [r["first_page"] for r in out.get("reports", []) if r.get("first_page")]
+        for r in rows:
+            if r and r.get("document_id") and r.get("page_number"):
+                keys.add((r["document_id"], r["page_number"]))
+    pages: dict[tuple, Page] = {}
+    for doc_id, pno in keys:
+        p = Page.objects.filter(document_id=doc_id, page_number=pno).select_related("document").first()
+        if p:
+            pages[(p.document.broker, str(p.document.published_date), p.page_number)] = p
+    return pages
+
+
 def _history_to_api(messages: list[dict]) -> list[dict]:
     """History messages -> API input: keep only user/assistant messages.
 
@@ -329,7 +356,7 @@ def run_turn(conversation: Conversation, text: str,
     t0 = time.time()
     usage_in = usage_out = usage_cached = calls = 0
     trace: list[dict] = []
-    turn_pages: dict[tuple, Page] = {}
+    turn_pages: dict[tuple, Page] = _prior_pages(conversation.messages)  # follow-ups verify against earlier turns
     sent_images: set[tuple] = set()  # pages whose originals were already attached this turn (dedup)
 
     user_content: list[dict] = [{"type": "input_text", "text": text}]

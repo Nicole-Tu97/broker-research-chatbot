@@ -204,13 +204,14 @@ Corpus window is 3.5 months — the system says so rather than extrapolating. Th
 numeric validator cannot see same-value collisions or zero-count-neutral column
 shifts (compensated by original-image feedback and grounding badges). The golden set
 is 124 items (9 answer-location types × 4 cross-cutting tags); end-to-end behavior
-scoring has run on 106 of them (14 preregistered core, 17 figure-crop, 75 of the 94
-new items — correctness 116/116, unsupported numbers 0/144, hallucination 0/11,
-figure-crop accuracy 0.82). The remaining 19 (deep-page, multi-turn, attachment items)
-are checkpointed and resume when API credits are topped up. Two scorer blind spots
-surfaced only at this scale and were fixed: Chinese scale words (亿/万) and the
-multiplication sign in answers, and page numbers inside citation labels being
-counted as numeric claims. Pricing for the chat model is assumed
+scoring has run on all of them (14 preregistered core, 17 figure-crop, 94 new —
+correctness 136/136, unsupported numbers 2/163 citations, hallucination 0/11, multi-turn 5/5,
+attachment input 10/10, figure-crop accuracy 0.82). Three scorer blind spots surfaced
+only at this scale and were fixed with tests: Chinese scale words (亿/万) and the
+multiplication sign in answers; page numbers inside citation labels counted as numeric
+claims; and citations to pages retrieved in an earlier turn (or named from an attached
+image) being marked unverifiable — the last one was also a product defect (follow-up
+answers showed a warning badge) and is fixed in the chat loop. Pricing for the chat model is assumed
 ($5/$30 per 1M) pending the official price page. The 52-DPI tier for the quarterly
 decks rests on a dominance argument (the harder keynote passes at 52), not direct
 sampling.

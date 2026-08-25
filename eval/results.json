@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25 20:31",
+  "generated_at": "2026-08-25 21:07",
   "retrieval": {
     "per_item": [
       {
@@ -1580,11 +1580,14 @@
       }
     },
     "items:CT3,TN2,TN3,XT2,NF2,RQ5,RQ6,RQ7,RQ8,RQ9,SQ1,SQ2,SQ5,SQ7,SQ8,XT3,XT4,XT5,XT6,XT7,XT8,XT9,XT10,TS1,TS2,TS3,TS4,TS5,TS6,TS7,TS8,TS9,TS10,PC13,PC14,CT4,CT5,CT6,CT7,CT8,CT9,CT10,CT11,CT12,TN5,TN6,TN7,TN8,TN9,TN10,TN11,TN12,TN13,TN14,TN15,TN16,TN17,TN18,TN19,TN20,AB5,AB6,AB7,AB8,AB9,AB10,AB11,AB12,AB13,AB14,AB15,NF3,NF4,NF5,NF6,NF7,NF8,NF9,NF10,MT1,MT2,MT3,MT4,MT5,MI1,MI2,MI3,MI4,MI5,MI6,MI7,MI8,MI9,MI10": {
-      "cost_usd": 17.21,
+      "cost_usd": 5.91,
       "groundedness": {
-        "badge_grounded_rate": 1.0,
+        "badge_grounded_rate": 0.988,
         "fact_hit_rate": 1.0,
-        "rescored": "facts rescored with CJK-unit/×-normalized scorer and surface-form aliases; badges re-judged after excluding citation-label numbers (answers unchanged)"
+        "unsupported_rate": 0.012,
+        "unverified_citations": 5,
+        "checked_citations": 163,
+        "total_cost_usd_all_runs": 23.12
       },
       "abstention": {
         "pass": 11,
@@ -1647,18 +1650,82 @@
       },
       "watermark": {
         "leaks": [],
-        "answers_scanned": 75,
+        "answers_scanned": 94,
         "canaries": 122
       },
       "multi_turn": {
-        "pass": 0,
-        "total": 0,
-        "detail": []
+        "pass": 5,
+        "total": 5,
+        "detail": [
+          {
+            "id": "MT1",
+            "pass": true
+          },
+          {
+            "id": "MT2",
+            "pass": true
+          },
+          {
+            "id": "MT3",
+            "pass": true
+          },
+          {
+            "id": "MT4",
+            "pass": true
+          },
+          {
+            "id": "MT5",
+            "pass": true
+          }
+        ],
+        "rescored": "page match via citation labels (pages named from memory/attachment are not re-retrieved)"
       },
       "attachment": {
-        "pass": 0,
-        "total": 0,
-        "detail": []
+        "pass": 10,
+        "total": 10,
+        "detail": [
+          {
+            "id": "MI1",
+            "pass": true
+          },
+          {
+            "id": "MI2",
+            "pass": true
+          },
+          {
+            "id": "MI3",
+            "pass": true
+          },
+          {
+            "id": "MI4",
+            "pass": true
+          },
+          {
+            "id": "MI5",
+            "pass": true
+          },
+          {
+            "id": "MI6",
+            "pass": true
+          },
+          {
+            "id": "MI7",
+            "pass": true
+          },
+          {
+            "id": "MI8",
+            "pass": true
+          },
+          {
+            "id": "MI9",
+            "pass": true
+          },
+          {
+            "id": "MI10",
+            "pass": true
+          }
+        ],
+        "rescored": "page match via citation labels (pages named from memory/attachment are not re-retrieved)"
       },
       "figure_crop": {
         "pass": 0,
@@ -1667,27 +1734,7 @@
         "iou_threshold": 0.5,
         "detail": []
       },
-      "failed_items": [
-        "NF7",
-        "NF8",
-        "NF9",
-        "NF10",
-        "MT1",
-        "MT2",
-        "MT3",
-        "MT4",
-        "MT5",
-        "MI1",
-        "MI2",
-        "MI3",
-        "MI4",
-        "MI5",
-        "MI6",
-        "MI7",
-        "MI8",
-        "MI9",
-        "MI10"
-      ],
+      "failed_items": [],
       "answers": {
         "CT3": {
           "answer": "本知识库覆盖 **2025年6月12日至9月29日**。以下为每家券商在该窗口内**最新一份披露英伟达目标价的报告**：\n\n| 券商 | 最新报告日期 | 评级 | 目标价 |\n|---|---:|---|---:|\n| BNP Paribas Exane | 2025-09-29 | Outperform | **$240** [BNP Paribas Exane, 2025-09-29, p.1] |\n| Barclays | 2025-09-25 | Overweight | **$240** [Barclays, 2025-09-25, p.1] |\n| BofA Global Research | 2025-09-22 | Buy | **$235** [BofA Global Research, 2025-09-22, p.1] |\n| Bernstein Research | 2025-09-19 | Outperform | **$225** [Bernstein Research, 2025-09-19, p.3] |\n| Wells Fargo Securities | 2025-09-09 | Overweight | **$220** [Wells Fargo Securities, 2025-09-09, p.1] |\n| JPMorgan Research | 2025-09-04 | Overweight | **$215**（Dec-26）[JPMorgan Research, 2025-09-04, p.1] |\n| Citi | 2025-09-09 | Buy | **$200** [Citi, 2025-09-09, p.1] |\n| Mizuho Securities USA | 2025-08-03 | Outperform | **$192** [Mizuho Securities USA, 2025-08-03, p.1] |\n| UBS Research | 2025-07-08 | Buy | **$175**（12个月）[UBS Research, 2025-07-08, p.1] |\n| Morgan Stanley | 2025-06-12 | Overweight | **$170** [Morgan Stanley, 2025-06-12, p.1] |\n\n整体看，最新目标价区间为 **$170–$240**。BNP Paribas Exane和Barclays最高，均为 **$240**；Morgan Stanley最低为 **$170**，但其对应报告日期较早，因此与9月份更新目标价的券商可比性有限。",
@@ -3151,6 +3198,286 @@
             }
           ],
           "cost": 0.1164
+        },
+        "NF7": {
+          "answer": "| Forecast stock return | Market return assumption | Implied excess return |\n|---:|---:|---:|\n| 10.6% | 8.9% | **1.7 percentage points** [UBS Research, 2025-07-08, p.7] |\n\nThus, UBS’s framework forecasts a **10.6% stock return**, implying **1.7% excess return** over the market assumption.",
+          "citations": [
+            {
+              "citation": "[UBS Research, 2025-07-08, p.7]",
+              "status": "grounded",
+              "page": 7,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.2681
+        },
+        "NF8": {
+          "answer": "| 项目 | Mizuho 估计 | 说明 |\n|---|---:|---|\n| 定制芯片（Custom Si）启动成本 | **约 5,000 万美元/款芯片** | 指前期开发/启动成本，不是量产单颗成本。[Mizuho Securities USA, 2025-06-29, p.3] |\n| GPU 单颗成本 | **2.5万–4万美元/颗** | 报告用于与定制 ASIC 的单颗成本比较。[Mizuho Securities USA, 2025-06-29, p.3] |\n\n补充：Mizuho 估计定制芯片量产后的平均单颗成本约为 **5,000–9,000 美元**，明显低于 GPU。[Mizuho Securities USA, 2025-06-29, p.3]",
+          "citations": [
+            {
+              "citation": "[Mizuho Securities USA, 2025-06-29, p.3]",
+              "status": "grounded",
+              "page": 3,
+              "crop": null,
+              "show_page": null
+            },
+            {
+              "citation": "[Mizuho Securities USA, 2025-06-29, p.3]",
+              "status": "grounded",
+              "page": 3,
+              "crop": null,
+              "show_page": null
+            },
+            {
+              "citation": "[Mizuho Securities USA, 2025-06-29, p.3]",
+              "status": "grounded",
+              "page": 3,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.2256
+        },
+        "NF9": {
+          "answer": "Wells Fargo’s **$220 price target** is based on an approximately **29× P/E multiple applied to its calendar 2027 earnings estimate (C2027E)**. [Wells Fargo Securities, 2025-09-09, p.5]",
+          "citations": [
+            {
+              "citation": "[Wells Fargo Securities, 2025-09-09, p.5]",
+              "status": "grounded",
+              "page": 5,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.1007
+        },
+        "NF10": {
+          "answer": "| 指标 | 报告统计 |\n|---|---:|\n| 已公布的 AI 数据中心容量 | **76 GW**；明细表精确合计为 **76,005 MW（76.005 GW）** [BNP Paribas Exane, 2025-09-29, p.5] |\n| Compute 隐含市场规模（SAM） | **约 1.5 万亿美元**；明细表合计为 **1.466 万亿美元** [BNP Paribas Exane, 2025-09-29, p.5] |\n\n报告采用的概算假设是：每 GW 总资本开支约 **400亿美元**，其中 **50%** 分配给 Compute，因此标题口径约为 **1.5万亿美元**。[BNP Paribas Exane, 2025-09-29, p.5]",
+          "citations": [
+            {
+              "citation": "[BNP Paribas Exane, 2025-09-29, p.5]",
+              "status": "grounded",
+              "page": 5,
+              "crop": null,
+              "show_page": null
+            },
+            {
+              "citation": "[BNP Paribas Exane, 2025-09-29, p.5]",
+              "status": "grounded",
+              "page": 5,
+              "crop": null,
+              "show_page": null
+            },
+            {
+              "citation": "[BNP Paribas Exane, 2025-09-29, p.5]",
+              "status": "grounded",
+              "page": 5,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.219
+        },
+        "MT1": {
+          "answer": "| Broker | Revision date | Previous price target | New price target |\n|---|---|---:|---:|\n| Barclays | Sep. 25, 2025 | **$200** | $240 [Barclays, 2025-09-25, p.1] |\n\nBefore the revision, Barclays’ NVDA price target was **$200**.",
+          "citations": [
+            {
+              "citation": "[Barclays, 2025-09-25, p.1]",
+              "status": "unknown",
+              "page": null,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.0692
+        },
+        "MT2": {
+          "answer": "It reiterates an **Overweight (OW)** rating on NVIDIA. [JPMorgan Research, 2025-09-04, p.1]",
+          "citations": [
+            {
+              "citation": "[JPMorgan Research, 2025-09-04, p.1]",
+              "status": "grounded",
+              "page": 1,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.0635
+        },
+        "MT3": {
+          "answer": "上调前的目标价是 **170 美元**。[BNP Paribas Exane, 2025-08-01, p.1]",
+          "citations": [
+            {
+              "citation": "[BNP Paribas Exane, 2025-08-01, p.1]",
+              "status": "grounded",
+              "page": 1,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.0724
+        },
+        "MT4": {
+          "answer": "| Metric | F2Q26 result |\n|---|---|\n| Networking revenue | **Record level**; absolute revenue was not disclosed |\n| Sequential growth | **+46% q/q** |\n| Year-over-year growth | **+98% y/y** |\n| Demand drivers | **Spectrum-X Ethernet, InfiniBand, and NVLink** |\n\n[NVIDIA, September 2025, p.7]\n\n**Takeaway:** Networking materially outpaced overall Data Center growth of **5% q/q and 56% y/y**, making it a major incremental growth driver in F2Q26. The deck does not provide a quarterly networking-revenue series or an absolute F2Q26 networking figure. [NVIDIA, September 2025, p.7]",
+          "citations": [
+            {
+              "citation": "[NVIDIA, September 2025, p.7]",
+              "status": "grounded",
+              "page": 7,
+              "crop": null,
+              "show_page": null
+            },
+            {
+              "citation": "[NVIDIA, September 2025, p.7]",
+              "status": "grounded",
+              "page": 7,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.603
+        },
+        "MT5": {
+          "answer": "UBS’s rating on NVDA was **Buy** as of July 8, 2025. [UBS Research, 2025-07-08, p.1]",
+          "citations": [
+            {
+              "citation": "[UBS Research, 2025-07-08, p.1]",
+              "status": "unknown",
+              "page": null,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.0448
+        },
+        "MI1": {
+          "answer": "The chart is from NVIDIA’s **“Investor Presentation — Q2 FY26”** (library filename: **NVDA-F2Q26-Quarterly-Presentation-FINAL**), **page 7**, titled **“Data Center.”** [NVIDIA, September 2025, p.7]",
+          "citations": [
+            {
+              "citation": "[NVIDIA, September 2025, p.7]",
+              "status": "grounded",
+              "page": 7,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.3901
+        },
+        "MI2": {
+          "answer": "The slide appears in **NVIDIA’s “GTC-Paris-2025-Keynote,” page 16** (knowledge-base document ID **29**). The deck has no printed publication date. [NVIDIA, n.d., p.16]",
+          "citations": [
+            {
+              "citation": "[NVIDIA, n.d., p.16]",
+              "status": "no_numeric_overlap",
+              "page": 16,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.5629
+        },
+        "MI3": {
+          "answer": "这张图来自 **Barclays（巴克莱）Thematic Investing** 报告：\n\n- **报告名称**：*Powering AI: Bring Your Own Power ('BYOP') as AI Party Continues – Data Center Insights v3.0*\n- **发布日期**：2025年8月13日\n- **页码**：第 **5** 页\n- **图号**：Figure 2，*Hyperscaler historical capex and consensus capex forecasts*  \n  [Barclays, 2025-08-13, p.5]",
+          "citations": [
+            {
+              "citation": "[Barclays, 2025-08-13, p.5]",
+              "status": "grounded",
+              "page": 5,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.098
+        },
+        "MI4": {
+          "answer": "The scatter chart appears on **page 4** of Bernstein Research’s **“NVIDIA (NVDA): Fine China?”**, dated **15 July 2025**. It is labeled **Exhibit 3: “Export Control Variable Space—Controlled vs Non-Controlled.”** [Bernstein Research, 2025-07-15, p.4]",
+          "citations": [
+            {
+              "citation": "[Bernstein Research, 2025-07-15, p.4]",
+              "status": "unknown",
+              "page": null,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.0467
+        },
+        "MI5": {
+          "answer": "The comp table is from J.P. Morgan’s **28 August 2025 NVIDIA Corporation report**, titled:\n\n**“Blackwell/Blackwell Ultra Ramp and Networking Strength Drive Solid Results/Guidance; H20 Upside Still Likely in the Cards, in Our View; Reit OW.”**\n\nIt appears on **page 6**, under **“Appendix I. Comp and Group Valuation,” Table 4: Semiconductor Comp and Group Valuation Table**. [JPMorgan Research, 2025-08-28, p.6]",
+          "citations": [
+            {
+              "citation": "[JPMorgan Research, 2025-08-28, p.6]",
+              "status": "unknown",
+              "page": null,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.0506
+        },
+        "MI6": {
+          "answer": "这是 **UBS Research（瑞银研究）** 于 **2025年7月8日** 发布的 NVIDIA 报告：\n\n**《NVIDIA Corp: Taiwan Export Data – June Above Seasonal, Reads Positively On The Surface》**\n\n你提供的图片是该报告的 **第2页**。[UBS Research, 2025-07-08, p.2]",
+          "citations": [
+            {
+              "citation": "[UBS Research, 2025-07-08, p.2]",
+              "status": "unknown",
+              "page": null,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.0527
+        },
+        "MI7": {
+          "answer": "| Most recent quarter | Data Center revenue | Document |\n|---|---:|---|\n| Q2 FY26 | **$41,096 million ($41.096 billion)** | NVIDIA *Investor Presentation — Q2 FY26*, September 2025 [NVIDIA, n.d., p.1] [NVIDIA, n.d., p.7] |\n\nThe chart appears on page 7 of NVIDIA’s Q2 FY26 quarterly presentation.",
+          "citations": [
+            {
+              "citation": "[NVIDIA, n.d., p.1]",
+              "status": "no_numeric_overlap",
+              "page": 1,
+              "crop": null,
+              "show_page": null
+            },
+            {
+              "citation": "[NVIDIA, n.d., p.7]",
+              "status": "grounded",
+              "page": 7,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.2511
+        },
+        "MI8": {
+          "answer": "| 核心数字 | 含义 | 出处 |\n|---|---|---|\n| **$100T（100万亿美元）** | 幻灯片将 AI Factory 产出的 tokens 称为“智能单位”，并展示其流向科学、企业、医疗和制造业；页面本身未注明该数字的具体测算口径或时间范围。 | NVIDIA《GTC Paris 2025 Keynote》第16页 [NVIDIA, n.d., p.16] |\n\n因此，这张图出自 **NVIDIA 的《GTC-Paris-2025-Keynote》演示文稿**，核心数字是 **100万亿美元**。[NVIDIA, n.d., p.16]",
+          "citations": [
+            {
+              "citation": "[NVIDIA, n.d., p.16]",
+              "status": "grounded",
+              "page": 16,
+              "crop": null,
+              "show_page": null
+            },
+            {
+              "citation": "[NVIDIA, n.d., p.16]",
+              "status": "grounded",
+              "page": 16,
+              "crop": null,
+              "show_page": null
+            }
+          ],
+          "cost": 0.5091
+        },
+        "MI9": {
+          "answer": "The provided ACME Semiconductor Research report is **not in the knowledge base**. The corpus contains reports only from the listed brokers and NVIDIA, dated **June 12–September 29, 2025**; it does not include ACME Semiconductor Research or ZZZ Corp.\n\nTherefore, I cannot compare or relate this report’s **Buy rating** or **$10 price target** to the knowledge-base reports.",
+          "citations": [],
+          "cost": 0.0078
+        },
+        "MI10": {
+          "answer": "I can’t match this image to any chart in the library. The exact phrase **“Grocery list: eggs, milk, bread”** does not appear in the indexed reports or NVIDIA decks, so it is likely not from the available corpus.",
+          "citations": [],
+          "cost": 2.2767
         }
       }
     }
