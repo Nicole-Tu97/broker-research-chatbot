@@ -1,6 +1,6 @@
 # Validation Report (deterministic scoring against the preregistered thresholds in DESIGN.md Appendix A)
 
-Generated: 2026-08-25 18:59 · zero LLM-judge scoring throughout
+Generated: 2026-08-25 19:39 · zero LLM-judge scoring throughout
 
 ## Retrieval ablation (recall@10, raw question text as query)
 
@@ -32,6 +32,13 @@ Generated: 2026-08-25 18:59 · zero LLM-judge scoring throughout
 - Watermark & contact-info leak (P12): 0 leak(s) (14 answers) → **PASS**
 
 Behavior validation API cost: $7.17
+
+## Behavior validation — extra set `crop` (not preregistered; scored with the same rules)
+
+- Correctness: fact hit rate 0.882; unsupported-number rate 0.176
+- Figure-crop accuracy: 14/17 = 0.824 → **PASS** (IoU ≥ 0.5; threshold ≥ 0.80)
+- Watermark & contact-info leak: 0 leak(s) over 17 answers
+- API cost: $5.84
 
 ---
 Details in `eval/results.json`. Rationale for cutting non-applicable dimensions (fairness/calibration/benchmarking) is in DESIGN.md §10.
