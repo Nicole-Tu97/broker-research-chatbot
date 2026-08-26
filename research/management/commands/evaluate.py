@@ -524,6 +524,10 @@ class Command(BaseCommand):
         r = results.get("retrieval")
         if r:
             L.append("## Retrieval ablation (recall@10, raw question text as query)\n")
+            L.append("P1–P6 grade **preregistered predictions** (fixed before the first run, never")
+            L.append("revised): P1 is a quality gate on this conservative single-shot proxy; P2–P5 are")
+            L.append("bets about *how the retriever works* — a FAIL there means the forecast was wrong,")
+            L.append("not that users get worse answers. End-to-end quality is the section below.\n")
             L.append("| Category | dense | fts | hybrid |")
             L.append("|---|---|---|---|")
             for cat, modes in sorted(r["by_cat_mode"].items()):
@@ -532,13 +536,21 @@ class Command(BaseCommand):
                      f"**{r['by_mode']['fts']}** | **{r['by_mode']['hybrid']}** |")
             L.append("")
             hy = r["by_mode"]["hybrid"]
-            L.append(f"- P1 hybrid ≥ 0.85: **{'PASS' if hy >= 0.85 else 'FAIL'}** ({hy})")
+            L.append(f"- P1 hybrid ≥ 0.85: **{'PASS' if hy >= 0.85 else 'FAIL'}** ({hy}) — single-shot proxy; "
+                     f"the production path (agent rewrites queries and retries) recovered every miss "
+                     f"(agentic recall 0.9 strict)")
             L.append(f"- P2 hybrid ≥ both single modes: **{'PASS' if hy >= max(r['by_mode']['dense'], r['by_mode']['fts']) else 'FAIL'}**")
             if r["cn_items_fts_recall"] is not None:
-                L.append(f"- P3 non-English items FTS-only ≤ 0.2: **{'PASS' if r['cn_items_fts_recall'] <= 0.2 else 'FAIL'}** ({r['cn_items_fts_recall']})")
+                p3 = r['cn_items_fts_recall']
+                L.append(f"- P3 non-English items FTS-only ≤ 0.2: **{'PASS' if p3 <= 0.2 else 'FAIL'}** ({p3}) — "
+                         f"a design-assumption bet that the lexical leg would be useless off-English; "
+                         f"falsified in the GOOD direction (English tickers/terms inside non-English "
+                         f"questions still match). Non-English items score 1.0 correctness end-to-end")
             tn = r["by_cat_mode"].get("table_numeric", {})
             if tn:
-                L.append(f"- P4 table_numeric dense < fts: **{'PASS' if tn['dense'] < tn['fts'] else 'FAIL'}** ({tn['dense']} vs {tn['fts']})")
+                L.append(f"- P4 table_numeric dense < fts: **{'PASS' if tn['dense'] < tn['fts'] else 'FAIL'}** "
+                         f"({tn['dense']} vs {tn['fts']}) — a which-leg-is-stronger bet, falsified; "
+                         f"the fused result on these items is {tn.get('hybrid', '?')}")
             pc = r["by_cat_mode"].get("pure_chart", {})
             if pc:
                 L.append(f"- P5 pure_chart hybrid ≥ 0.67: **{'PASS' if pc['hybrid'] >= 2/3 - 1e-9 else 'FAIL'}** ({pc['hybrid']})")

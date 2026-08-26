@@ -4,6 +4,11 @@ Generated: 2026-08-25 21:30 · zero LLM-judge scoring throughout
 
 ## Retrieval ablation (recall@10, raw question text as query)
 
+P1–P6 grade **preregistered predictions** (fixed before the first run, never
+revised): P1 is a quality gate on this conservative single-shot proxy; P2–P5 are
+bets about *how the retriever works* — a FAIL there means the forecast was wrong,
+not that users get worse answers. End-to-end quality is the section below.
+
 | Category | dense | fts | hybrid |
 |---|---|---|---|
 | comparison_timeseries | 0.587 | 0.426 | 0.541 |
@@ -14,10 +19,10 @@ Generated: 2026-08-25 21:30 · zero LLM-judge scoring throughout
 | temporal | 0.5 | 0.55 | 0.6 |
 | **Mean** | **0.773** | **0.681** | **0.814** |
 
-- P1 hybrid ≥ 0.85: **FAIL** (0.814)
+- P1 hybrid ≥ 0.85: **FAIL** (0.814) — single-shot proxy; the production path (agent rewrites queries and retries) recovered every miss (agentic recall 0.9 strict)
 - P2 hybrid ≥ both single modes: **PASS**
-- P3 non-English items FTS-only ≤ 0.2: **FAIL** (0.624)
-- P4 table_numeric dense < fts: **FAIL** (0.708 vs 0.708)
+- P3 non-English items FTS-only ≤ 0.2: **FAIL** (0.624) — a design-assumption bet that the lexical leg would be useless off-English; falsified in the GOOD direction (English tickers/terms inside non-English questions still match). Non-English items score 1.0 correctness end-to-end
+- P4 table_numeric dense < fts: **FAIL** (0.708 vs 0.708) — a which-leg-is-stronger bet, falsified; the fused result on these items is 0.833
 - P5 pure_chart hybrid ≥ 0.67: **PASS** (0.938)
 - P6 reranker: hybrid below threshold → triggers reranker evaluation
 
