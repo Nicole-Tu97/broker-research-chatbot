@@ -80,12 +80,15 @@ DESIGN.md Appendix A.
 
 **What is being tested.** The full **production system** — the same agentic
 pipeline the chat page runs (up to 6 rounds of tool calls), called live, one
-final answer per question. 
-
+final answer per question.
 
 **What was asked.** All 124 golden-set questions: abstention (15), attachment_input (10), comparison_timeseries (13), deep_page_recovery (11), multi_turn (5), pure_chart (16), simple_qa (20), table_numeric (24), temporal (10).
-- Answers and their citations are scored by deterministic rules (string and number matching; no LLM grades anything).
-- Some questions were deliberately asked more than once (one question three times, for reproducibility; the figure questions twice, to measure run-to-run variance). Per-run raw numbers are archived in `eval/results.json`.
+- Answers and their citations are scored by deterministic rules (string and
+  number matching; no LLM grades anything).
+- Some questions were deliberately asked more than once (one question three times,
+  for reproducibility; the figure questions twice, to measure run-to-run variance)
+  — 148 live calls in total; the metrics below score each question's most
+  recent answer once. Per-run raw numbers are archived in `eval/results.json`.
 
 - **Correctness (P7b)** — share of the answer key's expected facts the answer actually
   states, over the 103 questions carrying 189 expected facts: 1.0
@@ -95,16 +98,22 @@ final answer per question.
   page that cannot be re-checked — e.g. answered from conversation memory — are
   excluded): 0.02 (threshold ≤0.10 → **PASS**)
 - **Hallucination rate (P8)** — 15 deliberately unanswerable questions (a year or a
-  broker the library does not cover); the system must decline, and answering anyway
-  counts as a hallucination: 0/15 answered anyway (threshold = 0 → **PASS**)
+  broker the library does not cover); the system must decline. "Answered anyway" is
+  detected mechanically, by a per-question forbidden text pattern — e.g. for a question
+  about 2023 targets, any dollar figure in the answer counts as answering; a decline
+  contains none: 0/15 answered anyway (threshold = 0 → **PASS**)
 - **Multi-turn context carry** — follow-up questions must keep citing the right pages
   from earlier turns (5 multi-turn conversations): 5/5 → **PASS**
 - **Attachment input** — a chart screenshot or PDF attached to the question must be
   matched to the right report and page (10 questions): 10/10 → **PASS**
 - **Figure-crop accuracy** — when the answer embeds a figure, the crop must overlap the
-  hand-annotated figure box (IoU ≥ 0.5); the 17 figure questions were asked in
+  hand-annotated figure box with IoU ≥ 0.5 (IoU = overlap area of the two boxes ÷ their
+  combined area; 0 = no overlap, 1 = exact match, so ≥ 0.5 means at least half overlap);
+  the 17 figure questions were asked in
   2 separate runs: 26/32 scoreable = 0.812 (run 1: 14/17; run 2: 12/15; a question whose
   annotated page is not cited is not scoreable) (threshold ≥0.80 → **PASS**).
+  An early 3-question spot-check scored 1/3 and triggered the locator fix;
+  it measured the pre-fix locator and is archived, not pooled.
 - **Reproducibility (P9)** — the same question asked 3 separate times; every run must
   contain all the key numbers: 3/3 → **PASS**
 - **Robustness (P10)** — the same question asked in two different wordings (3 pairs);
