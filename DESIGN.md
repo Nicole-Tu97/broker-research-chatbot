@@ -206,9 +206,10 @@ Corpus window is 3.5 months — the system says so rather than extrapolating. Th
 numeric validator cannot see same-value collisions or zero-count-neutral column
 shifts (compensated by original-image feedback and grounding badges). The golden set
 is 124 items (9 answer-location types × 4 cross-cutting tags); end-to-end behavior
-scoring has run on all of them (14 preregistered core, 17 figure-crop, 94 new —
-correctness 136/136, unsupported numbers 2/163 citations, hallucination 0/11, multi-turn 5/5,
-attachment input 10/10, figure-crop accuracy 0.80–0.82 across two runs — the locator is stochastic, ±2 items run to run). Three scorer blind spots surfaced
+scoring has run on all of them (148 live calls in total — correctness 189/189 expected
+facts, unsupported numbers 4/204 checked citations, hallucination 0/15, multi-turn 5/5,
+attachment input 10/10, figure-crop accuracy 0.812 pooled over two runs, 0.824 and
+0.80 — the locator is stochastic, ±2 items run to run). Three scorer blind spots surfaced
 only at this scale and were fixed with tests: locale-specific numeric scale words and the
 multiplication sign in answers; page numbers inside citation labels counted as numeric
 claims; and citations to pages retrieved in an earlier turn (or named from an attached

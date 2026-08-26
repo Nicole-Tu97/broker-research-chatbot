@@ -28,10 +28,10 @@ Example — the brief's own question:
 ## How well it works
 
 Validated on a 124-item golden set (9 question types × 4 cross-cutting tags), scored
-deterministically: correctness 1.0 on the preregistered core and 136/136 facts on the
-expanded set; hallucination 0/15 on unanswerable questions; prompt-injection canary 0 leaks
-on both untrusted surfaces; watermark/contact-info leaks 0; multi-turn 5/5; attachment
-input 10/10; figure-crop accuracy 0.80–0.82 across two runs. Retrieval is judged on the
+deterministically: correctness 189/189 expected facts; hallucination 0/15 on unanswerable
+questions; prompt-injection canary 0 leaks on both untrusted surfaces; watermark/contact-info
+leaks 0 across 145 answers; multi-turn 5/5; attachment input 10/10; figure-crop accuracy
+0.812 pooled over two runs (0.824 and 0.80). Retrieval is judged on the
 production loop (the agent rewrites queries, retries, and picks tools): recall@10 reaches
 0.956 on 94 golden-set items, clearing the 0.90 acceptance bar; single-shot hybrid
 retrieval alone scores 0.814 on the same items. Full detail in

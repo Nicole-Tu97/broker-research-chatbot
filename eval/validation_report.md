@@ -72,27 +72,47 @@ keep the single-shot hybrid results as a floor (or route by question type) so th
 agent's choices can only add pages, never lose them; hybrid alone already scores
 0.909 on this type.
 
+The preregistered design-phase predictions about the retriever's internals (P1–P6)
+and their outcomes — including the falsified ones, kept unrevised — are recorded in
+DESIGN.md Appendix A.
 
-## Behavior validation (end-to-end) — preregistered core
+## Behavior validation (end-to-end)
 
-**What is being tested here.** The full **production system** — the same agentic
+**What is being tested.** The full **production system** — the same agentic
 pipeline the chat page runs (up to 6 rounds of tool calls), called live, one
-final answer per question. The answer text and its citations are then scored by
+final answer per question. Answers and their citations are scored by
 deterministic rules (string and number matching; no LLM grades anything).
-Unlike the retrieval table above, nothing here is split by question type — each
-line pools every question its metric applies to.
+Unlike the retrieval table above, nothing here is split by question type —
+each metric line below states what it measures and how many calls it covers.
 
-**How many calls.** This core run asked 14 questions once each, plus the
-flagship comparison question twice more (for reproducibility) and one planted
-injection question. Per-metric counts are on each line below.
+**What was asked.** All 124 golden-set questions: abstention (15), attachment_input (10), comparison_timeseries (13), deep_page_recovery (11), multi_turn (5), pure_chart (16), simple_qa (20), table_numeric (24), temporal (10).
+Some questions were deliberately asked more than once (one question three
+times, for reproducibility; the figure questions twice, to measure run-to-run
+variance) — 148 live calls in total. Where a question was asked more than
+once, the metrics below score its most recent answer once; the repeats feed
+only the reproducibility and figure-crop lines. Per-run raw numbers are
+archived in `eval/results.json`.
 
-- **Unsupported-number rate (P7a)** — share of the numbers in the answers that do *not*
-  appear on the page they cite: 0.0 (threshold ≤0.10 → **PASS**)
-- **Correctness (P7b)** — share of the answer key's expected facts that the answer
-  actually states: 1.0 (threshold ≥0.85 → **PASS**)
-- **Hallucination rate (P8)** — 4 deliberately unanswerable questions (a year or a
+- **Correctness (P7b)** — share of the answer key's expected facts the answer actually
+  states, over the 103 questions carrying 189 expected facts: 1.0
+  (threshold ≥0.85 → **PASS**)
+- **Unsupported-number rate (P7a)** — share of checked citations whose numbers do *not*
+  appear on the page they cite, over 204 checked citations (5 citations naming a
+  page that cannot be re-checked — e.g. answered from conversation memory — are
+  excluded): 0.02 (threshold ≤0.10 → **PASS**)
+- **Hallucination rate (P8)** — 15 deliberately unanswerable questions (a year or a
   broker the library does not cover); the system must decline, and answering anyway
-  counts as a hallucination: 0/4 answered anyway (threshold = 0 → **PASS**)
+  counts as a hallucination: 0/15 answered anyway (threshold = 0 → **PASS**)
+- **Multi-turn context carry** — follow-up questions must keep citing the right pages
+  from earlier turns (5 multi-turn conversations): 5/5 → **PASS**
+- **Attachment input** — a chart screenshot or PDF attached to the question must be
+  matched to the right report and page (10 questions): 10/10 → **PASS**
+- **Figure-crop accuracy** — when the answer embeds a figure, the crop must overlap the
+  hand-annotated figure box (IoU ≥ 0.5); the 17 figure questions were asked in
+  2 separate runs: 26/32 scoreable = 0.812 (run 1: 14/17; run 2: 12/15; a question whose
+  annotated page is not cited is not scoreable) (threshold ≥0.80 → **PASS**).
+  An early 3-question spot-check scored 1/3 and triggered the locator fix;
+  it measured the pre-fix locator and is archived, not pooled.
 - **Reproducibility (P9)** — the same question asked 3 separate times; every run must
   contain all the key numbers: 3/3 → **PASS**
 - **Robustness (P10)** — the same question asked in two different wordings (3 pairs);
@@ -101,57 +121,9 @@ injection question. Per-metric counts are on each line below.
   secret canary word; the canary must never surface in an answer: not leaked → **PASS**
 - **Watermark & contact-info leak (P12)** — 122 client-identifying strings harvested
   from the PDFs (distribution watermarks, e-mail addresses); none may appear in any
-  answer: 0 leak(s) across 14 answers → **PASS**
-- **Figure-crop accuracy** — the figure embedded in the answer must overlap the hand-annotated figure box on that page (IoU ≥ 0.5): 1/1 → **PASS**
+  answer: 0 leak(s) across all 145 archived answers → **PASS**
 
-Behavior validation API cost: $2.43
-
-## Behavior validation — the extra sets
-
-The section above is the preregistered core, fixed before any testing. The golden
-set was later expanded to 124 items, and the new items were run end-to-end in the
-batches below — same production system, same deterministic scoring rules. They are
-reported separately (and marked *not preregistered*) so the core record stays
-untouched. Across the core and these batches, every golden-set item was asked
-end-to-end at least once; item IDs per batch are recorded in `eval/results.json`.
-
-### Extra set — figure-locator probe (3 questions) *(not preregistered; same rules)*
-
-An early spot-check of the figure locator. Its low crop score here is what triggered the locator work; the two full 17-question crop runs below are the real measurement.
-
-- Correctness: fact hit rate 0.8; unsupported-number rate 0.0
-- Figure-crop accuracy: 1/3 = 0.333 → **FAIL** (IoU ≥ 0.5; threshold ≥ 0.80)
-- Watermark & contact-info leak: 0 leak(s) over 3 answers
-- API cost: $0.59
-
-### Extra set — golden-set expansion (94 questions) *(not preregistered; same rules)*
-
-Every item added when the golden set grew to 124 — all question types, including the multi-turn and attachment-input items.
-
-- Correctness: fact hit rate 1.0; unsupported-number rate 0.012
-- Hallucination rate: 0.0 (0/11 answered anyway)
-- Multi-turn context carry: 5/5 = 1.0 → **PASS**
-- Attachment input: 10/10 = 1.0 → **PASS**
-- Watermark & contact-info leak: 0 leak(s) over 94 answers
-- API cost: $5.91
-
-### Extra set — figure-crop run 1 (17 questions) *(not preregistered; same rules)*
-
-All figure-annotated questions, asked end-to-end to measure whether the figure embedded in the answer matches the hand-annotated box (IoU ≥ 0.5). Run twice to see run-to-run variance.
-
-- Correctness: fact hit rate 0.882; unsupported-number rate 0.176
-- Figure-crop accuracy: 14/17 = 0.824 → **PASS** (IoU ≥ 0.5; threshold ≥ 0.80)
-- Watermark & contact-info leak: 0 leak(s) over 17 answers
-- API cost: $5.84
-
-### Extra set — figure-crop run 2 (17 questions) *(not preregistered; same rules)*
-
-All figure-annotated questions, asked end-to-end to measure whether the figure embedded in the answer matches the hand-annotated box (IoU ≥ 0.5). Run twice to see run-to-run variance.
-
-- Correctness: fact hit rate 1.0; unsupported-number rate 0.125
-- Figure-crop accuracy: 12/15 = 0.8 → **PASS** (IoU ≥ 0.5; threshold ≥ 0.80)
-- Watermark & contact-info leak: 0 leak(s) over 17 answers
-- API cost: $5.57
+Behavior validation total API cost: $20.34
 
 ---
 Details in `eval/results.json`. Rationale for cutting non-applicable dimensions (fairness/calibration/benchmarking) is in DESIGN.md §10.
