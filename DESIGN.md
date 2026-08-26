@@ -317,14 +317,17 @@ earned its shape.
 
 ## 8. Known limits and future directions
 
-**Limits, stated rather than hidden.** The corpus window is 3.5 months — the system
-says so rather than extrapolating. The numeric validator cannot see same-value
-collisions or zero-count-neutral column shifts (compensated by original-image
-feedback and grounding badges). The figure locator is stochastic (±2 items run to
-run). Chat-model pricing is assumed ($5/$30 per 1M tokens) pending the official price
-page. The 52-DPI tier for the quarterly decks rests on a dominance argument (the
-harder keynote passes at 52), not direct sampling. Measured behavior numbers live in
-[`eval/validation_report.md`](eval/validation_report.md).
+**Limits, stated rather than hidden:**
+
+- The corpus window is 3.5 months — the system says so rather than extrapolating.
+- The numeric validator cannot see same-value collisions or zero-count-neutral
+  column shifts (compensated by original-image feedback and grounding badges).
+- The figure locator is stochastic — its score moves ±2 items from run to run.
+- The 52-DPI render tier for the quarterly decks is justified by inference, not by
+  direct sampling: the *harder* GTC keynote transcribes correctly at 52 DPI, so the
+  easier quarterly slides are taken as safe there too.
+- Measured behavior numbers live in
+  [`eval/validation_report.md`](eval/validation_report.md).
 
 **Future directions — each anchored in data already collected:**
 

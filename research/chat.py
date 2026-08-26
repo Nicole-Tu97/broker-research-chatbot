@@ -22,7 +22,9 @@ from . import providers, tools
 from .models import Conversation, Document, Page
 from .numeric import numbers_in
 
-PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M, assumed prices for Sol (official pricing TBD)
+PRICE_IN, PRICE_OUT = 4.0, 20.0  # $/1M, official GPT-5.6 Sol rate as of 2026-08-24
+# (was 5.0/30.0 before OpenAI's Aug-2026 cut — archived run costs used that rate,
+#  which was official at the time; long-context requests >272k input are priced higher)
 MAX_TOOL_ROUNDS = 6
 
 BEHAVIOR_RULES = """
@@ -477,8 +479,8 @@ def run_turn(conversation: Conversation, text: str,
     conversation.messages = locked.messages
 
     # Cache-hit input is estimated at 1/10 price (the typical discount of OpenAI's
-    # automatic prefix caching; like $5/$30, an assumed rate until official pricing
-    # is verified). Estimating at full price previously overstated multi-round turns.
+    # automatic prefix caching). Estimating at full price previously overstated
+    # multi-round turns.
     cost = ((usage_in - usage_cached) / 1e6 * PRICE_IN
             + usage_cached / 1e6 * PRICE_IN * 0.1
             + usage_out / 1e6 * PRICE_OUT)
