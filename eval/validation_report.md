@@ -59,8 +59,7 @@ question is not in English?*
 
 **Acceptance bar — judged on the production (agentic) column.** One bar:
 the overall mean must reach 0.90. (Set after the first results were known, so
-marked post-hoc; from here on it is the bar every future run must clear. The
-preregistration record further below predates all runs and is kept unrevised.)
+marked post-hoc; from here on it is the bar every future run must clear.)
 
 - Overall mean ≥ 0.90: **PASS** (0.956)
 
@@ -73,18 +72,9 @@ keep the single-shot hybrid results as a floor (or route by question type) so th
 agent's choices can only add pages, never lose them; hybrid alone already scores
 0.909 on this type.
 
-**Preregistration record (P1–P6) — fixed before the first run, never revised.**
-These graded my design-phase forecasts about the retriever's *internals* (for
-example, which leg would be stronger — the bets that led to hybrid fusion). They
-are kept for the record, not as quality gates; the acceptance bar above is the
-gate. A FAIL here means a forecast was wrong, not that answers got worse.
-
-- P1 hybrid ≥ 0.85: **FAIL** (0.814) — the single-shot bar that motivated measuring the production column (agentic mean 0.956)
-- P2 hybrid ≥ both single modes: **PASS**
-- P3 non-English items FTS-only ≤ 0.2: **FAIL** (0.624) — falsified in the GOOD direction: English tickers/terms inside non-English questions still match (see the non-English row in the table)
-- P4 table_numeric dense < fts: **FAIL** (0.708 vs 0.708) — a which-leg-is-stronger bet; the fused result on these items is 0.833
-- P5 pure_chart hybrid ≥ 0.67: **PASS** (0.938)
-- P6 reranker: hybrid below threshold → triggers reranker evaluation
+The preregistered design-phase predictions about the retriever's internals (P1–P6)
+and their outcomes — including the falsified ones, kept unrevised — are recorded in
+DESIGN.md Appendix A.
 
 ## Behavior validation (end-to-end) — preregistered core
 

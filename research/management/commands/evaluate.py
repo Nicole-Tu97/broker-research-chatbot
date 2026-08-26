@@ -640,8 +640,7 @@ class Command(BaseCommand):
                 ag = r["by_mode"]["agentic"]
                 L.append("**Acceptance bar — judged on the production (agentic) column.** One bar:")
                 L.append("the overall mean must reach 0.90. (Set after the first results were known, so")
-                L.append("marked post-hoc; from here on it is the bar every future run must clear. The")
-                L.append("preregistration record further below predates all runs and is kept unrevised.)\n")
+                L.append("marked post-hoc; from here on it is the bar every future run must clear.)\n")
                 L.append(f"- Overall mean ≥ 0.90: **{'PASS' if ag >= 0.90 else 'FAIL'}** ({ag})\n")
                 dp = r["by_cat_mode"].get("deep_page_recovery", {})
                 if dp.get("agentic") is not None and dp.get("hybrid") is not None and dp["agentic"] < dp["hybrid"]:
@@ -653,31 +652,9 @@ class Command(BaseCommand):
                     L.append("keep the single-shot hybrid results as a floor (or route by question type) so the")
                     L.append(f"agent's choices can only add pages, never lose them; hybrid alone already scores")
                     L.append(f"{dp['hybrid']} on this type.\n")
-            L.append("**Preregistration record (P1–P6) — fixed before the first run, never revised.**")
-            L.append("These graded my design-phase forecasts about the retriever's *internals* (for")
-            L.append("example, which leg would be stronger — the bets that led to hybrid fusion). They")
-            L.append("are kept for the record, not as quality gates; the acceptance bar above is the")
-            L.append("gate. A FAIL here means a forecast was wrong, not that answers got worse.\n")
-            hy = r["by_mode"]["hybrid"]
-            ag = r["by_mode"].get("agentic")
-            L.append(f"- P1 hybrid ≥ 0.85: **{'PASS' if hy >= 0.85 else 'FAIL'}** ({hy}) — the single-shot"
-                     f" bar that motivated measuring the production column"
-                     + (f" (agentic mean {ag})" if ag else ""))
-            L.append(f"- P2 hybrid ≥ both single modes: **{'PASS' if hy >= max(r['by_mode']['dense'], r['by_mode']['fts']) else 'FAIL'}**")
-            if r["cn_items_fts_recall"] is not None:
-                p3 = r['cn_items_fts_recall']
-                L.append(f"- P3 non-English items FTS-only ≤ 0.2: **{'PASS' if p3 <= 0.2 else 'FAIL'}** ({p3}) — "
-                         f"falsified in the GOOD direction: English tickers/terms inside non-English "
-                         f"questions still match (see the non-English row in the table)")
-            tn = r["by_cat_mode"].get("table_numeric", {})
-            if tn:
-                L.append(f"- P4 table_numeric dense < fts: **{'PASS' if tn['dense'] < tn['fts'] else 'FAIL'}** "
-                         f"({tn['dense']} vs {tn['fts']}) — a which-leg-is-stronger bet; "
-                         f"the fused result on these items is {tn.get('hybrid', '?')}")
-            pc = r["by_cat_mode"].get("pure_chart", {})
-            if pc:
-                L.append(f"- P5 pure_chart hybrid ≥ 0.67: **{'PASS' if pc['hybrid'] >= 2/3 - 1e-9 else 'FAIL'}** ({pc['hybrid']})")
-            L.append(f"- P6 reranker: hybrid {'meets threshold → keep not building one' if hy >= 0.85 else 'below threshold → triggers reranker evaluation'}")
+            L.append("The preregistered design-phase predictions about the retriever's internals (P1–P6)")
+            L.append("and their outcomes — including the falsified ones, kept unrevised — are recorded in")
+            L.append("DESIGN.md Appendix A.")
             L.append("")
         b = results.get("behavior")
         if b:
