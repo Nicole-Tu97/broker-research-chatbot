@@ -76,6 +76,22 @@ docker compose up -d db
 make migrate ingest
 ```
 
+## Adding more documents
+
+The corpus is a directory of PDFs — expanding it is an operation, not a code change:
+
+1. Drop new PDFs into `case_study/` (any research PDFs; filenames like
+   `YYYYMMDD - Broker - TICKER - Title.pdf` get their metadata parsed, others fall
+   back to first-page content).
+2. Run `make ingest`. Ingestion is **idempotent**: documents are identified by content
+   hash, finished ones are skipped, interrupted ones resume — so re-running only pays
+   for what is new (~$0.055/page).
+3. Nothing else to update: the corpus boundary in the system prompt, broker lists, and
+   ticker page hints are computed from the database at request time.
+
+Scaling beyond thousands of documents (batch ingestion, index partitioning, when a
+pre-extracted facts table starts to pay) is mapped out in DESIGN.md §9.
+
 ## Tests & evaluation
 
 ```bash
