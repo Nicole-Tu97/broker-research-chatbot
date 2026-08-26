@@ -114,82 +114,93 @@ adversarial review caught four errors in my own first-round numbers):
 
 ## 4. The architecture core: chunking, embedding, retrieval — and the rules the model answers under
 
-**4.1 Parsing: one multimodal call per page.** Page image *and* native text layer go
-into a single transcription call; the prompt pins prose to the text layer (numbers
-must keep their original surface forms) and uses vision for structure and image-only
-content. A benchmarked prompt rule ("cell count must match header count; blank cells
-stay blank — never fill with 0") exists because the benchmark caught exactly that
-failure.
+At a glance — each stage's choice and the reason for it:
 
-*Rationale: one call per page is the cheapest way to capture text, tables,
-and pixel-only charts together — text stays exact, vision fills in what text cannot
-see.*
+| Stage | The choice | Why |
+|---|---|---|
+| Parsing | one multimodal call per page (image + native text layer) | text stays exact; vision fills in what text cannot see |
+| Chunking | none — one page = one retrieval unit | tables and charts survive intact; citations map to real pages; no chunk size to tune wrong |
+| Embedding | text-embedding-3-large at 1024 dims, one vector per page | cross-lingual space; index at a third of native width; cost flat per page |
+| Storage | one Postgres row: vector + tsvector + metadata | three access paths that can never drift apart |
+| Retrieval | two tools; the agent loop is the router | matches the two real question shapes; flexibility comes from the loop, not a pipeline |
+| Verification | deterministic checks at ingestion and at answer time | numbers are trusted because they are checked, not because the model said so |
 
-**4.2 Chunking: none — the page is the atomic unit.** The right chunk size is the
-corpus's own unit of self-contained meaning, and in broker research that unit is the
-page: the chart's caption lives in the prose, the table's numbers are discussed in
-the text, the price target sits in a sidebar next to both. Any sub-page cut shatters
-tables, orphans charts, and breaks page-level citations. Dilution risk on dense pages
-is compensated by the full-text leg, and page images ride along as ground truth.
+**4.1 Parsing: one multimodal call per page.**
 
-*Rationale: tables and charts survive intact, every citation maps to a real
-page, and there is no chunk size to tune wrong.*
+- Page image *and* native text layer go into a single transcription call: the prompt
+  pins prose to the text layer (numbers must keep their original surface forms) and
+  uses vision for structure and image-only content.
+- A benchmarked prompt rule ("cell count must match header count; blank cells stay
+  blank — never fill with 0") exists because the benchmark caught exactly that failure.
 
-**4.3 Embedding and storage: one table, three access paths.** Each page's
-transcription is embedded once with text-embedding-3-large — picked for its
-cross-lingual space, the property §4.4 measures end-to-end — stored at 1024 of its
-native 3072 dims to keep the vector index at a third of full width. The vector sits
-in a single Postgres row next to a DB-generated tsvector and the metadata columns
-(broker, date, tickers, png_path). One store, three access paths — semantic, lexical,
-exact SQL — with zero synchronization risk between them.
+**4.2 Chunking: none — the page is the atomic unit.**
 
-*Rationale: one store means the three search paths can never drift apart,
-and one embedding per page keeps index size and cost flat as the corpus grows.*
+- The right chunk is the corpus's own unit of self-contained meaning; in broker
+  research that unit is the page — the chart's caption lives in the prose, the
+  table's numbers are discussed in the text, the price target sits in a sidebar
+  next to both.
+- Any sub-page cut shatters tables, orphans charts, and breaks page-level citations.
+- Dilution risk on dense pages is compensated by the full-text leg, and page images
+  ride along as ground truth.
 
-**4.4 Retrieval: two tools, and the loop is the router.** `search_pages` runs a
-vector leg (pgvector cosine) and a full-text leg (`ts_rank_cd`, OR semantics), top-50
-each, fused with RRF (k=10), per-leg ranks logged into a visible retrieval trace.
-`list_reports` is pure metadata SQL — `WHERE broker = ? AND ? = ANY(tickers) ORDER BY
-published_date` is exactly what comparative and temporal questions need, and
-returning full first-page transcriptions preserves the *why* behind each rating
-change that a pre-extracted `pt=240` row would destroy. Routing lives in the tool
-descriptions, and the function-calling loop is demonstrably capable of multi-step
-recovery — filtered follow-up searches, page-hint navigation, including the 2/21
-reports whose price target hides deeper than page 1. Cross-lingual behavior
-(measured): non-English questions work end-to-end because the model writes English
-search queries and the embedding space is cross-lingual.
+**4.3 Embedding and storage: one table, three access paths.**
 
-*Rationale: the two tools match the two real question shapes — "find pages
-about X" and "list exactly these reports in date order" — and the agent's loop
-supplies the flexibility a fixed pipeline lacks.*
+- Embedded once per page with text-embedding-3-large — picked for its cross-lingual
+  space, the property §4.4 measures end-to-end — stored at 1024 of its native 3072
+  dims to keep the vector index at a third of full width.
+- Each vector sits in a single Postgres row next to a DB-generated tsvector and the
+  metadata columns (broker, date, tickers, png_path).
+- One store, three access paths — semantic, lexical, exact SQL — with zero
+  synchronization risk between them.
 
-**4.5 Numbers: validated at ingestion, verified at answer time.** A normalized
-multiset diff flags transcription numbers absent from the page's own text layer
-(~20 lines of code, zero API calls, applicable to 350/423 pages); its blind spots
-(same-value collisions, zero-count-neutral shifts) are documented and compensated by
-the original-image feedback in 4.6. At answer time the same idea returns as the
-**grounding badge** — every number in every citation is checked against the cited
-page (✓/⚠) — plus a **recency label** when a cited report is superseded by a newer
-note from the same broker (one deterministic SQL check per citation; the most
-expensive mistake an analyst can make, prevented for free). No LLM judges anything,
-anywhere.
+**4.4 Retrieval: two tools, and the loop is the router.**
 
-**4.6 Original assets surface twice: in model context and in the answer.** Pages with
-visuals return their original image inside the tool result (Responses API), for both
-tools — so a transcription omission is recoverable at query time. On the UI side, one
-isolated vision call per cited visual page (capped at 2) makes a three-way call:
-a question-relevant chart/table exists → its bounding box is located and the server
-re-renders just that region from the PDF (PyMuPDF clip — no new dependency, no new
-storage) as an inline card; the page as a whole IS the visual (a chart slide) → the
-full page embeds; the page's contribution is textual → NO image at all — the citation
-link suffices (embedding cover pages of text reports is noise, not evidence). The risk
-that made me reject cropping twice — a bad box silently losing axis labels or footnotes
-— is contained deterministically: coordinates are validated (out of range, degenerate,
-<8% or >85% of the page are all rejected), padded by 2%; located-but-invalid boxes fall
-back to the full page, and the click-through always opens the original PDF at the cited
-page. The locator call runs only on the interactive path, never during evaluation, and
-never touches the frozen prompts. Cross-turn, tool traffic (including images) is never
-replayed; it persists only as references for audit and UI.
+- `search_pages` — a vector leg (pgvector cosine) and a full-text leg (`ts_rank_cd`,
+  OR semantics), top-50 each, fused with RRF (k=10); per-leg ranks are logged into a
+  visible retrieval trace.
+- `list_reports` — pure metadata SQL: `WHERE broker = ? AND ? = ANY(tickers) ORDER BY
+  published_date` is exactly what comparative and temporal questions need, and
+  returning full first-page transcriptions preserves the *why* behind each rating
+  change that a pre-extracted `pt=240` row would destroy.
+- Routing lives in the tool descriptions; the function-calling loop is the router,
+  demonstrably capable of multi-step recovery — filtered follow-up searches,
+  page-hint navigation, including the 2/21 reports whose price target hides deeper
+  than page 1.
+- Cross-lingual behavior (measured): non-English questions work end-to-end because
+  the model writes English search queries and the embedding space is cross-lingual.
+
+**4.5 Numbers: validated at ingestion, verified at answer time.**
+
+- At ingestion, a normalized multiset diff flags transcription numbers absent from
+  the page's own text layer (~20 lines of code, zero API calls, applicable to
+  350/423 pages); its blind spots (same-value collisions, zero-count-neutral shifts)
+  are documented and compensated by the original-image feedback in 4.6.
+- At answer time the same idea returns as the **grounding badge**: every number in
+  every citation is checked against the cited page (✓/⚠).
+- A **recency label** is added when a cited report is superseded by a newer note from
+  the same broker — one deterministic SQL check per citation; the most expensive
+  mistake an analyst can make, prevented for free.
+- No LLM judges anything, anywhere.
+
+**4.6 Original assets surface twice: in model context and in the answer.**
+
+- *In model context:* pages with visuals return their original image inside the tool
+  result (Responses API), for both tools — so a transcription omission is
+  recoverable at query time.
+- *In the answer:* one isolated vision call per cited visual page (capped at 2)
+  makes a three-way call — a question-relevant chart/table exists → its bounding box
+  is located and the server re-renders just that region from the PDF (PyMuPDF clip;
+  no new dependency, no new storage) as an inline card; the page as a whole IS the
+  visual (a chart slide) → the full page embeds; the page's contribution is textual
+  → NO image at all — the citation link suffices.
+- The risk that made me reject cropping twice — a bad box silently losing axis
+  labels or footnotes — is contained deterministically: coordinates are validated
+  (out of range, degenerate, <8% or >85% of the page are all rejected), padded by
+  2%; located-but-invalid boxes fall back to the full page; the click-through always
+  opens the original PDF at the cited page.
+- The locator call runs only on the interactive path, never during evaluation, and
+  never touches the frozen prompts. Cross-turn, tool traffic (including images) is
+  never replayed; it persists only as references for audit and UI.
 
 **4.7 The rules the model answers under: corpus boundary + behavior rules.** The
 system prompt is regenerated from the database at request time, so the model is told,
@@ -220,16 +231,18 @@ fixed behavior rules:
 These rules are not aspirations; they are what the behavior suite scores (abstention,
 per-row citations, boundary statements).
 
-**4.8 Untrusted input is data, never instructions.** Two surfaces carry text the
-system must not obey: document content (a planted PDF could hide instructions) and
-user attachments. The defenses are structural, not hopeful: both retrieval tools are
-read-only, so no document content can trigger an action with side effects; the system
-prompt scopes instructions to the user turn; and the posture is *verified*, not
-assumed — a canary planted on each surface never leaked, and 122 client-identifying
-strings harvested from the PDFs (distribution watermarks, e-mail addresses) were
-scanned against every archived answer with zero hits. For a tool sitting on licensed,
-client-watermarked research, this is a design requirement on par with retrieval
-quality.
+**4.8 Untrusted input is data, never instructions.**
+
+- Two surfaces carry text the system must not obey: document content (a planted PDF
+  could hide instructions) and user attachments.
+- The defenses are structural, not hopeful: both retrieval tools are read-only, so no
+  document content can trigger an action with side effects; the system prompt scopes
+  instructions to the user turn.
+- The posture is *verified*, not assumed: a canary planted on each surface never
+  leaked, and 122 client-identifying strings harvested from the PDFs (distribution
+  watermarks, e-mail addresses) were scanned against every archived answer — zero hits.
+- For a tool sitting on licensed, client-watermarked research, this is a design
+  requirement on par with retrieval quality.
 
 ## 5. Evaluation: the method — all numbers live in the report
 
