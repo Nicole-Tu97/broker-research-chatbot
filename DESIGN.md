@@ -114,54 +114,26 @@ adversarial review caught four errors in my own first-round numbers):
 
 ## 4. The architecture core: chunking, embedding, retrieval — and the rules the model answers under
 
-At a glance — each stage's choice and the reason for it:
+The pipeline, one row per stage — this table is the design; the subsections after
+it hold only what a table cannot (mechanics, verification, rules, security):
 
 | Stage | The choice | Why |
 |---|---|---|
-| Parsing | one multimodal call per page (image + native text layer) | text stays exact; vision fills in what text cannot see |
-| Chunking | none — one page = one retrieval unit | tables and charts survive intact; citations map to real pages; no chunk size to tune wrong |
-| Embedding | text-embedding-3-large at 1024 dims, one vector per page | cross-lingual space; index at a third of native width; cost flat per page |
-| Storage | one Postgres row: vector + tsvector + metadata | three access paths that can never drift apart |
-| Retrieval | two tools; the agent loop is the router | matches the two real question shapes; flexibility comes from the loop, not a pipeline |
-| Verification | deterministic checks at ingestion and at answer time | numbers are trusted because they are checked, not because the model said so |
+| **Parsing** | One multimodal call per page: full-page image + native text layer → one markdown transcription. Prose is pinned to the text layer (numbers keep their original surface forms); vision handles structure and image-only content. | Text stays exact; vision fills in what text cannot see. The transcription prompt itself was benchmarked (e.g. "blank table cells stay blank — never fill with 0" exists because the benchmark caught that failure). |
+| **Chunking** | None — one page = one retrieval unit. | A broker page is the corpus's unit of self-contained meaning: chart captions live in the prose, table numbers are discussed in the text. Any sub-page cut shatters tables, orphans charts, and breaks page-level citations. Dense-page dilution is covered by the full-text leg — and there is no chunk size to tune wrong. |
+| **Embedding** | text-embedding-3-large, one vector per page, stored at 1024 of its native 3072 dims. | Cross-lingual vector space (measured end-to-end, §4.1); a third of the full index width; cost stays flat per page. |
+| **Storage** | **Two stores.** (1) A relational Postgres database: metadata columns (broker, date, tickers, title) plus a **vector column**, a DB-generated **full-text tsvector**, and a `png_path` per page. (2) A page-image store (`page_assets/`): one PNG per page, referenced by that `png_path`. | One row serves semantic, lexical, and exact-SQL access with zero drift between them; the original pixels stay retrievable for model context, figure crops, and the UI. |
+| **Retrieval** | Two tools, chosen by the agent per round: **`search_pages`** — hybrid semantic + full-text search over page transcriptions, for thematic and specific-fact questions; **`list_reports`** — exact SQL over the metadata columns, ordered by date, *all* matches guaranteed, for comparative and temporal questions. | The two tools match the two real question shapes ("find pages about X" / "list exactly these reports in order"); flexibility comes from the agent loop, not a fixed pipeline. |
+| **Verification** | Deterministic checks at ingestion (numeric multiset diff) and at answer time (grounding badges, recency labels). | Numbers are trusted because they are checked, not because the model said so. |
 
-**4.1 Parsing: one multimodal call per page.**
+**4.1 Retrieval mechanics: the loop is the router.**
 
-- Page image *and* native text layer go into a single transcription call: the prompt
-  pins prose to the text layer (numbers must keep their original surface forms) and
-  uses vision for structure and image-only content.
-- A benchmarked prompt rule ("cell count must match header count; blank cells stay
-  blank — never fill with 0") exists because the benchmark caught exactly that failure.
-
-**4.2 Chunking: none — the page is the atomic unit.**
-
-- The right chunk is the corpus's own unit of self-contained meaning; in broker
-  research that unit is the page — the chart's caption lives in the prose, the
-  table's numbers are discussed in the text, the price target sits in a sidebar
-  next to both.
-- Any sub-page cut shatters tables, orphans charts, and breaks page-level citations.
-- Dilution risk on dense pages is compensated by the full-text leg, and page images
-  ride along as ground truth.
-
-**4.3 Embedding and storage: one table, three access paths.**
-
-- Embedded once per page with text-embedding-3-large — picked for its cross-lingual
-  space, the property §4.4 measures end-to-end — stored at 1024 of its native 3072
-  dims to keep the vector index at a third of full width.
-- Each vector sits in a single Postgres row next to a DB-generated tsvector and the
-  metadata columns (broker, date, tickers, png_path).
-- One store, three access paths — semantic, lexical, exact SQL — with zero
-  synchronization risk between them.
-
-**4.4 Retrieval: two tools, and the loop is the router.**
-
-- `search_pages` — a vector leg (pgvector cosine) and a full-text leg (`ts_rank_cd`,
-  OR semantics), top-50 each, fused with RRF (k=10); per-leg ranks are logged into a
-  visible retrieval trace.
-- `list_reports` — pure metadata SQL: `WHERE broker = ? AND ? = ANY(tickers) ORDER BY
-  published_date` is exactly what comparative and temporal questions need, and
-  returning full first-page transcriptions preserves the *why* behind each rating
-  change that a pre-extracted `pt=240` row would destroy.
+- `search_pages` fuses a vector leg (pgvector cosine) and a full-text leg
+  (`ts_rank_cd`, OR semantics), top-50 each, with RRF (k=10); per-leg ranks are
+  logged into a visible retrieval trace.
+- `list_reports` returns full first-page transcriptions, not extracted rows — the
+  *why* behind each rating change survives, which a pre-extracted `pt=240` row
+  would destroy.
 - Routing lives in the tool descriptions; the function-calling loop is the router,
   demonstrably capable of multi-step recovery — filtered follow-up searches,
   page-hint navigation, including the 2/21 reports whose price target hides deeper
@@ -169,12 +141,12 @@ At a glance — each stage's choice and the reason for it:
 - Cross-lingual behavior (measured): non-English questions work end-to-end because
   the model writes English search queries and the embedding space is cross-lingual.
 
-**4.5 Numbers: validated at ingestion, verified at answer time.**
+**4.2 Numbers: validated at ingestion, verified at answer time.**
 
 - At ingestion, a normalized multiset diff flags transcription numbers absent from
   the page's own text layer (~20 lines of code, zero API calls, applicable to
   350/423 pages); its blind spots (same-value collisions, zero-count-neutral shifts)
-  are documented and compensated by the original-image feedback in 4.6.
+  are documented and compensated by the original-image feedback in §4.3.
 - At answer time the same idea returns as the **grounding badge**: every number in
   every citation is checked against the cited page (✓/⚠).
 - A **recency label** is added when a cited report is superseded by a newer note from
@@ -182,7 +154,7 @@ At a glance — each stage's choice and the reason for it:
   mistake an analyst can make, prevented for free.
 - No LLM judges anything, anywhere.
 
-**4.6 Original assets surface twice: in model context and in the answer.**
+**4.3 Original assets surface twice: in model context and in the answer.**
 
 - *In model context:* pages with visuals return their original image inside the tool
   result (Responses API), for both tools — so a transcription omission is
@@ -202,7 +174,7 @@ At a glance — each stage's choice and the reason for it:
   never touches the frozen prompts. Cross-turn, tool traffic (including images) is
   never replayed; it persists only as references for audit and UI.
 
-**4.7 The rules the model answers under: corpus boundary + behavior rules.** The
+**4.4 The rules the model answers under: corpus boundary + behavior rules.** The
 system prompt is regenerated from the database at request time, so the model is told,
 as fact, exactly what it has — broker list, date window, document counts. On top sit
 fixed behavior rules:
@@ -221,7 +193,7 @@ fixed behavior rules:
 4. **Cite everything** — every claim carries `[Broker, date, p.N]`, and the numbers
    must come from the cited page.
 5. **Follow the recovery path** — if page 1 lacks the needed value, use the
-   deep-page hints the tools provide (§4.4).
+   deep-page hints the tools provide (§4.1).
 6. **Named-document pinning** — when the question names a specific document ("the
    keynote", a broker's report of a given date), locate that document via metadata
    first and take numbers only from it — never substitute similar figures from
@@ -231,7 +203,7 @@ fixed behavior rules:
 These rules are not aspirations; they are what the behavior suite scores (abstention,
 per-row citations, boundary statements).
 
-**4.8 Untrusted input is data, never instructions.**
+**4.5 Untrusted input is data, never instructions.**
 
 - Two surfaces carry text the system must not obey: document content (a planted PDF
   could hide instructions) and user attachments.
@@ -284,7 +256,7 @@ triggers (§8), and two were closed *with data*.
   belonged in query formulation and were verified end-to-end.
 - **No pre-extracted facts table** — exact SQL over metadata plus full first-page
   context answers comparative/temporal questions without a lossy second store.
-- **No sub-page chunking** (§4.2). **No Celery/Redis queue** at 30 documents. **No
+- **No sub-page chunking** (§4, Chunking row). **No Celery/Redis queue** at 30 documents. **No
   Batch API** — measured, not assumed: 423 pages of base64 PNG exceed its 200 MB
   input cap, so the ~$12 saving would have bought a second code path. **No
   prompt-caching engineering** (the system prompt is ~5% of spend). **No frontend
@@ -316,7 +288,7 @@ trusting.
   — falsified in the good direction: non-English questions still carry English
   tickers and terms (NVDA, UBS) that OR matching finds.
 - **The first figure-crop probe scored 1/3.** What earned its keep: the three-way
-  decision in §4.6, deterministic coordinate validation with full-page fallback, and
+  decision in §4.3, deterministic coordinate validation with full-page fallback, and
   the pixel-dominance gate so text pages never ship as screenshots. What did not: a
   prompt hint that failed to fix its target case and coincided with regressions —
   reverted. Final accuracy: 0.80–0.82 across two runs.
@@ -326,11 +298,11 @@ trusting.
   undated documents; images are deduplicated within a turn (115 → 37); the cost
   footer prices cached tokens correctly.
 - **A real user caught scope substitution** — asked about 2023, the bot volunteered
-  2025 data. Fixed with an overlap-based boundary rule (rule 1 in §4.7); the first
+  2025 data. Fixed with an overlap-based boundary rule (rule 1 in §4.4); the first
   version of the fix regressed elsewhere, and the behavior suite caught that too.
 - **The suite caught three quieter product defects** — giving up on tool-round
   exhaustion, vocabulary mismatch on sparse slide pages, answering from an adjacent
-  source (now rule 6 in §4.7) — each fixed and re-verified.
+  source (now rule 6 in §4.4) — each fixed and re-verified.
 - **The scorer itself had blind spots at scale** — locale-specific numeric scale
   words, the multiplication sign, page numbers inside citation labels counted as
   numeric claims, and follow-up answers citing pages from memory marked unverifiable
