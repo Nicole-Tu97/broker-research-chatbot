@@ -13,6 +13,7 @@ Ask questions about a library of broker research reports (here: 30 PDFs, 423 pag
 
 - **Plain-language questions, in multiple languages** — comparative ("compare UBS's and Barclays's price targets"), temporal ("how did Citi's target evolve"), exact numbers from dense tables, facts that exist only inside charts.
 - **Cited and verified** — every answer cites its source as `[Broker, date, p.N]`, the link opens the original PDF at that page, and every number is re-checked against that page's own text: a ✓ badge means it appears there, ⚠ means it does not.
+- **Follow-up questions carry the conversation** — ask, then drill in ("and what was it before this revision?"): the answer can come from pages the conversation already retrieved, without a new search — and its citations are still verified against those pages.
 - **Relevant charts appear inline** — when a cited page's chart or table supports the answer, that figure is cropped from the original page and shown next to the text; text-only pages get a link, never a screenshot.
 - **Knows what it doesn't know** — brokers, tickers, or years outside the library get an explicit boundary statement instead of a guess; citations to reports superseded by a newer note from the same broker are flagged.
 - **Guards sensitive content, resists manipulation** — distribution watermarks and contact details from the source PDFs never surface in answers, and instructions hidden inside documents or attachments are ignored, not obeyed (both validated: 0 leaks, 0 injections — see the validation report).
