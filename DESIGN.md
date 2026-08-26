@@ -281,42 +281,98 @@ Every item below followed the same loop: try → measure → root-cause → fix 
 re-verify. The failures stay on the record deliberately — they are where the design
 earned its shape.
 
-- **Keyword search demanded every word to match — so real questions matched almost
-  nothing.** I had expected the lexical leg to win on exact-number table questions; the data said
-  otherwise. FTS-only recall was 0.094 on 94 items — a long natural-language question fails an
-  AND of all its terms — and its noise votes slightly hurt fusion. Fix: OR semantics
-  ranked by `ts_rank_cd` → FTS-only 0.681, hybrid 0.761 → 0.814, and the behavior
-  round re-passed at a third of the previous cost ($2.43 vs $7.17) because the agent
-  now lands on the right page in fewer rounds.
-- **Every citation used to ship a full-page screenshot.** It looked
-  helpful and was actually noise: the cover page of a text report, embedded as an
-  image, adds nothing an analyst can use. The rule that replaced it (§4.3): attach a
-  figure only when the figure itself is the evidence — crop the specific chart when
-  one exists, embed the full page only when the page IS the chart (a slide), and
-  attach nothing when the answer is summarizable from text — the citation link
-  suffices. The figure-crop metric exists to keep exactly this honest.
-- **The first attempt at figure cropping mostly missed (1 of 3).** What earned its keep: the three-way
-  decision in §4.3, deterministic coordinate validation with full-page fallback, and
-  the pixel-dominance gate so text pages never ship as screenshots. What did not: a
-  prompt hint that failed to fix its target case and coincided with regressions —
-  reverted. Final accuracy: 0.80–0.82 across two runs.
-- **One question cost $4.85.** A date filter silently excluded the undated NVIDIA
-  decks, so the agent burned 13 futile tool calls, re-attaching page images every
-  round. Fixes: the tool now returns an explicit warning when a date filter excluded
-  undated documents; images are deduplicated within a turn (115 → 37); the cost
-  footer prices cached tokens correctly.
-- **Asked about 2023, the bot answered with 2025 data.** A real user caught this
-  scope substitution. Fixed with an overlap-based boundary rule (rule 1 in §4.4); the first
-  version of the fix regressed elsewhere, and the behavior suite caught that too.
-- **Three quiet defects only the test suite noticed** — giving up on tool-round
-  exhaustion, vocabulary mismatch on sparse slide pages, answering from an adjacent
-  source (now rule 6 in §4.4) — each fixed and re-verified.
-- **The grading script itself judged some correct answers wrong** — locale-specific numeric scale
-  words, the multiplication sign, page numbers inside citation labels counted as
-  numeric claims, and follow-up answers citing pages from memory marked unverifiable
-  (that last one was also a product defect: follow-ups showed a warning badge —
-  fixed in the chat loop). Each fixed with a regression test; stored answers were
-  transparently rescored.
+**1. Keyword search demanded every word to match — so real questions matched almost nothing.**
+
+- *What happened:* the full-text leg scored 0.094 recall on 94 items, and its noise
+  votes slightly hurt the fused result.
+- *Why:* the leg ran websearch AND-semantics — every word of the question must
+  appear on a page, and no page contains every word of a long natural-language
+  question. (I had expected this leg to win on exact-number table questions; the
+  data said otherwise.)
+- *The fix:* OR semantics, ranked by `ts_rank_cd`.
+- *Verified:* FTS-only 0.094 → 0.681, hybrid 0.761 → 0.814; the behavior round
+  re-passed at a third of the previous cost ($2.43 vs $7.17) because the agent now
+  lands on the right page in fewer rounds.
+
+**2. Every citation used to ship a full-page screenshot.**
+
+- *What happened:* early answers embedded a screenshot of every cited page — the
+  cover page of a text report included.
+- *Why:* "more context cannot hurt" is wrong: irrelevant images dilute the answer
+  and add nothing an analyst can use.
+- *The fix:* the three-way rule in §4.3 — crop the specific chart when one exists;
+  embed the full page only when the page IS the chart; attach nothing when the
+  answer is summarizable from text.
+- *Verified:* the figure-crop metric exists to keep exactly this honest — 0.824 and
+  0.80 across two full runs.
+
+**3. The first attempt at figure cropping mostly missed (1 of 3).**
+
+- *What happened:* the first spot-check cropped 1 of 3 figures correctly.
+- *Why:* a vision model's boxes drift — axis labels cut off, the wrong figure, or
+  coordinates outside the page.
+- *The fix:* deterministic coordinate validation with full-page fallback
+  (out-of-range, degenerate, and <8% / >85% boxes all rejected), plus the
+  pixel-dominance gate. A prompt hint that failed to fix its target case and
+  coincided with regressions was reverted — prompt changes must earn their keep.
+- *Verified:* two full 17-question runs, 0.824 and 0.80, both above the 0.80 bar.
+
+**4. One question cost $4.85.**
+
+- *What happened:* a single date-filtered question burned 13 futile tool calls.
+- *Why:* the date filter silently excluded the undated NVIDIA decks, so the agent
+  kept searching without seeing why nothing came back — while re-attaching the same
+  page images every round (115 attachments for 37 distinct pages).
+- *The fix:* the tool now warns explicitly when a date filter excluded undated
+  documents; images are deduplicated within a turn; the cost footer prices cached
+  tokens correctly.
+- *Verified:* same-shape questions returned to normal cost, and the live footer
+  keeps every answer's spend visible.
+
+**5. Asked about 2023, the bot answered with 2025 data.**
+
+- *What happened:* a real user asked for NVDA's 2023 target trajectory; the bot
+  volunteered the 2025 data it did have.
+- *Why:* "be helpful" beats "stay in scope" unless the boundary is an explicit rule.
+- *The fix:* the overlap-based boundary rule (rule 1 in §4.4) — declare-then-answer
+  on partial overlap, state-and-stop on zero overlap. The first version of the fix
+  regressed elsewhere; the behavior suite caught that too.
+- *Verified:* 0/15 deliberately unanswerable questions answered; the user's exact
+  question entered the golden set.
+
+**6. One hard question failed three different ways.**
+
+- *What happened:* the keynote's "$100T market" question, asked in adversarial
+  wording, failed three times — each failure a distinct defect.
+- *Why and the fixes, one per defect:*
+  - On round exhaustion the agent returned "please narrow your question" — $1.25
+    for a give-up message. Now hitting the round cap forces one final, tool-free,
+    best-effort answer: a give-up message is strictly the worse output.
+  - The model searched in analyst vocabulary ("market size", "TAM") while the
+    slide's transcription holds only the page's own words. The tool description now
+    says: search slide-style content with the page's own words, and after a miss
+    re-word drastically instead of tweaking synonyms.
+  - Re-worded, the model found a similar-looking real number (~$100 *billion*, a
+    broker's European-capex figure) in an adjacent source and answered with it.
+    Behavior rule 6 (named-document pinning, §4.4) now forbids substituting a
+    nearby source for the named one.
+- *Verified:* the question now answers $100 trillion citing the keynote page
+  itself, and the whole pure-chart category passes end-to-end.
+
+**7. The grading script itself judged some correct answers wrong.**
+
+- *What happened:* at 124-item scale, four scorer blind spots surfaced — each had
+  marked a correct answer wrong.
+- *Why:* literal matching is strict by design: locale-specific numeric scale words,
+  the multiplication sign, page numbers inside citation labels counted as numeric
+  claims, and follow-up answers citing pages from conversation memory marked
+  unverifiable (that last one was also a product defect — follow-ups showed a
+  warning badge).
+- *The fix:* each blind spot fixed and pinned with a regression test that replays
+  the once-misjudged example; the memory case also fixed in the chat loop.
+- *Verified:* stored answers were transparently rescored under the amended rules —
+  the rule change is public in the code, not a quiet grade bump — and the
+  regression tests keep the fixes from silently un-fixing.
 
 ## 8. Known limits and future directions
 
