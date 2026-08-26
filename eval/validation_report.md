@@ -7,24 +7,11 @@ Generated: 2026-08-26 16:45 · zero LLM-judge scoring throughout
 **What this is.** A golden-set evaluation: the correct answer pages were marked
 *before* any testing, and the retriever is scored against that fixed answer key.
 
-**How the answer key was made — three defenses against a wrong key.**
-1. *Anchored in the source, not in the system.* Every fact and page reference was
-   taken from the PDF's own text layer (extracted deterministically, no LLM), then
-   a question was written for it — the answer existed before the question did.
-2. *The drafting model is not the tested model.* Questions were drafted with a
-   different vendor's model than the one the system runs on, so the system cannot
-   grade its own homework.
-3. *Every item passed a machine check (no LLM).* A script verified that the cited
-   file exists, the page exists, and each expected fact literally appears on that
-   page. Items that failed were fixed before entering the set.
-
 **How the test runs.** 94 questions, each with 1–10 hand-checked answer
 pages (about 135 hand-checked answer pages in total). Each question is sent to the retriever exactly as written, once
 per configuration (94 × 3 = 282 single-shot searches, each returning its
 top 10 pages). The score per question is the share of its answer pages that show
-up in the top 10; the table averages this per question type. The agentic column is
-different: it replays the 94 archived production runs and counts every page the
-agent retrieved during the whole turn.
+up in the top 10; the table averages this per question type.
 
 **The six question types.**
 - `simple_qa` — the answer sits plainly on one page

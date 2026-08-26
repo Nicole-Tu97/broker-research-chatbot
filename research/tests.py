@@ -607,3 +607,57 @@ class ChatPureTests(TestCase):
         # Tool traffic (incl. image refs) never replays across turns: reasoning
         # models' reasoning-pairing constraint + cost
         self.assertEqual([m.get("role") for m in api], ["user", "assistant"])
+
+class ValidationReportTemplateTests(SimpleTestCase):
+    """The report's module structure was frozen with the reviewer on 2026-08-26.
+    Structure changes must be deliberate: update the marker list here alongside
+    render_report. Also guards against editing the .md by hand — the committed
+    file must be byte-identical to what the generator produces."""
+
+    MARKERS = [
+        "# Validation Report",
+        "## Retrieval quality — golden-set (reference-based) evaluation",
+        "**What this is.**",
+        "**How the test runs.**",
+        "**The six question types.**",
+        "**The four columns.**",
+        "| Category | dense | fts | hybrid |",
+        "| non-English questions",
+        "| **Mean (",
+        "**Acceptance bar — judged on the production (agentic) column.**",
+        "- Overall mean ≥ 0.90:",
+        "**One weak spot to note.**",
+        "DESIGN.md Appendix A.",
+        "## Behavior validation (end-to-end)",
+        "**What is being tested.**",
+        "**What was asked.**",
+        "**How answers are graded — preset rules, never an LLM judging an LLM.**",
+        "1. **Must contain**",
+        "2. **Must NOT contain**",
+        "3. **Box match**",
+        "- **Correctness (P7b)**",
+        "- **Unsupported-number rate (P7a)**",
+        "- **Hallucination rate (P8)**",
+        "- **Multi-turn context carry**",
+        "- **Attachment input**",
+        "- **Figure-crop accuracy**",
+        "- **Reproducibility (P9)**",
+        "- **Robustness (P10)**",
+        "- **Injection resistance (P11)**",
+        "- **Watermark & contact-info leak (P12)**",
+        "Behavior validation total API cost",
+    ]
+
+    def test_report_structure_and_sync(self):
+        import json as jsonlib
+        from .management.commands.evaluate import EVAL, Command
+        report = Command().render_report(jsonlib.loads((EVAL / "results.json").read_text()))
+        pos = -1
+        for marker in self.MARKERS:
+            i = report.find(marker, pos + 1)
+            self.assertGreater(i, pos, f"report section missing or out of order: {marker!r}")
+            pos = i
+        self.assertEqual(
+            report, (EVAL / "validation_report.md").read_text(),
+            "eval/validation_report.md is out of sync with the generator — regenerate it "
+            "via render_report instead of editing the file by hand")
