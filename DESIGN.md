@@ -321,9 +321,6 @@ earned its shape.
 **Limits:**
 
 - The corpus window is 3.5 months — the system says so rather than extrapolating.
-- The numeric validator cannot see same-value collisions or zero-count-neutral
-  column shifts (compensated by original-image feedback and grounding badges).
-- The figure locator is stochastic — its score moves ±2 items from run to run.
 - No live data: answers stop at the corpus. The newest fact is dated 2025-09-29,
   so "today's price" is out of scope by design.
 - Targeted questions, not corpus-wide analytics: retrieval returns the top-ranked
