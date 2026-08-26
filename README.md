@@ -7,10 +7,34 @@ with page-level citations, deterministic grounding badges, and recency labels.
 > that didn't work) · [`eval/validation_report.md`](eval/validation_report.md)
 > (pre-registered, deterministic scoring).
 
-All six behavior dimensions pass machine scoring (final strict round): grounding 1.0,
-expected facts 1.0, abstention 4/4 (incl. a user-caught scope-substitution case),
-reproducibility 3/3, robustness 3/3, prompt-injection canary 0 leaks on both
-untrusted-input surfaces, client-watermark PII 0 leaks.
+## What it does
+
+Ask questions about a library of broker research reports (here: 30 PDFs, 423 pages, June–September 2025 coverage of NVDA and AI infrastructure) and get answers an analyst can verify:
+
+- **Plain-language questions, English or Chinese** — comparative ("compare UBS's and Barclays's price targets"), temporal ("how did Citi's target evolve"), exact numbers from dense tables, facts that exist only inside charts.
+- **Every answer cites the source page** — `[Broker, date, p.N]` links open the original PDF at that page.
+- **Numbers are verified, not trusted** — each citation carries a badge: ✓ the answer's numbers appear on the cited page, ⚠ they do not. No LLM judges another LLM anywhere.
+- **Relevant charts appear inline** — when a cited page's chart or table supports the answer, that figure is cropped from the original page and shown next to the text; text-only pages get a link, never a screenshot.
+- **Knows what it doesn't know** — brokers, tickers, or years outside the library get an explicit boundary statement instead of a guess; citations to reports superseded by a newer note from the same broker are flagged.
+- **Image and PDF input** — attach a chart screenshot to find which report and page it comes from, or a PDF to relate it to the library.
+- **A visible process** — the answer streams with its tool calls, pages read, and per-answer cost and latency.
+
+Example — the brief's own question:
+
+> **Q:** Compare the change in price target for NVDA between UBS's research and Barclays's research over the past two years.
+>
+> **A:** *Coverage note: the library covers 12 June–29 September 2025, not the full two years.* Then a table — Barclays $170 → $200 (17 Jun) → $240 (25 Sep), UBS $175 (8 Jul), each row cited `[Barclays, 2025-09-25, p.1] ✓` — and a short synthesis. Nothing is averaged across brokers.
+
+## How well it works
+
+Validated on a 124-item golden set (9 question types × 4 cross-cutting tags), scored
+deterministically: correctness 1.0 on the preregistered core and 136/136 facts on the
+expanded set; hallucination 0/15 on unanswerable questions; prompt-injection canary 0 leaks
+on both untrusted surfaces; watermark/contact-info leaks 0; multi-turn 5/5; attachment
+input 10/10; figure-crop accuracy 0.80–0.82 across two runs. Single-shot hybrid retrieval
+recall@10 is 0.814 on 94 items — below its preregistered 0.85 threshold and reported as
+such (the agent's own query rewriting recovers the misses: agentic recall 0.9). Full
+detail in [`eval/validation_report.md`](eval/validation_report.md) and DESIGN.md Appendix A.
 
 ## Deliverables map (per the case-study brief)
 
