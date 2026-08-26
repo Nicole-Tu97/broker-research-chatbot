@@ -277,7 +277,7 @@ def _post_stream(path: str, payload: dict, on_delta, timeout: int = 300,
 
     Retry semantics match _post, but retries happen only while no delta has yet
     been forwarded to the client -- retrying after forwarding would produce
-    duplicated text in the UI, so at that point we prefer an explicit failure
+    duplicated text in the UI, so at that point an explicit failure is preferred
     for this round."""
     body = json.dumps(payload).encode()
     for attempt in range(retries + 1):

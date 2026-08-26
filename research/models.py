@@ -53,7 +53,7 @@ class Page(models.Model):
     # NULL = not yet transcribed; "" = transcribed and legitimately empty
     # (disclaimer pages the prompt is told to ignore). This is the textbook
     # counterexample to "never use null on a TextField" — three states are
-    # exactly what we need.
+    # exactly what is needed.
     markdown = models.TextField(null=True, blank=True, default=None)
     has_visual = models.BooleanField(default=False)
     png_path = models.TextField(blank=True, default="")

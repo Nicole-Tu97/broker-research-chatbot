@@ -1,6 +1,6 @@
 """Minimal Django configuration.
 
-What we skip and why (see DESIGN.md §10): no auth/admin/sessions (irrelevant to
+What this project skips and why (see DESIGN.md §10): no auth/admin/sessions (irrelevant to
 the assessment), no frontend framework (templates suffice). .env is injected by
 the shell or docker compose; no dotenv dependency: locally run
 `export $(grep -v '^#' .env | xargs)`, in containers compose env_file handles it.

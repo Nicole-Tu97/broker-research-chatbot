@@ -3,7 +3,7 @@
 Django chatbot over broker research PDFs — hybrid retrieval (pgvector + Postgres FTS)
 with page-level citations, deterministic grounding badges, and recency labels.
 
-> **Start here:** [`DESIGN.md`](DESIGN.md) (design & trade-offs, and what we tried
+> **Start here:** [`DESIGN.md`](DESIGN.md) (design & trade-offs, and what I tried
 > that didn't work) · [`eval/validation_report.md`](eval/validation_report.md)
 > (pre-registered, deterministic scoring).
 

@@ -31,8 +31,8 @@ tables. Two tools. No queue, no reranker, no fact table, no framework.
 
 ## 3. Measure first: what the corpus actually is
 
-We measured all 30 PDFs page-by-page before designing (and re-measured after an
-adversarial review caught four errors in our own first-round numbers):
+I measured all 30 PDFs page-by-page before designing (and re-measured after an
+adversarial review caught four errors in my own first-round numbers):
 
 - **423 pages.** Filename page counts are systematically wrong (12→6, 18→8, 40→32) —
   metadata must be content-verified, never trusted from names.
@@ -80,7 +80,7 @@ re-renders just that region from the PDF (PyMuPDF clip — no new dependency, no
 storage) as an inline card; the page as a whole IS the visual (a chart slide) → the
 full page embeds; the page's contribution is textual → NO image at all — the citation
 link suffices (embedding cover pages of text reports is noise, not evidence). The risk
-that made us reject cropping twice — a bad box silently losing axis labels or footnotes
+that made me reject cropping twice — a bad box silently losing axis labels or footnotes
 — is contained deterministically: coordinates are validated (out of range, degenerate,
 <8% or >85% of the page are all rejected), padded by 2%; located-but-invalid boxes fall
 back to the full page, and the click-through always opens the original PDF at the cited
@@ -137,7 +137,7 @@ core behavior round was re-run after the change: all six dimensions still pass, 
 third of the previous cost ($2.43 vs $7.17) because the agent now lands on the right
 page in fewer rounds. Agentic recall on the production path: 0.9 strict on the 10
 end-to-end items, 10/10 once an equally valid newer source is credited. Two
-original predictions were falsified, and we kept the receipts: FTS dies on
+original predictions were falsified, and I kept the receipts: FTS dies on
 natural-language sentences (websearch AND-semantics) long before term precision can
 matter — its value is on model-written keyword queries. The reranker decision closed with data: every miss
 was candidate absence (recall = 0 in *all* configs), which reranking cannot fix; the
@@ -186,7 +186,7 @@ tsvector configs when non-English corpora arrive; pg_search/BM25 then Elasticsea
 for lexical scale; object storage for page assets (`png_path` is already relative).
 Unit economics: ~$0.055/page ingested, $0.05–0.9/question, both measured.
 
-## 10. What we deliberately did not build
+## 10. What I deliberately did not build
 
 No LangChain/LlamaIndex (two tools and one table don't need a framework). No
 pre-extracted facts table, no reranker (both decisions closed *with data*). No
@@ -194,8 +194,8 @@ sub-page chunking, no bbox cropping, no Celery/Redis, no Batch API at this scale
 prompt-caching engineering (system prompt is ~5% of spend), no LLM-as-judge anywhere
 (deterministic validation instead — "who validates the validator" terminates), no
 frontend framework, no auth/multi-tenancy. Each omission is argued, and several were
-*reversals of our own earlier designs* — documented throughout this document with
-their triggers and lessons, per the brief's request for what we tried and what
+*reversals of my own earlier designs* — documented throughout this document with
+their triggers and lessons, per the brief's request for what I tried and what
 didn't work.
 
 ## 11. Known limits (stated, not hidden)
