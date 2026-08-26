@@ -50,28 +50,39 @@ agent retrieved during the whole turn.
 | table_numeric | 0.708 | 0.708 | 0.833 | **0.917** |
 | temporal | 0.5 | 0.55 | 0.6 | **1.0** |
 | **Mean** | **0.773** | **0.681** | **0.814** | **0.956** |
+| *non-English questions (35 of 94)* | *0.782* | *0.624* | *0.779* | ***0.969*** |
 
-**Production verdict (post-hoc, not preregistered): agentic mean 0.956 — above the 0.85 bar.** The two weakest single-shot
-types (temporal, comparison) are exactly where the agent gains the most — those
-answers are meant to come from query rewriting and date-ordered lookups, not from
-one similarity search.
+*The italic row is not a seventh type — it is the same questions sliced by
+language (they overlap the type rows above), answering one question: does
+retrieval hold up when the question is not in English?*
 
-**Worth noticing:** on `deep_page_recovery`, single-shot hybrid (0.909) beats
+**Acceptance bars — judged on the production (agentic) column.** Two bars:
+every question type must reach 0.85, and the overall mean must reach 0.90.
+(Set after the first results were known, so marked post-hoc; from here on they
+are the bars every future run must clear. The preregistration record further
+below predates all runs and is kept unrevised.)
+
+- Every type ≥ 0.85: **FAIL** — 5 of 6 types clear it; `deep_page_recovery` at 0.818 does not (explained below)
+- Overall mean ≥ 0.90: **PASS** (0.956)
+
+**The miss, explained.** On `deep_page_recovery`, single-shot hybrid (0.909) beats
 agentic (0.818). Part of this is a scoring artifact (the agent sometimes answers
 from an equally valid *other* page, which the fixed answer key does not credit), but it
 also points to a real improvement path: do not rely on the agent blindly — keep the
 single-shot hybrid results as a floor (or route by question type) so the agent's
-choices can only add pages, never lose them.
+choices can only add pages, never lose them. Hybrid alone already scores 0.909
+on this type, so that fix would clear the failed bar.
 
-**Preregistered predictions (P1–P6).** These were fixed before the first run and
-never revised. P1 gates the single-shot proxy; P2–P5 are bets about *how the
-retriever works* — a FAIL means the forecast was wrong, not that users get worse
-answers. End-to-end quality is the section below.
+**Preregistration record (P1–P6) — fixed before the first run, never revised.**
+These graded my design-phase forecasts about the retriever's *internals* (for
+example, which leg would be stronger — the bets that led to hybrid fusion). They
+are kept for the record, not as quality gates; the acceptance bars above are the
+gates. A FAIL here means a forecast was wrong, not that answers got worse.
 
-- P1 hybrid ≥ 0.85: **FAIL** (0.814) — single-shot proxy; the production path (agent rewrites queries and retries) recovers the misses (agentic mean 0.956)
+- P1 hybrid ≥ 0.85: **FAIL** (0.814) — the single-shot bar that motivated measuring the production column (agentic mean 0.956)
 - P2 hybrid ≥ both single modes: **PASS**
-- P3 non-English items FTS-only ≤ 0.2: **FAIL** (0.624) — a design-assumption bet that the lexical leg would be useless off-English; falsified in the GOOD direction (English tickers/terms inside non-English questions still match). Non-English items score 1.0 correctness end-to-end
-- P4 table_numeric dense < fts: **FAIL** (0.708 vs 0.708) — a which-leg-is-stronger bet, falsified; the fused result on these items is 0.833
+- P3 non-English items FTS-only ≤ 0.2: **FAIL** (0.624) — falsified in the GOOD direction: English tickers/terms inside non-English questions still match (see the non-English row in the table)
+- P4 table_numeric dense < fts: **FAIL** (0.708 vs 0.708) — a which-leg-is-stronger bet; the fused result on these items is 0.833
 - P5 pure_chart hybrid ≥ 0.67: **PASS** (0.938)
 - P6 reranker: hybrid below threshold → triggers reranker evaluation
 

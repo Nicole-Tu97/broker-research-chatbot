@@ -566,6 +566,7 @@ class Command(BaseCommand):
         r = results.get("retrieval")
         if r:
             n_items = len(r["per_item"])
+            by_id = {}
             try:
                 golden = json.loads((EVAL / "golden_set.json").read_text())
                 by_id = {i["id"]: i for i in golden["items"]}
@@ -616,42 +617,66 @@ class Command(BaseCommand):
             L.append(f"| **Mean** | **{r['by_mode']['dense']}** | "
                      f"**{r['by_mode']['fts']}** | **{r['by_mode']['hybrid']}** |"
                      + (f" **{r['by_mode']['agentic']}** |" if has_ag else ""))
+            sl = [row for row in r["per_item"]
+                  if "multilingual" in by_id.get(row["id"], {}).get("tags", [])]
+            if sl:
+                sm = {}
+                for m in ("dense", "fts", "hybrid", "agentic"):
+                    vals = [row["recall"][m] for row in sl if m in row["recall"]]
+                    sm[m] = round(sum(vals) / len(vals), 3) if vals else None
+                L.append(f"| *non-English questions ({len(sl)} of {n_items})* | "
+                         f"*{sm['dense']}* | *{sm['fts']}* | *{sm['hybrid']}* |"
+                         + (f" ***{sm['agentic']}*** |" if has_ag and sm.get("agentic") is not None else ""))
             L.append("")
+            if sl:
+                L.append("*The italic row is not a seventh type — it is the same questions sliced by")
+                L.append("language (they overlap the type rows above), answering one question: does")
+                L.append("retrieval hold up when the question is not in English?*\n")
             if has_ag:
                 ag = r["by_mode"]["agentic"]
-                L.append(f"**Production verdict (post-hoc, not preregistered): agentic mean {ag} — "
-                         f"{'above' if ag >= 0.85 else 'below'} the 0.85 bar.** The two weakest single-shot")
-                L.append("types (temporal, comparison) are exactly where the agent gains the most — those")
-                L.append("answers are meant to come from query rewriting and date-ordered lookups, not from")
-                L.append("one similarity search.\n")
+                cats = {c: m["agentic"] for c, m in r["by_cat_mode"].items()
+                        if m.get("agentic") is not None}
+                below = {c: v for c, v in cats.items() if v < 0.85}
+                L.append("**Acceptance bars — judged on the production (agentic) column.** Two bars:")
+                L.append("every question type must reach 0.85, and the overall mean must reach 0.90.")
+                L.append("(Set after the first results were known, so marked post-hoc; from here on they")
+                L.append("are the bars every future run must clear. The preregistration record further")
+                L.append("below predates all runs and is kept unrevised.)\n")
+                if below:
+                    fails = ", ".join(f"`{c}` at {v}" for c, v in sorted(below.items()))
+                    L.append(f"- Every type ≥ 0.85: **FAIL** — {len(cats) - len(below)} of {len(cats)} types clear it; {fails} does not (explained below)")
+                else:
+                    L.append(f"- Every type ≥ 0.85: **PASS** — all {len(cats)} types clear it")
+                L.append(f"- Overall mean ≥ 0.90: **{'PASS' if ag >= 0.90 else 'FAIL'}** ({ag})\n")
                 dp = r["by_cat_mode"].get("deep_page_recovery", {})
                 if dp.get("agentic") is not None and dp.get("hybrid") is not None and dp["agentic"] < dp["hybrid"]:
-                    L.append(f"**Worth noticing:** on `deep_page_recovery`, single-shot hybrid ({dp['hybrid']}) beats")
+                    L.append(f"**The miss, explained.** On `deep_page_recovery`, single-shot hybrid ({dp['hybrid']}) beats")
                     L.append(f"agentic ({dp['agentic']}). Part of this is a scoring artifact (the agent sometimes answers")
                     L.append("from an equally valid *other* page, which the fixed answer key does not credit), but it")
                     L.append("also points to a real improvement path: do not rely on the agent blindly — keep the")
                     L.append("single-shot hybrid results as a floor (or route by question type) so the agent's")
-                    L.append("choices can only add pages, never lose them.\n")
-            L.append("**Preregistered predictions (P1–P6).** These were fixed before the first run and")
-            L.append("never revised. P1 gates the single-shot proxy; P2–P5 are bets about *how the")
-            L.append("retriever works* — a FAIL means the forecast was wrong, not that users get worse")
-            L.append("answers. End-to-end quality is the section below.\n")
+                    L.append(f"choices can only add pages, never lose them. Hybrid alone already scores {dp['hybrid']}")
+                    L.append("on this type, so that fix would clear the failed bar.\n")
+            L.append("**Preregistration record (P1–P6) — fixed before the first run, never revised.**")
+            L.append("These graded my design-phase forecasts about the retriever's *internals* (for")
+            L.append("example, which leg would be stronger — the bets that led to hybrid fusion). They")
+            L.append("are kept for the record, not as quality gates; the acceptance bars above are the")
+            L.append("gates. A FAIL here means a forecast was wrong, not that answers got worse.\n")
             hy = r["by_mode"]["hybrid"]
             ag = r["by_mode"].get("agentic")
-            L.append(f"- P1 hybrid ≥ 0.85: **{'PASS' if hy >= 0.85 else 'FAIL'}** ({hy}) — single-shot proxy; "
-                     f"the production path (agent rewrites queries and retries) recovers the misses"
+            L.append(f"- P1 hybrid ≥ 0.85: **{'PASS' if hy >= 0.85 else 'FAIL'}** ({hy}) — the single-shot"
+                     f" bar that motivated measuring the production column"
                      + (f" (agentic mean {ag})" if ag else ""))
             L.append(f"- P2 hybrid ≥ both single modes: **{'PASS' if hy >= max(r['by_mode']['dense'], r['by_mode']['fts']) else 'FAIL'}**")
             if r["cn_items_fts_recall"] is not None:
                 p3 = r['cn_items_fts_recall']
                 L.append(f"- P3 non-English items FTS-only ≤ 0.2: **{'PASS' if p3 <= 0.2 else 'FAIL'}** ({p3}) — "
-                         f"a design-assumption bet that the lexical leg would be useless off-English; "
-                         f"falsified in the GOOD direction (English tickers/terms inside non-English "
-                         f"questions still match). Non-English items score 1.0 correctness end-to-end")
+                         f"falsified in the GOOD direction: English tickers/terms inside non-English "
+                         f"questions still match (see the non-English row in the table)")
             tn = r["by_cat_mode"].get("table_numeric", {})
             if tn:
                 L.append(f"- P4 table_numeric dense < fts: **{'PASS' if tn['dense'] < tn['fts'] else 'FAIL'}** "
-                         f"({tn['dense']} vs {tn['fts']}) — a which-leg-is-stronger bet, falsified; "
+                         f"({tn['dense']} vs {tn['fts']}) — a which-leg-is-stronger bet; "
                          f"the fused result on these items is {tn.get('hybrid', '?')}")
             pc = r["by_cat_mode"].get("pure_chart", {})
             if pc:
