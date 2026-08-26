@@ -331,8 +331,10 @@ earned its shape.
 - It reproduces original figures; it does not draw new ones. Ask for a chart of the
   price-target trajectory and the answer is a cited table — generating new
   visualizations is out of scope.
-- No memory across conversations: each chat starts fresh; findings and preferences
-  from an earlier conversation are not carried over.
+- One conversation at a time: the page holds a single running chat, and a refresh
+  starts a new one — there is no conversation list to switch or resume, and nothing
+  carries over between conversations. (Transcripts are stored in the database; what
+  is missing is the management UI.)
 
 **Future directions — each anchored in data already collected:**
 
