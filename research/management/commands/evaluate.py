@@ -560,8 +560,7 @@ class Command(BaseCommand):
     # ---- Report ----
 
     def render_report(self, results) -> str:
-        L = ["# Validation Report (deterministic scoring against the preregistered "
-             "thresholds in DESIGN.md Appendix A)",
+        L = ["# Validation Report",
              f"\nGenerated: {results['generated_at']} · zero LLM-judge scoring throughout\n"]
         r = results.get("retrieval")
         if r:
@@ -577,12 +576,12 @@ class Command(BaseCommand):
             L.append("## Retrieval quality — golden-set (reference-based) evaluation\n")
             L.append("**What this is.** A golden-set evaluation: the correct answer pages were marked")
             L.append("*before* any testing, and the retriever is scored against that fixed answer key.\n")
-            n_pages_s = f" (about {n_pages} hand-checked answer pages in total)" if n_pages else ""
+            n_pages_s = f" (about {n_pages} in total)" if n_pages else ""
             L.append(f"**How the test runs.** {n_items} questions, each with 1–10 hand-checked answer")
-            L.append(f"pages{n_pages_s}. Each question is sent to the retriever exactly as written, once")
-            L.append(f"per configuration ({n_items} × 3 = {n_items * 3} single-shot searches, each returning its")
-            L.append(f"top 10 pages). The score per question is the share of its answer pages that show")
-            L.append(f"up in the top 10; the table averages this per question type.\n")
+            L.append(f"pages{n_pages_s}. Each question is sent to the retriever exactly as written,")
+            L.append(f"once per configuration ({n_items} × 3 = {n_items * 3} single-shot searches, each returning")
+            L.append(f"its top 10 pages). The score per question is the share of its answer pages that")
+            L.append(f"show up in the top 10; the table averages this per question type.\n")
             L.append("**The six question types.**")
             L.append("- `simple_qa` — the answer sits plainly on one page")
             L.append("- `table_numeric` — an exact number inside a dense financial table")
@@ -758,8 +757,8 @@ class Command(BaseCommand):
                 L.append(f"- **Figure-crop accuracy** — when the answer embeds a figure, the crop must overlap the")
                 L.append(f"  hand-annotated figure box with IoU ≥ 0.5 (IoU = overlap area of the two boxes ÷ their")
                 L.append(f"  combined area; 0 = no overlap, 1 = exact match, so ≥ 0.5 means at least half overlap);")
-                L.append(f"  the {n_fig} figure questions were asked in")
-                L.append(f"  {len(full_runs)} separate runs: {cp}/{ct} scoreable = {cr} ({runs_s}; a question whose")
+                L.append(f"  the {n_fig} figure questions were asked in {len(full_runs)} separate runs:")
+                L.append(f"  {cp}/{ct} scoreable = {cr} ({runs_s}; a question whose")
                 L.append(f"  annotated page is not cited is not scoreable) (threshold ≥0.80 → **{'PASS' if cr >= 0.80 else 'FAIL'}**).")
                 probe_fc = (extras.get("items:PC5,PC9,PC11") or {}).get("figure_crop")
                 if probe_fc:

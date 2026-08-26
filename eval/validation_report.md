@@ -1,4 +1,4 @@
-# Validation Report (deterministic scoring against the preregistered thresholds in DESIGN.md Appendix A)
+# Validation Report
 
 Generated: 2026-08-26 16:45 · zero LLM-judge scoring throughout
 
@@ -8,10 +8,10 @@ Generated: 2026-08-26 16:45 · zero LLM-judge scoring throughout
 *before* any testing, and the retriever is scored against that fixed answer key.
 
 **How the test runs.** 94 questions, each with 1–10 hand-checked answer
-pages (about 135 hand-checked answer pages in total). Each question is sent to the retriever exactly as written, once
-per configuration (94 × 3 = 282 single-shot searches, each returning its
-top 10 pages). The score per question is the share of its answer pages that show
-up in the top 10; the table averages this per question type.
+pages (about 135 in total). Each question is sent to the retriever exactly as written,
+once per configuration (94 × 3 = 282 single-shot searches, each returning
+its top 10 pages). The score per question is the share of its answer pages that
+show up in the top 10; the table averages this per question type.
 
 **The six question types.**
 - `simple_qa` — the answer sits plainly on one page
@@ -113,8 +113,8 @@ so every score is exactly reproducible.
 - **Figure-crop accuracy** — when the answer embeds a figure, the crop must overlap the
   hand-annotated figure box with IoU ≥ 0.5 (IoU = overlap area of the two boxes ÷ their
   combined area; 0 = no overlap, 1 = exact match, so ≥ 0.5 means at least half overlap);
-  the 17 figure questions were asked in
-  2 separate runs: 26/32 scoreable = 0.812 (run 1: 14/17; run 2: 12/15; a question whose
+  the 17 figure questions were asked in 2 separate runs:
+  26/32 scoreable = 0.812 (run 1: 14/17; run 2: 12/15; a question whose
   annotated page is not cited is not scoreable) (threshold ≥0.80 → **PASS**).
   An early 3-question spot-check scored 1/3 and triggered the locator fix;
   it measured the pre-fix locator and is archived, not pooled.
