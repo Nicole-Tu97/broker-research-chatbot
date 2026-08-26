@@ -148,7 +148,9 @@ it hold only what a table cannot (mechanics, verification, rules, security):
   350/423 pages); its blind spots (same-value collisions, zero-count-neutral shifts)
   are documented and compensated by the original-image feedback in §4.3.
 - At answer time the same idea returns as the **grounding badge**: every number in
-  every citation is checked against the cited page (✓/⚠).
+  every citation is checked against the cited page (✓/⚠). A number the model computes
+  itself (a percent change, an average) appears on no page and therefore shows ⚠ —
+  deliberate conservatism, not an error.
 - A **recency label** is added when a cited report is superseded by a newer note from
   the same broker — one deterministic SQL check per citation; the most expensive
   mistake an analyst can make, prevented for free.
@@ -326,9 +328,11 @@ earned its shape.
 - Targeted questions, not corpus-wide analytics: retrieval returns the top-ranked
   pages, so "summarize all 30 reports" or "count every mention across 423 pages"
   exceeds the tool budget.
-- Quoted numbers are verified; derived numbers cannot be. The badge proves a number
-  exists on the cited page — a figure the model computes itself (a percent change,
-  an average) exists on no page, so it shows ⚠ rather than being silently trusted.
+- It reproduces original figures; it does not draw new ones. Ask for a chart of the
+  price-target trajectory and the answer is a cited table — generating new
+  visualizations is out of scope.
+- No memory across conversations: each chat starts fresh; findings and preferences
+  from an earlier conversation are not carried over.
 
 **Future directions — each anchored in data already collected:**
 
