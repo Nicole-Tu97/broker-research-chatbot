@@ -237,7 +237,8 @@ figure crops, multi-turn, attachment input). Ingestion quality has its own bench
 (`bench/`): 20 human-verified ground-truth pages across DPI tiers, 60 runs —
 production DPI was *measured into* the design, including the counterintuitive result
 that more resolution is not monotonically safer (150 DPI hallucinated on the keynote;
-72 passes).
+72 passes; the quarterly decks' 52-DPI tier is inferred from the harder keynote
+passing at 52, not sampled directly).
 
 **All results: [`eval/validation_report.md`](eval/validation_report.md).**
 
@@ -317,17 +318,20 @@ earned its shape.
 
 ## 8. Known limits and future directions
 
-**Limits, stated rather than hidden:**
+**Limits:**
 
 - The corpus window is 3.5 months — the system says so rather than extrapolating.
 - The numeric validator cannot see same-value collisions or zero-count-neutral
   column shifts (compensated by original-image feedback and grounding badges).
 - The figure locator is stochastic — its score moves ±2 items from run to run.
-- The 52-DPI render tier for the quarterly decks is justified by inference, not by
-  direct sampling: the *harder* GTC keynote transcribes correctly at 52 DPI, so the
-  easier quarterly slides are taken as safe there too.
-- Measured behavior numbers live in
-  [`eval/validation_report.md`](eval/validation_report.md).
+- No live data: answers stop at the corpus. The newest fact is dated 2025-09-29,
+  so "today's price" is out of scope by design.
+- Targeted questions, not corpus-wide analytics: retrieval returns the top-ranked
+  pages, so "summarize all 30 reports" or "count every mention across 423 pages"
+  exceeds the tool budget.
+- Quoted numbers are verified; derived numbers cannot be. The badge proves a number
+  exists on the cited page — a figure the model computes itself (a percent change,
+  an average) exists on no page, so it shows ⚠ rather than being silently trusted.
 
 **Future directions — each anchored in data already collected:**
 
