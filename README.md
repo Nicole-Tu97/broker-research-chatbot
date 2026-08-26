@@ -12,8 +12,7 @@ with page-level citations, deterministic grounding badges, and recency labels.
 Ask questions about a library of broker research reports (here: 30 PDFs, 423 pages, June–September 2025 coverage of NVDA and AI infrastructure) and get answers an analyst can verify:
 
 - **Plain-language questions, in multiple languages** — comparative ("compare UBS's and Barclays's price targets"), temporal ("how did Citi's target evolve"), exact numbers from dense tables, facts that exist only inside charts.
-- **Every answer cites the source page** — `[Broker, date, p.N]` links open the original PDF at that page.
-- **Numbers are verified, not trusted** — a citation tells you where a number came from; the badge tells you it checks out. Every number is re-checked against the cited page's own text: ✓ it appears there, ⚠ it does not.
+- **Cited and verified** — every answer cites its source as `[Broker, date, p.N]`, the link opens the original PDF at that page, and every number is re-checked against that page's own text: a ✓ badge means it appears there, ⚠ means it does not.
 - **Relevant charts appear inline** — when a cited page's chart or table supports the answer, that figure is cropped from the original page and shown next to the text; text-only pages get a link, never a screenshot.
 - **Knows what it doesn't know** — brokers, tickers, or years outside the library get an explicit boundary statement instead of a guess; citations to reports superseded by a newer note from the same broker are flagged.
 - **Guards sensitive content, resists manipulation** — distribution watermarks and contact details from the source PDFs never surface in answers, and instructions hidden inside documents or attachments are ignored, not obeyed (both validated: 0 leaks, 0 injections — see the validation report).
