@@ -270,11 +270,11 @@ triggers (§8), and two were closed *with data*.
   are cited facts, not probabilities), public leaderboards (they do not measure this
   corpus).
 
-Several of these are reversals of my own earlier designs — those stories are in §7.
+Several of these are reversals of my own earlier designs — the details are in §7.
 
 ## 7. What I tried that didn't work — and what fixed it
 
-Every story below followed the same loop: try → measure → root-cause → fix →
+Every item below followed the same loop: try → measure → root-cause → fix →
 re-verify. The failures stay on the record deliberately — they are where the design
 earned its shape.
 
