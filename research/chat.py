@@ -249,6 +249,11 @@ def grounding_badges(answer: str, turn_pages: dict[tuple, Page]) -> list[dict]:
 
 
 FIGURE_CROP_CAP = 2      # at most 2 figure locates per answer (~$0.025 each; caps cost/latency)
+# A "whole page is the figure" decision is honored only for pixel-dominant pages (slides,
+# keynotes: text layer median 161 chars on this corpus). Report pages carry >= 712 chars
+# on their covers; embedding them whole is noise next to the answer, so the decision
+# degrades to "no image". The locator itself is stochastic on this branch.
+WHOLE_PAGE_MAX_TEXT_CHARS = 600
 _CROP_PAD = 2.0          # expand 2% outward: better to over-crop than cut off axis labels
 
 
@@ -310,11 +315,20 @@ def _figure_crops(question: str, badges: list[dict], emit) -> tuple[int, int, in
         calls += 1
         if not box or box.get("no_figure"):
             continue
+        page = Page.objects.filter(document_id=key[0], page_number=key[1]).only("raw_text").first()
+        pixel_dominant = page is not None and len(page.raw_text or "") <= WHOLE_PAGE_MAX_TEXT_CHARS
         if box.get("whole_page"):
+            if not pixel_dominant:
+                continue  # text-dominant page: a full-page card adds nothing the answer lacks
             mark = {"show_page": True}
         else:
             crop = _valid_crop(box)
-            mark = {"crop": crop} if crop else {"show_page": True}
+            if crop:
+                mark = {"crop": crop}
+            elif pixel_dominant:
+                mark = {"show_page": True}  # figure located but box invalid: whole slide is acceptable
+            else:
+                continue  # invalid box on a text page: no image rather than a cover screenshot
         for bb in badges:
             if (bb.get("document_id"), bb.get("page_number")) == key:
                 bb.update(mark)

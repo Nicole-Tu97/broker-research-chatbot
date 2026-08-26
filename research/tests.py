@@ -534,6 +534,43 @@ class ChatPureTests(TestCase):
                     else:
                         self.assertIn(expect, bs[0], ret)
 
+    def test_whole_page_decision_denied_on_text_heavy_pages(self):
+        # Deterministic guard: "whole_page" from the locator is honored only for
+        # pixel-dominant pages; a report cover with a long text layer gets no image
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from django.test import override_settings
+        from . import chat as chat_mod
+        from .models import Document, Page
+        doc = Document.objects.create(filename="wp.pdf", content_hash="w" * 64, broker="X")
+        cover = Page.objects.create(document=doc, page_number=1, png_path="c.png",
+                                    raw_text="lorem " * 200, markdown="x", has_visual=True)
+        slide = Page.objects.create(document=doc, page_number=2, png_path="c.png",
+                                    raw_text="", markdown="chart", has_visual=True)
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "c.png").write_bytes(b"x")
+            with override_settings(PAGE_ASSET_DIR=Path(td)), \
+                 patch.object(chat_mod.providers, "figure_bbox", return_value=({"whole_page": True}, {})):
+                b_cover = [{"citation": "[X, n.d., p.1]", "document_id": doc.id, "page_number": 1,
+                            "png_path": "c.png", "has_visual": True}]
+                b_slide = [{"citation": "[X, n.d., p.2]", "document_id": doc.id, "page_number": 2,
+                            "png_path": "c.png", "has_visual": True}]
+                chat_mod._figure_crops("q", b_cover, lambda e: None)
+                chat_mod._figure_crops("q", b_slide, lambda e: None)
+        self.assertNotIn("show_page", b_cover[0])   # text-heavy cover → no image
+        self.assertTrue(b_slide[0].get("show_page"))  # pixel-dominant slide → full page ok
+        # located-but-invalid box (too small) on a text-heavy cover: also no image
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "c.png").write_bytes(b"x")
+            with override_settings(PAGE_ASSET_DIR=Path(td)), \
+                 patch.object(chat_mod.providers, "figure_bbox",
+                              return_value=({"x0": 70, "y0": 20, "x1": 75, "y1": 26}, {})):
+                b_small = [{"citation": "[X, n.d., p.1]", "document_id": doc.id, "page_number": 1,
+                            "png_path": "c.png", "has_visual": True}]
+                chat_mod._figure_crops("q", b_small, lambda e: None)
+        self.assertNotIn("show_page", b_small[0]); self.assertNotIn("crop", b_small[0])
+
     def test_page_image_crop_endpoint(self):
         # ?crop= re-renders the region from the PDF; invalid coords fall back to
         # the full page (no 404, no crash)
