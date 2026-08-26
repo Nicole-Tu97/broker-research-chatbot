@@ -65,14 +65,6 @@ class Page(models.Model):
     )
     numeric_flags = models.JSONField(null=True, blank=True)  # suspect-number list (ingest-time check output)
 
-    @property
-    def png_abspath(self):
-        """png_path stores only the basename (fixtures stay portable across
-        machines); the read side joins the full path here."""
-        from django.conf import settings
-
-        return settings.PAGE_ASSET_DIR / self.png_path if self.png_path else None
-
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["document", "page_number"], name="uniq_doc_page"),

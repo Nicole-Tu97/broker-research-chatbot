@@ -41,61 +41,12 @@ OUT_TIERS = BENCH / "out_tiers"
 
 PRICE_IN, PRICE_OUT = 5.0, 30.0  # $/1M tokens, assumed Sol pricing (official rates unverified)
 
-# ---- Transcription prompt v3 (verbatim from research/providers.py, the single source of truth;
-#      kept in Chinese because that is the exact production prompt under test) ----
+# ---- Transcription prompt v3: imported from research/providers.py (single source of truth) ----
 
-SYSTEM = """你是金融文档转录引擎。你的输出会成为券商研报检索系统中该页的唯一文本表示。
-
-绝对约束：
-1. 不得输出页面上不存在的任何信息。宁可遗漏，不可编造。
-2. 转录中的每一个数字都必须能在页面上找到。你不做任何计算、推断或换算。
-3. 数字保留页面上的原始写法：千分位逗号、货币符号、百分号、尾零一律照抄，不得重新格式化。
-4. 若某字符/数字辨认不清，写 [?]，不要猜测。
-
-理由：本系统会带页码引用地向分析师呈现你的转录内容。一个错误的数字会被自信地引用，
-且无任何纠错路径；而一处遗漏可以由原始页面图兜底。"""
-
-USER_TEMPLATE = """以下是一页券商研报/演示文稿。
-
-<raw_text>
-{raw_text}
-</raw_text>
-
-<说明>
-raw_text 是从 PDF 精确抽取的原生文本层，逐字准确。
-若其为空或极短，说明该页内容以图像形式存在，此时完全依据页面图转录。
-</说明>
-
-请产出该页的 markdown 转录，遵循：
-
-【正文】
-- raw_text 非空时，正文直接采用其内容，仅整理段落与标题层级。
-- 不要从图像中重新读取已存在于 raw_text 的文字。
-
-【表格】
-- 用 markdown 表格重建，保留表头层级与行标签。
-- 单元格数值必须落在正确的行列位置。
-- 每行的单元格数必须与表头列数一致；原文的空单元格保留为空——不得填 0、不得左右移位补齐。
-- 合并单元格用重复值或空单元格表示，勿丢弃结构。
-
-【图表】
-每个图表输出一个区块：标题、图表类型、坐标轴（名称与单位）、
-数据系列（名称 + 可读出的关键数值：首尾端点、极值、有数据标签者）、趋势的一句话描述。
-读不出具体数值时，描述形状与相对关系，不要编造数字。
-
-【忽略】
-- 页眉页脚、页码、法律免责声明
-- 水印（常见形式：斜向或竖排的邮箱、机构名、时间戳）
-
-【输出格式】
-先输出一行元数据，再输出转录正文：
-
-HAS_VISUAL: true|false
-（true 表示本页含图表、图片或表格，需要在检索时向模型回传原始页面图）
-
----
-
-（转录正文）"""
+# The benchmark must exercise the exact production prompt: import it instead of
+# carrying a copy that could drift.
+sys.path.insert(0, str(ROOT))
+from research.providers import TRANSCRIBE_SYSTEM as SYSTEM, TRANSCRIBE_USER as USER_TEMPLATE  # noqa: E402
 
 
 def call_responses(model, detail, raw_text, png_bytes):

@@ -16,7 +16,6 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = ["*"]  # internal demo; no public exposure
 
 INSTALLED_APPS = [
-    "django.contrib.staticfiles",
     "research",
 ]
 
@@ -25,14 +24,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
-ASGI_APPLICATION = "config.asgi.application"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [],
         "APP_DIRS": True,
-        "OPTIONS": {"context_processors": []},
     }
 ]
 
@@ -47,10 +44,8 @@ DATABASES = {
     }
 }
 
-STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-USE_TZ = True
 TIME_ZONE = "UTC"
 
 # ---- Project-specific settings (external calls centralized in research/providers.py) ----

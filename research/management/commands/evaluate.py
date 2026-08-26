@@ -377,11 +377,6 @@ class Command(BaseCommand):
             bad = False
             if it.get("forbidden_facts_pattern"):
                 bad = bool(re.search(it["forbidden_facts_pattern"], r["answer"]))
-            for f in it.get("forbidden_facts", []):
-                # A rating word only violates if asserted as Goldman's rating —
-                # to be conservative, search for the word near "Goldman" directly
-                if re.search(rf"Goldman[^.。]*{f}|{f}[^.。]*Goldman", r["answer"], re.I):
-                    bad = True
             ab.append({"id": iid, "pass": not bad})
         out["abstention"] = {"pass": sum(1 for a in ab if a["pass"]), "total": len(ab),
                              "detail": ab}

@@ -150,7 +150,14 @@ class Command(BaseCommand):
                     f"  [meta] date mismatch: filename {doc.published_date} vs page 1 {content_date}"
                     " (keeping filename value; logged)")
 
-        doc.status = Document.Status.RENDERED
+        # Only advance a PENDING document; --render-only on a loaded fixture must not
+
+        # demote DONE documents (that hid the whole corpus behind the fixture path).
+
+        if doc.status == Document.Status.PENDING:
+
+            doc.status = Document.Status.RENDERED
+
         doc.save()
         self.stdout.write(f"[RENDER] {pdf.name}: {doc.page_count} pages")
         if opts["dry_run"] or opts["render_only"]:

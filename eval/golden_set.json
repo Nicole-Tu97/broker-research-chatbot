@@ -374,14 +374,9 @@
       "cat": "abstention",
       "question": "What is Goldman Sachs' current rating on NVIDIA?",
       "expect_abstain": true,
-      "forbidden_facts": [
-        "Buy",
-        "Neutral",
-        "Sell",
-        "Overweight"
-      ],
       "notes": "No Goldman in the corpus — must declare the gap rather than invent a rating",
-      "tags": []
+      "tags": [],
+      "forbidden_facts_pattern": "(?i)Goldman[^.。]*(?:Buy|Neutral|Sell|Overweight|Underweight|Outperform)|(?:Buy|Neutral|Sell|Overweight|Underweight|Outperform)[^.。]*Goldman"
     },
     {
       "id": "AB3",

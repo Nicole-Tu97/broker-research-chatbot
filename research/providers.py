@@ -25,7 +25,7 @@ _BASE = "https://api.openai.com/v1"
 # keep its original surface form; unclear glyphs become [?]; tables rebuilt with exact cell
 # placement; each chart described with axes and readable values; headers/footers/watermarks/
 # disclaimers ignored; first line reports HAS_VISUAL: true|false.
-# Single source of truth; verbatim identical to bench/run_bench.py.
+# Single source of truth; bench/run_bench.py imports these constants rather than copying them.
 TRANSCRIBE_SYSTEM = """你是金融文档转录引擎。你的输出会成为券商研报检索系统中该页的唯一文本表示。
 
 绝对约束：

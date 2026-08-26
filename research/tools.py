@@ -32,19 +32,22 @@ FTS_MAX_QUERY_WORDS = None
 FTS_WEIGHT = 1.0
 
 
-def _doc_filters(tickers=None, brokers=None, date_from=None, date_to=None) -> Q:
+def _doc_filters(tickers=None, brokers=None, date_from=None, date_to=None,
+                 prefix: str = "document__") -> Q:
+    """Ticker / broker / date filters. prefix="document__" targets Page queries,
+    prefix="" targets Document queries — one builder for both sides."""
     q = Q()
     if tickers:
-        q &= Q(document__tickers__overlap=[t.upper() for t in tickers])
+        q &= Q(**{f"{prefix}tickers__overlap": [t.upper() for t in tickers]})
     if brokers:
         broker_q = Q()
         for b in brokers:
-            broker_q |= Q(document__broker__icontains=b)
+            broker_q |= Q(**{f"{prefix}broker__icontains": b})
         q &= broker_q
     if date_from:
-        q &= Q(document__published_date__gte=date_from)
+        q &= Q(**{f"{prefix}published_date__gte": date_from})
     if date_to:
-        q &= Q(document__published_date__lte=date_to)
+        q &= Q(**{f"{prefix}published_date__lte": date_to})
     return q
 
 
@@ -55,13 +58,7 @@ def _undated_warning(tickers=None, brokers=None) -> str | None:
     within one retry instead of rewording endlessly against 0 results.
     Deterministic SQL, zero API calls."""
     q = Q(status=Document.Status.DONE, published_date=None)
-    if tickers:
-        q &= Q(tickers__overlap=[t.upper() for t in tickers])
-    if brokers:
-        broker_q = Q()
-        for b in brokers:
-            broker_q |= Q(broker__icontains=b)
-        q &= broker_q
+    q &= _doc_filters(tickers, brokers, prefix="")
     n = Document.objects.filter(q).count()
     if not n:
         return None
@@ -167,9 +164,7 @@ def list_reports(tickers=None, brokers=None, date_from=None, date_to=None) -> di
     """Metadata SQL: matching reports sorted by date, each with its first-page
     transcription and the pages where each ticker is mentioned."""
     docs = Document.objects.filter(status=Document.Status.DONE)
-    inner = _doc_filters(tickers, brokers, date_from, date_to)
-    # _doc_filters emits Page-side lookups; strip the document__ prefix to reuse on Document
-    docs = docs.filter(_strip_document_prefix(inner)).order_by("published_date")
+    docs = docs.filter(_doc_filters(tickers, brokers, date_from, date_to, prefix="")).order_by("published_date")
 
     reports = []
     for d in docs:
@@ -192,18 +187,6 @@ def list_reports(tickers=None, brokers=None, date_from=None, date_to=None) -> di
             out["warning"] = w
     return out
 
-
-def _strip_document_prefix(q: Q) -> Q:
-    new = Q()
-    new.connector = q.connector
-    new.negated = q.negated
-    for child in q.children:
-        if isinstance(child, Q):
-            new.children.append(_strip_document_prefix(child))
-        else:
-            key, val = child
-            new.children.append((key.replace("document__", "", 1), val))
-    return new
 
 
 # ---- Responses API tool schemas (maintained alongside the signatures above) ----
