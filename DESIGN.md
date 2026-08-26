@@ -129,10 +129,12 @@ stay blank — never fill with 0") exists because the benchmark caught exactly t
 failure.
 
 **4.3 Embedding and storage: one table, three access paths.** Each page's
-transcription is embedded once (text-embedding-3-large, 1024 dims) and stored in a
-single Postgres row next to a DB-generated tsvector and the metadata columns (broker,
-date, tickers, png_path). One store, three access paths — semantic, lexical, exact
-SQL — with zero synchronization risk between them.
+transcription is embedded once with text-embedding-3-large — picked for its
+cross-lingual space, the property §4.4 measures end-to-end — stored at 1024 of its
+native 3072 dims to keep the vector index at a third of full width. The vector sits
+in a single Postgres row next to a DB-generated tsvector and the metadata columns
+(broker, date, tickers, png_path). One store, three access paths — semantic, lexical,
+exact SQL — with zero synchronization risk between them.
 
 **4.4 Retrieval: two tools, and the loop is the router.** `search_pages` runs a
 vector leg (pgvector cosine) and a full-text leg (`ts_rank_cd`, OR semantics), top-50
@@ -194,6 +196,17 @@ fixed behavior rules:
 
 These rules are not aspirations; they are what the behavior suite scores (abstention,
 per-row citations, boundary statements).
+
+**4.8 Untrusted input is data, never instructions.** Two surfaces carry text the
+system must not obey: document content (a planted PDF could hide instructions) and
+user attachments. The defenses are structural, not hopeful: both retrieval tools are
+read-only, so no document content can trigger an action with side effects; the system
+prompt scopes instructions to the user turn; and the posture is *verified*, not
+assumed — a canary planted on each surface never leaked, and 122 client-identifying
+strings harvested from the PDFs (distribution watermarks, e-mail addresses) were
+scanned against every archived answer with zero hits. For a tool sitting on licensed,
+client-watermarked research, this is a design requirement on par with retrieval
+quality.
 
 ## 5. Evaluation: the method — all numbers live in the report
 
