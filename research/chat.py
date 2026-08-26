@@ -55,7 +55,7 @@ Answer rules (non-negotiable):
 
 
 def corpus_boundary() -> str:
-    """Corpus-boundary facts computed once at startup (the data side of behavior rule 1)."""
+    """Corpus-boundary facts, computed from the live database (the data side of behavior rule 1)."""
     docs = Document.objects.filter(status=Document.Status.DONE)
     n = docs.count()
     if not n:

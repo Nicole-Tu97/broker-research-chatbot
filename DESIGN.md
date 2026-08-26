@@ -186,13 +186,22 @@ fixed behavior rules:
    memory. If the question partly overlaps the covered window, declare the true
    coverage first, then answer the covered part in full. If it does not overlap at
    all, state the boundary and stop — never substitute another year, broker, or
-   ticker.
+   ticker (at most offer, in one sentence, to answer for what *is* covered).
 2. **Table-first** — comparative, time-series, and numeric answers open with a
    Markdown table, one row per broker/date/rating/target, each row carrying its own
    citation, followed by a short synthesis.
 3. **No cross-broker blending** — numbers from different brokers are never averaged
-   or merged into one figure.
-4. **Cite everything** — every claim carries `[Broker, date, p.N]`.
+   or merged into one figure; every number must trace to a specific broker, date,
+   and page.
+4. **Cite everything** — every claim carries `[Broker, date, p.N]`, and the numbers
+   must come from the cited page.
+5. **Follow the recovery path** — if page 1 lacks the needed value, use the
+   deep-page hints the tools provide (§4.4).
+6. **Named-document pinning** — when the question names a specific document ("the
+   keynote", a broker's report of a given date), locate that document via metadata
+   first and take numbers only from it — never substitute similar figures from
+   another source.
+7. **Answer in the user's language** (default: English).
 
 These rules are not aspirations; they are what the behavior suite scores (abstention,
 per-row citations, boundary statements).
@@ -294,7 +303,7 @@ trusting.
   version of the fix regressed elsewhere, and the behavior suite caught that too.
 - **The suite caught three quieter product defects** — giving up on tool-round
   exhaustion, vocabulary mismatch on sparse slide pages, answering from an adjacent
-  source — each fixed and re-verified.
+  source (now rule 6 in §4.7) — each fixed and re-verified.
 - **The scorer itself had blind spots at scale** — locale-specific numeric scale
   words, the multiplication sign, page numbers inside citation labels counted as
   numeric claims, and follow-up answers citing pages from memory marked unverifiable
