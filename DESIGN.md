@@ -359,7 +359,10 @@ earned its shape.
   an ingestion queue, object storage for page images, per-language full-text
   configs for non-English documents, a dedicated lexical engine, and a structured
   facts table once `list_reports` matches exceed ~50 reports (below that, full
-  first-page context wins). Production deployment re-adds the §6 cuts, auth first;
+  first-page context wins). Precomputed per-document rollups — one offline summary
+  per report, built at ingestion — turn corpus-wide questions ("summarize all 30
+  reports") back into retrieval questions. Production deployment re-adds the §6
+  cuts, auth first;
   operational detail lives in the README under "Adding more documents".
 - **Wider verification, richer answers.** Extend the badge to prose by requiring a
   short verbatim quote per qualitative claim and string-matching it against the
