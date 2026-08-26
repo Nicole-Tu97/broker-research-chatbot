@@ -121,12 +121,19 @@ the text, the price target sits in a sidebar next to both. Any sub-page cut shat
 tables, orphans charts, and breaks page-level citations. Dilution risk on dense pages
 is compensated by the full-text leg, and page images ride along as ground truth.
 
+*Why this strategy: tables and charts survive intact, every citation maps to a real
+page, and there is no chunk size to tune wrong.*
+
 **4.2 Parsing: one multimodal call per page.** Page image *and* native text layer go
 into a single transcription call; the prompt pins prose to the text layer (numbers
 must keep their original surface forms) and uses vision for structure and image-only
 content. A benchmarked prompt rule ("cell count must match header count; blank cells
 stay blank — never fill with 0") exists because the benchmark caught exactly that
 failure.
+
+*Why this strategy: one call per page is the cheapest way to capture text, tables,
+and pixel-only charts together — text stays exact, vision fills in what text cannot
+see.*
 
 **4.3 Embedding and storage: one table, three access paths.** Each page's
 transcription is embedded once with text-embedding-3-large — picked for its
@@ -135,6 +142,9 @@ native 3072 dims to keep the vector index at a third of full width. The vector s
 in a single Postgres row next to a DB-generated tsvector and the metadata columns
 (broker, date, tickers, png_path). One store, three access paths — semantic, lexical,
 exact SQL — with zero synchronization risk between them.
+
+*Why this strategy: one store means the three search paths can never drift apart,
+and one embedding per page keeps index size and cost flat as the corpus grows.*
 
 **4.4 Retrieval: two tools, and the loop is the router.** `search_pages` runs a
 vector leg (pgvector cosine) and a full-text leg (`ts_rank_cd`, OR semantics), top-50
@@ -148,6 +158,10 @@ recovery — filtered follow-up searches, page-hint navigation, including the 2/
 reports whose price target hides deeper than page 1. Cross-lingual behavior
 (measured): non-English questions work end-to-end because the model writes English
 search queries and the embedding space is cross-lingual.
+
+*Why this strategy: the two tools match the two real question shapes — "find pages
+about X" and "list exactly these reports in date order" — and the agent's loop
+supplies the flexibility a fixed pipeline lacks.*
 
 **4.5 Numbers: validated at ingestion, verified at answer time.** A normalized
 multiset diff flags transcription numbers absent from the page's own text layer
