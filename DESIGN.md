@@ -342,7 +342,14 @@ harder keynote passes at 52), not direct sampling. Measured behavior numbers liv
   weak spot is deep-page recovery (agentic 0.818 vs single-shot hybrid 0.909): keep
   the single-shot hybrid results as a floor so the agent's choices can only add
   pages, never lose them — the validation report's "one weak spot" note, turned into
-  a roadmap item.
+  a roadmap item. The general version is a **thoroughness dial**: today the agent
+  stops when it judges the evidence sufficient — a cost-driven satisficing policy
+  (`list_reports` questions are already exhaustive by SQL; the risk sits on the
+  search path). When accuracy outweighs cost, run every answer exhaustively — full
+  sweep on every retrieval leg, maximum agent rounds, union of candidates — and let
+  verification, not early stopping, decide what enters the answer. More context is
+  not automatically better (dilution), so the dial widens *candidate collection*,
+  not the prompt.
 - **A rating facts table once `list_reports` matches exceed ~50 reports** — below
   that, full first-page context wins.
 - **Per-language tsvector configs** when non-English corpora arrive — today the
