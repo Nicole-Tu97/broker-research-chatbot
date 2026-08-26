@@ -253,8 +253,8 @@ class ToolTests(TestCase):
 class EvaluateScoringTests(SimpleTestCase):
     """Pure scoring helpers of the evaluation harness — no DB, no API."""
 
-    def test_fact_in_answer_cjk_units_and_times_sign(self):
-        # Chinese-language answers use 亿/万 scale words and × — the scorer must not
+    def test_fact_in_answer_scale_words_and_times_sign(self):
+        # Answers in other locales may write 亿/万 scale words and × — the scorer must not
         # penalize a correct answer for its surface form (the 131,651 vs 131.651 lesson)
         from .management.commands.evaluate import fact_in_answer
         self.assertTrue(fact_in_answer("17,500", "增量中国收入 **175亿美元**"))   # millions key

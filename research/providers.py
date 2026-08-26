@@ -19,7 +19,8 @@ from django.conf import settings
 
 _BASE = "https://api.openai.com/v1"
 
-# Transcription prompt (v3, benchmark-locked, in Chinese). It was benchmarked and used to
+# Transcription prompt (v3, benchmark-locked, kept verbatim in its original language).
+# It was benchmarked and used to
 # build the shipped index; translating it would invalidate the benchmark. Rules it enforces:
 # never output information absent from the page; every number must exist on the page and
 # keep its original surface form; unclear glyphs become [?]; tables rebuilt with exact cell

@@ -16,7 +16,7 @@ Generated: 2026-08-25 21:30 · zero LLM-judge scoring throughout
 
 - P1 hybrid ≥ 0.85: **FAIL** (0.814)
 - P2 hybrid ≥ both single modes: **PASS**
-- P3 Chinese items FTS-only ≤ 0.2: **FAIL** (0.624)
+- P3 non-English items FTS-only ≤ 0.2: **FAIL** (0.624)
 - P4 table_numeric dense < fts: **FAIL** (0.708 vs 0.708)
 - P5 pure_chart hybrid ≥ 0.67: **PASS** (0.938)
 - P6 reranker: hybrid below threshold → triggers reranker evaluation

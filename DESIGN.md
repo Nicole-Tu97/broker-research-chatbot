@@ -105,7 +105,7 @@ each, fused with RRF (k=10), per-leg ranks logged into a visible retrieval trace
 planner layer — the function-calling loop is the planner, and it is demonstrably
 capable of multi-step recovery (filtered follow-up searches, page-hint navigation).
 
-Cross-lingual behavior (measured): questions in Chinese work end-to-end because the
+Cross-lingual behavior (measured): non-English questions work end-to-end because the
 model writes English search queries and the embedding space is cross-lingual; the
 English-config FTS leg contributes only on English keyword queries — by design.
 
@@ -207,7 +207,7 @@ is 124 items (9 answer-location types × 4 cross-cutting tags); end-to-end behav
 scoring has run on all of them (14 preregistered core, 17 figure-crop, 94 new —
 correctness 136/136, unsupported numbers 2/163 citations, hallucination 0/11, multi-turn 5/5,
 attachment input 10/10, figure-crop accuracy 0.80–0.82 across two runs — the locator is stochastic, ±2 items run to run). Three scorer blind spots surfaced
-only at this scale and were fixed with tests: Chinese scale words (亿/万) and the
+only at this scale and were fixed with tests: locale-specific numeric scale words and the
 multiplication sign in answers; page numbers inside citation labels counted as numeric
 claims; and citations to pages retrieved in an earlier turn (or named from an attached
 image) being marked unverifiable — the last one was also a product defect (follow-up
@@ -226,7 +226,7 @@ never used to revise a prediction. Two predictions were falsified — kept as-is
 |---|---|---|
 | P1 | Hybrid mean recall@10 ≥ 0.85 | **FAIL** (0.804) — every miss was candidate absence, recoverable by the agentic layer (verified per item) |
 | P2 | hybrid ≥ each single leg | PASS |
-| P3 | FTS-only ≈ 0 on Chinese questions (≤ 0.2) | PASS (0.167) |
+| P3 | FTS-only ≈ 0 on non-English questions (≤ 0.2) | PASS (0.167) |
 | P4 | dense < fts on exact-number table questions | **FALSIFIED** (0.75 vs 0.0) — websearch AND-semantics kills FTS on full sentences before term precision can matter |
 | P5 | pure-chart hybrid ≥ 2 of 3 | PASS (0.667) |
 | P6 | reranker built only if hybrid misses threshold | Evaluated → **not built**: misses were recall-zero cases, which reranking cannot fix |
@@ -245,7 +245,7 @@ writes its own queries; the original n=17 retrieval set had limited statistical 
 re-registered):** under the original AND-semantics FTS leg — P1 FAIL (0.761), **P2
 falsified** (dense 0.773 > hybrid 0.761), P3 PASS (0.195), P4 falsified (0.708 vs
 0.125), P5 PASS (0.812). After switching the lexical leg to OR semantics — P1 FAIL
-(0.814), P2 PASS, **P3 falsified** (0.624: Chinese questions still contain English
+(0.814), P2 PASS, **P3 falsified** (0.624: non-English questions still contain English
 tokens such as NVDA/UBS that OR matching finds), P4 dense = fts (0.708), P5 PASS
 (0.938). The original outcomes above are kept as the preregistered record; this
 paragraph is the honest update.

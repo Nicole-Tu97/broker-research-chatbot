@@ -11,7 +11,7 @@ with page-level citations, deterministic grounding badges, and recency labels.
 
 Ask questions about a library of broker research reports (here: 30 PDFs, 423 pages, June–September 2025 coverage of NVDA and AI infrastructure) and get answers an analyst can verify:
 
-- **Plain-language questions, English or Chinese** — comparative ("compare UBS's and Barclays's price targets"), temporal ("how did Citi's target evolve"), exact numbers from dense tables, facts that exist only inside charts.
+- **Plain-language questions, in multiple languages** — comparative ("compare UBS's and Barclays's price targets"), temporal ("how did Citi's target evolve"), exact numbers from dense tables, facts that exist only inside charts.
 - **Every answer cites the source page** — `[Broker, date, p.N]` links open the original PDF at that page.
 - **Numbers are verified, not trusted** — each citation carries a badge: ✓ the answer's numbers appear on the cited page, ⚠ they do not. No LLM judges another LLM anywhere.
 - **Relevant charts appear inline** — when a cited page's chart or table supports the answer, that figure is cropped from the original page and shown next to the text; text-only pages get a link, never a screenshot.
@@ -114,3 +114,7 @@ LC_ALL=en_US.UTF-8 /opt/homebrew/opt/postgresql@17/bin/pg_ctl -D /opt/homebrew/v
 createdb research && psql research -c "CREATE EXTENSION vector"
 make venv migrate test
 ```
+
+## License
+
+MIT — see [LICENSE](LICENSE).

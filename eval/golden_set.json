@@ -1,5 +1,5 @@
 {
-  "description": "Retrieval and behavior evaluation golden set — 9 answer-location/capability types × 4 cross-cutting tags (zh, cross_ticker, rephrase, crop). expected_pages = [filename fragment, page]; expected_facts = canonical numbers/keywords the answer must contain ('a|b' = accepted aliases); abstention items carry a forbidden_facts_pattern that a hallucinated answer would match.",
+  "description": "Retrieval and behavior evaluation golden set — 9 answer-location/capability types × 4 cross-cutting tags (multilingual, cross_ticker, rephrase, crop). expected_pages = [filename fragment, page]; expected_facts = canonical numbers/keywords the answer must contain ('a|b' = accepted aliases); abstention items carry a forbidden_facts_pattern that a hallucinated answer would match.",
   "items": [
     {
       "id": "CT1",
@@ -72,9 +72,9 @@
         "240",
         "175"
       ],
-      "notes": "Chinese question; the FTS english config fails on the raw sentence, exercising the cross-lingual path",
+      "notes": "Non-English question; the FTS english config fails on the raw sentence, exercising the cross-lingual path",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -118,7 +118,7 @@
         "2 Trillion|2万亿|2 万亿"
       ],
       "tags": [
-        "zh",
+        "multilingual",
         "crop"
       ],
       "expected_figure": {
@@ -177,7 +177,7 @@
         "6.93"
       ],
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -210,7 +210,7 @@
         "Outperform"
       ],
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -239,10 +239,10 @@
       ],
       "must_declare_boundary": true,
       "base_id": "CT1",
-      "notes": "Chinese rephrasing of CT1 — used for the robustness dimension",
+      "notes": "Non-English rephrasing of CT1 — used for the robustness dimension",
       "tags": [
         "rephrase",
-        "zh"
+        "multilingual"
       ],
       "rephrase_of": "CT1"
     },
@@ -286,7 +286,7 @@
       "notes": "Colloquial rephrasing",
       "tags": [
         "rephrase",
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -305,7 +305,7 @@
       "notes": "Multi-industry report that says NVIDIA throughout, never NVDA — key test of alias-dictionary recall",
       "tags": [
         "cross_ticker",
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -355,7 +355,7 @@
         "Price objective"
       ],
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -366,7 +366,7 @@
       "forbidden_facts_pattern": "\\$\\s?\\d{2,3}(?!\\d)",
       "notes": "Corpus window starts 2025-06; must not fabricate a 2023 PT",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -386,7 +386,7 @@
       "forbidden_facts_pattern": "\\$\\s?\\d{2,3}(?!\\d)",
       "notes": "AAPL is only mentioned as a peer; the corpus has no price target for it",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -411,10 +411,10 @@
       "expected_facts": [
         "100T|100 trillion|100万亿"
       ],
-      "notes": "Chinese colloquial rephrasing of PC1 (base_id: PC1). Answer lives only in the visual layer of GTC-Paris keynote p16 ($100T AI factories slide, zero text layer); tests cross-lingual robustness on a pure-chart fact.",
+      "notes": "Non-English colloquial rephrasing of PC1 (base_id: PC1). Answer lives only in the visual layer of GTC-Paris keynote p16 ($100T AI factories slide, zero text layer); tests cross-lingual robustness on a pure-chart fact.",
       "tags": [
         "rephrase",
-        "zh",
+        "multilingual",
         "crop"
       ],
       "rephrase_of": "PC1",
@@ -461,7 +461,7 @@
         "192",
         "Outperform"
       ],
-      "notes": "English colloquial rephrasing of the Chinese base item TN2's sibling TN4 (base_id: TN4); flips language direction (ZH base -> EN rephrase). Answer on p1 of the 20250803 Mizuho report: $192 PT, Outperform.",
+      "notes": "English colloquial rephrasing of the Non-English base item TN2's sibling TN4 (base_id: TN4); flips language direction (ZH base -> EN rephrase). Answer on p1 of the 20250803 Mizuho report: $192 PT, Outperform.",
       "tags": [
         "rephrase"
       ],
@@ -480,10 +480,10 @@
       "expected_facts": [
         "25,707|257.07|25.707"
       ],
-      "notes": "Chinese rephrasing of XT2 (base_id: XT2). Answer is the 1H25 US data center construction starts total ($25,707mn) on p4 of the BofA Industrials multi-industry report; also stresses the alias/cross-ticker recall path in Chinese.",
+      "notes": "Non-English rephrasing of XT2 (base_id: XT2). Answer is the 1H25 US data center construction starts total ($25,707mn) on p4 of the BofA Industrials multi-industry report; also stresses the alias/cross-ticker recall path in Non-English.",
       "tags": [
         "rephrase",
-        "zh",
+        "multilingual",
         "cross_ticker"
       ],
       "rephrase_of": "XT2"
@@ -659,9 +659,9 @@
         "220",
         "170"
       ],
-      "notes": "Chinese question; p1 of BNP 2025-08-01 states 'TP of $220 (from $170 prior)' plus header 'TARGET PRICE USD220'. Single-page PT revision fact.",
+      "notes": "Non-English question; p1 of BNP 2025-08-01 states 'TP of $220 (from $170 prior)' plus header 'TARGET PRICE USD220'. Single-page PT revision fact.",
       "tags": [
-        "zh",
+        "multilingual",
         "crop"
       ],
       "expected_figure": {
@@ -681,9 +681,9 @@
       "expected_facts": [
         "4.5"
       ],
-      "notes": "Chinese question; p1 of Bernstein 2025-07-15 'Fine China?' states the '($4.5B) inventory reserve' NVDA took. Plain named number on one page.",
+      "notes": "Non-English question; p1 of Bernstein 2025-07-15 'Fine China?' states the '($4.5B) inventory reserve' NVDA took. Plain named number on one page.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -700,9 +700,9 @@
         "10",
         "100bn|100 billion|1000亿|1,000亿|1,000 亿|1000 亿"
       ],
-      "notes": "Chinese question; p1 of BNP 2025-09-23 flash lists 'at least 10 gigawatts (GW)' and 'NVIDIA will invest up to $100bn'. Both terms sit in the same bullet list on one page.",
+      "notes": "Non-English question; p1 of BNP 2025-09-23 flash lists 'at least 10 gigawatts (GW)' and 'NVIDIA will invest up to $100bn'. Both terms sit in the same bullet list on one page.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -776,10 +776,10 @@
         "23",
         "0.8"
       ],
-      "notes": "Answer on p1 of Bernstein 2025-09-19: Intel rose 23% during the session while AMD fell ~0.8% (NVDA +3.5%). Chinese cross-lingual phrasing targeting INTC/AMD price reactions, not NVDA.",
+      "notes": "Answer on p1 of Bernstein 2025-09-19: Intel rose 23% during the session while AMD fell ~0.8% (NVDA +3.5%). Non-English cross-lingual phrasing targeting INTC/AMD price reactions, not NVDA.",
       "tags": [
         "cross_ticker",
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -796,7 +796,7 @@
         "105",
         "510|500"
       ],
-      "notes": "Answer in Exhibit 2 on p3 of Morgan Stanley's 2025-09-29 GOOG video note: GOOGL 2026 capex $105bn, stacked total $510bn ($500bn+ in the exhibit title). GOOG-targeted item on a table page transcribed partly in Chinese.",
+      "notes": "Answer in Exhibit 2 on p3 of Morgan Stanley's 2025-09-29 GOOG video note: GOOGL 2026 capex $105bn, stacked total $510bn ($500bn+ in the exhibit title). GOOG-targeted item on a table page transcribed partly in Non-English.",
       "tags": [
         "cross_ticker"
       ]
@@ -815,10 +815,10 @@
         "discounted cash flow|DCF|贴现现金流|折现现金流",
         "14"
       ],
-      "notes": "Answer on p4 (Valuation Methodology and Risks) of the 2025-09-29 Morgan Stanley GOOG note: DCF/discount to long-term EBITDA multiple, implies ~14X 2025e adjusted EBITDA. Chinese question targeting GOOGL valuation, a page NVDA never appears on.",
+      "notes": "Answer on p4 (Valuation Methodology and Risks) of the 2025-09-29 Morgan Stanley GOOG note: DCF/discount to long-term EBITDA multiple, implies ~14X 2025e adjusted EBITDA. Non-English question targeting GOOGL valuation, a page NVDA never appears on.",
       "tags": [
         "cross_ticker",
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -835,10 +835,10 @@
         "15",
         "25"
       ],
-      "notes": "Answer on p3 of Mizuho's 2025-08-03 hyperscaler note: reports of AMD potentially raising MI350 prices from $15k to $25k. Chinese question targeting AMD product pricing buried inside an NVDA-flagged report.",
+      "notes": "Answer on p3 of Mizuho's 2025-08-03 hyperscaler note: reports of AMD potentially raising MI350 prices from $15k to $25k. Non-English question targeting AMD product pricing buried inside an NVDA-flagged report.",
       "tags": [
         "cross_ticker",
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -920,9 +920,9 @@
         "220",
         "240"
       ],
-      "notes": "Chinese evolution question on one broker: BNP p1 headers show TARGET PRICE USD220 (8/01) then USD240 (9/23). Exercises cross-lingual retrieval plus temporal ordering.",
+      "notes": "Non-English evolution question on one broker: BNP p1 headers show TARGET PRICE USD220 (8/01) then USD240 (9/23). Exercises cross-lingual retrieval plus temporal ordering.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -960,9 +960,9 @@
         "39.1|39,112|39.112",
         "41.1|41,096|41.096"
       ],
-      "notes": "Non-PT temporal on the company itself: Data Center revenue $39.1B (F1Q26 deck p5, up 73% Y/Y) grew to $41.1B (F2Q26 deck p5, up 56% Y/Y). Chinese phrasing; the two quarterly decks have no published_date, so retrieval must key off fiscal-quarter labels.",
+      "notes": "Non-PT temporal on the company itself: Data Center revenue $39.1B (F1Q26 deck p5, up 73% Y/Y) grew to $41.1B (F2Q26 deck p5, up 56% Y/Y). Non-English phrasing; the two quarterly decks have no published_date, so retrieval must key off fiscal-quarter labels.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1029,9 +1029,9 @@
       "expected_facts": [
         "235"
       ],
-      "notes": "Latest item, Chinese: BofA NVDA PO was $220 on 8/11 (p2) and 8/25 (p9) but the most recent BofA doc (2025-09-22, latest of five BofA docs by published_date) shows 'PO: 235.00 USD' on p1. Answering 220 means the recency ranking failed.",
+      "notes": "Latest item, Non-English: BofA NVDA PO was $220 on 8/11 (p2) and 8/25 (p9) but the most recent BofA doc (2025-09-22, latest of five BofA docs by published_date) shows 'PO: 235.00 USD' on p1. Answering 220 means the recency ranking failed.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1148,9 +1148,9 @@
         "Inflight Batching",
         "Optimized KV Cache"
       ],
-      "notes": "Crop-discrimination item (Chinese): keynote page 44 holds TWO flow diagrams (Training vs Inference); question targets the Inference diagram (LoRA / Inflight Batching / Optimized KV Cache). Zero-text-layer page — answer exists only in pixels.",
+      "notes": "Crop-discrimination item (Non-English): keynote page 44 holds TWO flow diagrams (Training vs Inference); question targets the Inference diagram (LoRA / Inflight Batching / Optimized KV Cache). Zero-text-layer page — answer exists only in pixels.",
       "tags": [
-        "zh",
+        "multilingual",
         "crop"
       ],
       "expected_figure": {
@@ -1223,9 +1223,9 @@
         "25.0|25",
         "4.3"
       ],
-      "notes": "Chinese item on BofA Industrials Exhibit 1 schematic: per-item $/MW labels (Servers $25.0mn/MW, Networking $4.3mn/MW) exist only in the figure; only the $39mn/MW headline survives in the text layer.",
+      "notes": "Non-English item on BofA Industrials Exhibit 1 schematic: per-item $/MW labels (Servers $25.0mn/MW, Networking $4.3mn/MW) exist only in the figure; only the $39mn/MW headline survives in the text layer.",
       "tags": [
-        "zh",
+        "multilingual",
         "crop"
       ],
       "expected_figure": {
@@ -1251,9 +1251,9 @@
       "expected_facts": [
         "15X|15x"
       ],
-      "notes": "Chinese item: the '15X TPS/GPU VS. H200' callout exists only inside the throughput-vs-interactivity line chart on NDR deck page 13; the text layer holds slide titles only.",
+      "notes": "Non-English item: the '15X TPS/GPU VS. H200' callout exists only inside the throughput-vs-interactivity line chart on NDR deck page 13; the text layer holds slide titles only.",
       "tags": [
-        "zh",
+        "multilingual",
         "crop"
       ],
       "expected_figure": {
@@ -1301,9 +1301,9 @@
       "expected_facts": [
         "LightOn"
       ],
-      "notes": "Chinese item: the Perplexity interface mock on page 35 lists regional Nemotron providers (LightOn = French Nemotron); text layer carries only the slide title, so the mapping exists solely in the slide figure.",
+      "notes": "Non-English item: the Perplexity interface mock on page 35 lists regional Nemotron providers (LightOn = French Nemotron); text layer carries only the slide title, so the mapping exists solely in the slide figure.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1434,9 +1434,9 @@
         "Buy|买入",
         "Outperform|跑赢|优于大市"
       ],
-      "notes": "Whole-KB enumeration #2 (Chinese). Ratings verified per page: Overweight — MS 0612 p1, Barclays 0925 p2 ('Why OVERWEIGHT?'), Wells Fargo 0909 p1, JPM 0904 p1; Buy — UBS 0708 p1, BofA 0922 p1 ('Reiterate Rating: BUY'), Citi 0909 p1; Outperform — Bernstein 0919 p2, Mizuho 0803 p1 table, BNP 0923 p1. Values repeat across brokers, so facts are the three distinct rating labels.",
+      "notes": "Whole-KB enumeration #2 (Non-English). Ratings verified per page: Overweight — MS 0612 p1, Barclays 0925 p2 ('Why OVERWEIGHT?'), Wells Fargo 0909 p1, JPM 0904 p1; Buy — UBS 0708 p1, BofA 0922 p1 ('Reiterate Rating: BUY'), Citi 0909 p1; Outperform — Bernstein 0919 p2, Mizuho 0803 p1 table, BNP 0923 p1. Values repeat across brokers, so facts are the three distinct rating labels.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1540,9 +1540,9 @@
         "10 GW|10GW|10 gigawatts|10吉瓦",
         "3x-5x|3x–5x|3-5x|3到5倍|3—5倍|3–5倍|3-5倍"
       ],
-      "notes": "Chinese cross-broker event comparison: both pages state the up-to-$100bn OpenAI investment and at-least-10 GW LOI; BofA (0922 p1) frames it as 3x-5x ROI ($300-500bn revenue) with financing-optics caveats, BNP (0923 p1) calls it supportive of mid/long-term demand.",
+      "notes": "Non-English cross-broker event comparison: both pages state the up-to-$100bn OpenAI investment and at-least-10 GW LOI; BofA (0922 p1) frames it as 3x-5x ROI ($300-500bn revenue) with financing-optics caveats, BNP (0923 p1) calls it supportive of mid/long-term demand.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1587,9 +1587,9 @@
         "300",
         "140"
       ],
-      "notes": "Chinese scenario-range comparison across two brokers: Morgan Stanley bull $215 / bear $100 around a $170 base (0612 p4 chart transcription); Barclays upside $300 / downside $140 around the $240 target (0925 p2 chart transcription).",
+      "notes": "Non-English scenario-range comparison across two brokers: Morgan Stanley bull $215 / bear $100 around a $170 base (0612 p4 chart transcription); Barclays upside $300 / downside $140 around the $240 target (0925 p2 chart transcription).",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1643,9 +1643,9 @@
       "expected_facts": [
         "290,276|290.276"
       ],
-      "notes": "Chinese item. Income statement table on p2 of Barclays 2025-09-25 revision note: 2027E revenue 290,276 $mn. Different metric from existing TN2 (EPS 6.93, p1).",
+      "notes": "Non-English item. Income statement table on p2 of Barclays 2025-09-25 revision note: 2027E revenue 290,276 $mn. Different metric from existing TN2 (EPS 6.93, p1).",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1677,9 +1677,9 @@
       "expected_facts": [
         "15,365|15.365"
       ],
-      "notes": "Chinese item. Table 7 NVIDIA Cash Flow Statement on p8 of JPM 2025-08-28: Cash Flow from operations for Jul'25 2Q26 is $15,365mn. Deep-in-table quarterly cash-flow row.",
+      "notes": "Non-English item. Table 7 NVIDIA Cash Flow Statement on p8 of JPM 2025-08-28: Cash Flow from operations for Jul'25 2Q26 is $15,365mn. Deep-in-table quarterly cash-flow row.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1727,9 +1727,9 @@
       "expected_facts": [
         "269,034|269.034"
       ],
-      "notes": "Chinese item. Figure 6 change-to-estimates table on p7 of BNP 2025-08-01: New FY28 Datacenter 269,034 (raised 7% from 251,134). Requires reading the New vs Old columns correctly.",
+      "notes": "Non-English item. Figure 6 change-to-estimates table on p7 of BNP 2025-08-01: New FY28 Datacenter 269,034 (raised 7% from 251,134). Requires reading the New vs Old columns correctly.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1794,9 +1794,9 @@
         "17,500|17.5",
         "0.45"
       ],
-      "notes": "Chinese item. Exhibit 2 on p3 of Bernstein 2025-07-15 'Fine China': Incremental China Revenue $17,500M and EPS Impact $0.45. Two cells from the same scenario table.",
+      "notes": "Non-English item. Exhibit 2 on p3 of Bernstein 2025-07-15 'Fine China': Incremental China Revenue $17,500M and EPS Impact $0.45. Two cells from the same scenario table.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1845,9 +1845,9 @@
       "expected_facts": [
         "2.50|2.5"
       ],
-      "notes": "Chinese item. Exhibit 12 on p8 of BofA 2025-09-15 Industrials report: Rent/MW year 1 = 2.50 $mn in a 20-year project economics table. Also exercises cross-ticker recall (industrials doc).",
+      "notes": "Non-English item. Exhibit 12 on p8 of BofA 2025-09-15 Industrials report: Rent/MW year 1 = 2.50 $mn in a 20-year project economics table. Also exercises cross-ticker recall (industrials doc).",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1879,9 +1879,9 @@
       "expected_facts": [
         "264,648|264.648"
       ],
-      "notes": "Chinese item. KEY EARNINGS INPUTS table on the Risk Reward page (p5) of Morgan Stanley 2025-06-12 GTC Paris note: GAAP Revenue 2027e = 264,648 $mm.",
+      "notes": "Non-English item. KEY EARNINGS INPUTS table on the Risk Reward page (p5) of Morgan Stanley 2025-06-12 GTC Paris note: GAAP Revenue 2027e = 264,648 $mm.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1899,9 +1899,9 @@
       "question": "汇丰（HSBC）目前给英伟达的评级和目标价分别是什么？",
       "expect_abstain": true,
       "forbidden_facts_pattern": "(HSBC|汇丰)[^。.\\n]{0,100}(买入|增持|持有|减持|卖出|\\$\\s?\\d{2,3}(?!\\d)|\\d{2,3}\\s?美元)",
-      "notes": "Absent broker, Chinese phrasing: 'HSBC' has zero corpus occurrences. Pattern fails a Chinese rating word or price figure attributed to HSBC in the same sentence.",
+      "notes": "Absent broker, Non-English phrasing: 'HSBC' has zero corpus occurrences. Pattern fails a Non-English rating word or price figure attributed to HSBC in the same sentence.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1937,9 +1937,9 @@
       "question": "英伟达 2025 年 11 月发布 FY26 第三季度财报之后，巴克莱把目标价上调到了多少？",
       "expect_abstain": true,
       "forbidden_facts_pattern": "(巴克莱|Barclays)[^。.\\n]{0,100}(\\$\\s?\\d{2,3}(?!\\d)|\\d{2,3}\\s?美元)",
-      "notes": "Out-of-window future, Chinese: corpus ends 2025-09-29 and the latest Barclays note is 2025-09-25, so no post-November-earnings update exists. Pattern anchors the number to $ or 美元 so date strings like 2025年9月 in an honest boundary declaration do not trip it; quoting the Sept $240 as the answer (scope substitution) does.",
+      "notes": "Out-of-window future, Non-English: corpus ends 2025-09-29 and the latest Barclays note is 2025-09-25, so no post-November-earnings update exists. Pattern anchors the number to $ or 美元 so date strings like 2025年9月 in an honest boundary declaration do not trip it; quoting the Sept $240 as the answer (scope substitution) does.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1957,9 +1957,9 @@
       "question": "研报里对 Palantir（PLTR）的最新评级和目标价是什么？",
       "expect_abstain": true,
       "forbidden_facts_pattern": "(PLTR|Palantir)[^。.\\n]{0,100}(\\$\\s?\\d{1,3}(?!\\d)|\\d{1,3}\\s?美元|买入|增持|\\b(Buy|Outperform|Overweight)\\b)",
-      "notes": "Zero-coverage ticker, Chinese: 'PLTR' and 'Palantir' have zero corpus occurrences despite being an obvious AI-adjacent name. Pattern fails a price or rating attributed to Palantir in the same sentence.",
+      "notes": "Zero-coverage ticker, Non-English: 'PLTR' and 'Palantir' have zero corpus occurrences despite being an obvious AI-adjacent name. Pattern fails a price or rating attributed to Palantir in the same sentence.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -1986,9 +1986,9 @@
       "question": "根据这些研报，英伟达高管最近一次内部减持（insider selling）的金额是多少？",
       "expect_abstain": true,
       "forbidden_facts_pattern": "(减持|insider|抛售)[^。.\\n]{0,100}\\d[\\d,\\.]*\\s?(万|亿|百万|美元|million|billion)",
-      "notes": "Metric no report gives, Chinese: no corpus page mentions insider selling in any phrasing ('insider', '10b5', 'sold shares', 'share/stock sale' all zero occurrences). Pattern fails a monetary amount with a currency/scale unit near the insider-selling terms; digit-free abstention text passes.",
+      "notes": "Metric no report gives, Non-English: no corpus page mentions insider selling in any phrasing ('insider', '10b5', 'sold shares', 'share/stock sale' all zero occurrences). Pattern fails a monetary amount with a currency/scale unit near the insider-selling terms; digit-free abstention text passes.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -2057,9 +2057,9 @@
         "225",
         "Outperform"
       ],
-      "notes": "Bernstein's NVDA PT ($225, Outperform) appears only in the ticker table / investment implications on p3; p1-p2 discuss the Intel deal with no PT (verified '225' absent from both). Chinese for the cross-lingual dimension.",
+      "notes": "Bernstein's NVDA PT ($225, Outperform) appears only in the ticker table / investment implications on p3; p1-p2 discuss the Intel deal with no PT (verified '225' absent from both). Non-English for the cross-lingual dimension.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -2095,9 +2095,9 @@
         "25,000|25000",
         "40,000|40000|25,000-40,000"
       ],
-      "notes": "The ~$50M per-chip startup cost and $25,000-40,000/chip GPU cost range are on p3 only; p1's industry-commentary summary omits all of them (verified). Chinese question.",
+      "notes": "The ~$50M per-chip startup cost and $25,000-40,000/chip GPU cost range are on p3 only; p1's industry-commentary summary omits all of them (verified). Non-English question.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -2131,9 +2131,9 @@
         "76",
         "1.5"
       ],
-      "notes": "76GW of announced AI datacenter capacity and $1.5Tr implied compute SAM sit in the p5 project table; p1 is an 84-character summary slide (TP $240 + three bullets) with neither figure. Chinese question.",
+      "notes": "76GW of announced AI datacenter capacity and $1.5Tr implied compute SAM sit in the p5 project table; p1 is an 84-character summary slide (TP $240 + three bullets) with neither figure. Non-English question.",
       "tags": [
-        "zh"
+        "multilingual"
       ]
     },
     {
@@ -2191,9 +2191,9 @@
         "170"
       ],
       "tags": [
-        "zh"
+        "multilingual"
       ],
-      "notes": "Chinese pair; turn 2 has no entity at all — pure context carry (BNP 08-01 p1: 220 from 170)."
+      "notes": "Non-English pair; turn 2 has no entity at all — pure context carry (BNP 08-01 p1: 220 from 170)."
     },
     {
       "id": "MT4",
@@ -2307,9 +2307,9 @@
       ],
       "expected_facts": [],
       "tags": [
-        "zh"
+        "multilingual"
       ],
-      "notes": "Chinese reverse lookup of Barclays Powering AI p5 (FIGURE 2 hyperscaler capex)."
+      "notes": "Non-English reverse lookup of Barclays Powering AI p5 (FIGURE 2 hyperscaler capex)."
     },
     {
       "id": "MI4",
@@ -2384,7 +2384,7 @@
       ],
       "expected_facts": [],
       "tags": [
-        "zh"
+        "multilingual"
       ],
       "notes": "UBS Taiwan export page with two similar charts."
     },
@@ -2440,9 +2440,9 @@
         "100T|100 trillion|100万亿"
       ],
       "tags": [
-        "zh"
+        "multilingual"
       ],
-      "notes": "Chinese; $100T read from image + grounded to keynote p16."
+      "notes": "Non-English; $100T read from image + grounded to keynote p16."
     },
     {
       "id": "MI9",

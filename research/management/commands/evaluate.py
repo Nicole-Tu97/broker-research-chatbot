@@ -52,18 +52,18 @@ BEHAVIOR_ITEMS = ["CT1", "CT2", "RQ1", "RQ2", "RQ3", "TN1", "TN4",
                   "PC1", "NF1", "XT1", "AB1", "AB2", "AB3", "AB4"]
 
 
-_CJK_UNIT_RE = re.compile(r"(\d[\d,]*(?:\.\d+)?)\s*(万亿|亿|万)")
-_CJK_SCALE = {"万": 1e4, "亿": 1e8, "万亿": 1e12}
+_SCALE_WORD_RE = re.compile(r"(\d[\d,]*(?:\.\d+)?)\s*(万亿|亿|万)")
+_SCALE_WORDS = {"万": 1e4, "亿": 1e8, "万亿": 1e12}
 
 
-def _cjk_unit_numbers(answer: str) -> set[str]:
-    """Numbers written with Chinese scale words, expanded to the surface forms an English
+def _scale_word_numbers(answer: str) -> set[str]:
+    """Numbers written with locale-specific scale words, expanded to the surface forms an English
     answer key uses: '175亿' → 17,500 (millions), 17.5 (billions), 175 (raw). Answer keys
     quote table values in millions or headline values in billions, so both are offered."""
     out: set[str] = set()
-    for num, unit in _CJK_UNIT_RE.findall(answer):
+    for num, unit in _SCALE_WORD_RE.findall(answer):
         try:
-            val = float(num.replace(",", "")) * _CJK_SCALE[unit]
+            val = float(num.replace(",", "")) * _SCALE_WORDS[unit]
         except ValueError:
             continue
         for scaled in (val, val / 1e3, val / 1e6, val / 1e9, val / 1e12):
@@ -76,15 +76,15 @@ def _cjk_unit_numbers(answer: str) -> set[str]:
 def fact_in_answer(fact: str, answer: str) -> bool:
     """Numbers compare via canon (170 == 170.00 == $170); keywords via
     case-insensitive substring. A fact containing '|' passes if any alias
-    hits (e.g. "100T|100 trillion"). Chinese scale words (万/亿/万亿) and the
-    multiplication sign × are normalized, so a Chinese-language answer scores
+    hits (e.g. "100T|100 trillion"). Locale-specific scale words (万/亿/万亿) and the
+    multiplication sign × are normalized, so answers in other languages score
     against an English answer key without per-item aliases."""
     if "|" in fact:
         return any(fact_in_answer(f, answer) for f in fact.split("|"))
     norm = answer.replace("×", "x")
     c = canon(fact)
     if c is not None:
-        return c in numbers_in(norm) or c in _cjk_unit_numbers(answer)
+        return c in numbers_in(norm) or c in _scale_word_numbers(answer)
     return fact.lower() in norm.lower()
 
 
@@ -263,7 +263,7 @@ class Command(BaseCommand):
             for cat in {r["cat"] for r in out["per_item"]}:
                 cv = [r["recall"][mode] for r in out["per_item"] if r["cat"] == cat]
                 out["by_cat_mode"].setdefault(cat, {})[mode] = round(sum(cv) / len(cv), 3)
-        # Chinese-language items reported separately (PREDICTIONS P3)
+        # Non-English items reported separately (PREDICTIONS P3)
         cn = [r for r in out["per_item"]
               if re.search(r"[一-鿿]", items[r["id"]]["question"])]
         out["cn_items_fts_recall"] = round(
@@ -535,7 +535,7 @@ class Command(BaseCommand):
             L.append(f"- P1 hybrid ≥ 0.85: **{'PASS' if hy >= 0.85 else 'FAIL'}** ({hy})")
             L.append(f"- P2 hybrid ≥ both single modes: **{'PASS' if hy >= max(r['by_mode']['dense'], r['by_mode']['fts']) else 'FAIL'}**")
             if r["cn_items_fts_recall"] is not None:
-                L.append(f"- P3 Chinese items FTS-only ≤ 0.2: **{'PASS' if r['cn_items_fts_recall'] <= 0.2 else 'FAIL'}** ({r['cn_items_fts_recall']})")
+                L.append(f"- P3 non-English items FTS-only ≤ 0.2: **{'PASS' if r['cn_items_fts_recall'] <= 0.2 else 'FAIL'}** ({r['cn_items_fts_recall']})")
             tn = r["by_cat_mode"].get("table_numeric", {})
             if tn:
                 L.append(f"- P4 table_numeric dense < fts: **{'PASS' if tn['dense'] < tn['fts'] else 'FAIL'}** ({tn['dense']} vs {tn['fts']})")
