@@ -5,7 +5,7 @@ with page-level citations, deterministic grounding badges, and recency labels.
 
 > **Start here:** [`DESIGN.md`](DESIGN.md) (design & trade-offs, and what I tried
 > that didn't work) · [`eval/validation_report.md`](eval/validation_report.md)
-> (pre-registered, deterministic scoring).
+> (reference-based, deterministic scoring).
 
 ## What it does
 
@@ -177,8 +177,8 @@ make test                             # full test suite; the deterministic core 
                                       # eval/results.json + report already hold the results
 ```
 
-Evaluation is pre-registered — twelve predictions with fixed thresholds, registered
-before the first run; the two the data falsified are kept, unrevised, in DESIGN.md §7.
+How the evaluation works — and the approaches that did not survive it — is in
+DESIGN.md (§5 method, §7 what didn't work).
 
 ## Layout
 

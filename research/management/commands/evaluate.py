@@ -5,12 +5,12 @@ python manage.py evaluate [--retrieval] [--behavior] [--skip-injection]
 - Retrieval ablation: golden-set questions go verbatim through search_pages (one pass
   each for dense/fts/hybrid); recall@10 is scored against expected_pages. This is a
   conservative proxy for the production path (model-rewritten queries); the direction
-  of the bias is declared up front in the preregistered predictions (DESIGN.md §7).
+  of the bias is declared up front (DESIGN.md §5).
 - Behavior validation: end-to-end chat with deterministic scoring (groundedness /
   abstention / reproducibility / robustness / injection / watermark); methodology
   inherited from llm-validation-harness.
-- Outputs: eval/results.json + eval/validation_report.md (scored against preregistered
-  thresholds, see DESIGN.md §5/§7).
+- Outputs: eval/results.json + eval/validation_report.md (scored against fixed
+  thresholds; method in DESIGN.md §5).
 """
 
 import json
@@ -198,7 +198,7 @@ class Command(BaseCommand):
         parser.add_argument("--skip-injection", action="store_true")
         parser.add_argument("--behavior-set", default="core",
                             choices=["core", "full", "crop", "new"],
-                            help="core = the 14 preregistered items; full = every item; "
+                            help="core = the original 14 items; full = every item; "
                                  "crop = only figure-annotated items; new = items outside core")
         parser.add_argument("--items", default="",
                             help="comma-separated item ids; overrides --behavior-set (stored as its own extra set)")
@@ -226,7 +226,7 @@ class Command(BaseCommand):
                 set_name = "items:" + opts["items"]
             b = self.run_behavior(items, plan, opts["skip_injection"], set_name)
             if set_name == "core":
-                results["behavior"] = b          # the preregistered record
+                results["behavior"] = b          # the original core record
             else:
                 results["behavior_extra"][set_name] = b  # never overwrites core
 
@@ -639,9 +639,8 @@ class Command(BaseCommand):
                     L.append("keep the single-shot hybrid results as a floor (or route by question type) so the")
                     L.append(f"agent's choices can only add pages, never lose them; hybrid alone already scores")
                     L.append(f"{dp['hybrid']} on this type.\n")
-            L.append("The preregistered design-phase predictions about the retriever's internals")
-            L.append("and their outcomes — including the falsified ones, kept unrevised — are recorded in")
-            L.append("DESIGN.md §7 (what I tried that didn't work).")
+            L.append("How the retriever's design evolved — including the approaches that failed and")
+            L.append("what fixed them — is told in DESIGN.md §7 (what I tried that didn't work).")
             L.append("")
         b = results.get("behavior")
         if b:

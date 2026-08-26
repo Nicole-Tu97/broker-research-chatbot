@@ -222,12 +222,10 @@ per-row citations, boundary statements).
 
 ## 5. Evaluation: the method — all numbers live in the report
 
-Three principles, then a pointer. **Reference-based**: a 124-item golden set
+Two principles, then a pointer. **Reference-based**: a 124-item golden set
 (9 answer-location types × 4 cross-cutting tags), every expected fact and page
 anchored in the PDFs before any testing, with a grading rule attached to each
-question. **Preregistered**: twelve predictions with fixed thresholds were registered
-before `manage.py evaluate` first ran, and results never revised a prediction (the
-two the data falsified are in §7). **Deterministic**: string search, number
+question. **Deterministic**: string search, number
 comparison, and box overlap — no LLM judges another LLM, so every score reproduces
 exactly. Scoring methodology reused from my prior open-source project
 [llm-validation-harness](https://github.com/Nicole-Tu97/llm-validation-harness).
@@ -276,23 +274,24 @@ Several of these are reversals of my own earlier designs — those stories are i
 
 ## 7. What I tried that didn't work — and what fixed it
 
-Twelve predictions with fixed thresholds were registered before the first evaluation
-run; results never revised a prediction. In plain terms: I wrote down what I expected
-and what score would count as a pass *before* any test ran — so a wrong bet stays on
-the record as wrong, instead of the bar quietly moving to fit the result. Ten held;
-two were falsified, and the record is kept unrevised — an evaluation that can prove
-itself wrong is the only kind worth trusting.
+Every story below followed the same loop: try → measure → root-cause → fix →
+re-verify. The failures stay on the record deliberately — they are where the design
+earned its shape.
 
-- **Websearch AND-semantics killed full-text search on real questions** (a falsified
-  prediction: I expected the lexical leg to win on exact-number table questions).
-  FTS-only recall was 0.094 on 94 items — a long natural-language question fails an
+- **Websearch AND-semantics killed full-text search on real questions.** I had
+  expected the lexical leg to win on exact-number table questions; the data said
+  otherwise. FTS-only recall was 0.094 on 94 items — a long natural-language question fails an
   AND of all its terms — and its noise votes slightly hurt fusion. Fix: OR semantics
   ranked by `ts_rank_cd` → FTS-only 0.681, hybrid 0.761 → 0.814, and the behavior
   round re-passed at a third of the previous cost ($2.43 vs $7.17) because the agent
   now lands on the right page in fewer rounds.
-- **I bet the lexical leg would be useless off-English (≤ 0.2); the data said 0.624**
-  — falsified in the good direction: non-English questions still carry English
-  tickers and terms (NVDA, UBS) that OR matching finds.
+- **Answers first attached whole-page screenshots for every citation.** It looked
+  helpful and was actually noise: the cover page of a text report, embedded as an
+  image, adds nothing an analyst can use. The rule that replaced it (§4.3): attach a
+  figure only when the figure itself is the evidence — crop the specific chart when
+  one exists, embed the full page only when the page IS the chart (a slide), and
+  attach nothing when the answer is summarizable from text — the citation link
+  suffices. The figure-crop metric exists to keep exactly this honest.
 - **The first figure-crop probe scored 1/3.** What earned its keep: the three-way
   decision in §4.3, deterministic coordinate validation with full-page fallback, and
   the pixel-dominance gate so text pages never ship as screenshots. What did not: a
