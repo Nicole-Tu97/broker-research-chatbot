@@ -342,7 +342,33 @@ earned its shape.
 - **Answers take seconds, not milliseconds.** A question can run up to six tool
   rounds; latency and cost are shown live under every answer rather than hidden.
 
-**Future directions — each anchored in data already collected:**
+**Future directions.** The first group answers the limits above, one for one; the
+second is triggered by data or scale.
+
+*Answering today's limits:*
+
+- **Keep the corpus fresh** (window / live data). Ingestion is idempotent, so a
+  scheduled job that drops new PDFs into the corpus directory and runs `make
+  ingest` narrows staleness at ~$0.055/page; true live quotes are a market-data
+  feed integration, deliberately separate from research-report Q&A.
+- **Corpus-wide analytics** (targeted-only). Precomputed per-document rollups — an
+  offline summary per report, built once at ingestion — would turn "summarize all
+  30 reports" back into a retrieval question.
+- **Draw derived charts** (original figures only). The numbers in a comparison
+  table are already verified, so rendering them as a simple chart (a price-target
+  trajectory line) inherits that trust.
+- **Conversation management** (single conversation). Transcripts are already
+  stored; a list/resume view is pure UI work.
+- **Extend verification to prose** (numbers only). The deterministic route: require
+  a short verbatim quote per qualitative claim and string-match the quote against
+  the cited page — the badge idea applied to words. The heavier route, an
+  entailment/LLM checker, would break the no-LLM-judge property, which is why it
+  was not built.
+- **Fewer rounds for easy questions** (seconds, not milliseconds). Most latency is
+  agent rounds; routing simple lookups to single-shot hybrid (the routing item
+  below) removes them.
+
+*Triggered by data or scale:*
 
 - **Route retrieval by question type, or keep a hybrid floor.** The one production
   weak spot is deep-page recovery (agentic 0.818 vs single-shot hybrid 0.909): keep
