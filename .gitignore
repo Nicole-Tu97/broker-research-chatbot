@@ -19,3 +19,6 @@ bench/out_tiers/
 # index fixture — embeds transcribed licensed content; ships in the private
 # submission package, not in the public repo
 fixtures/
+
+# MS Office lock/temp files
+~$*

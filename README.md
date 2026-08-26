@@ -16,6 +16,7 @@ Ask questions about a library of broker research reports (here: 30 PDFs, 423 pag
 - **Numbers are verified, not trusted** — each citation carries a badge: ✓ the answer's numbers appear on the cited page, ⚠ they do not. No LLM judges another LLM anywhere.
 - **Relevant charts appear inline** — when a cited page's chart or table supports the answer, that figure is cropped from the original page and shown next to the text; text-only pages get a link, never a screenshot.
 - **Knows what it doesn't know** — brokers, tickers, or years outside the library get an explicit boundary statement instead of a guess; citations to reports superseded by a newer note from the same broker are flagged.
+- **Guards sensitive content, resists manipulation** — distribution watermarks and contact details from the source PDFs never surface in answers, and instructions hidden inside documents or attachments are ignored, not obeyed (both validated: 0 leaks, 0 injections — see the validation report).
 - **Image and PDF input** — attach a chart screenshot to find which report and page it comes from, or a PDF to relate it to the library.
 - **A visible process** — the answer streams with its tool calls, pages read, and per-answer cost and latency.
 
@@ -77,8 +78,8 @@ make demo
 ```
 
 What `make demo` does, in order: starts the Postgres container → applies migrations →
-loads the prebuilt index (453 objects: 30 documents, 423 page transcriptions with
-embeddings) → re-renders page PNGs locally from the PDFs (~1–2 min, free) → starts the
+loads the prebuilt index (453 objects: 30 documents and 423 page
+transcriptions) → re-renders page PNGs locally from the PDFs (~1–2 min, free) → starts the
 server. Leave it running and open **http://127.0.0.1:8000** — you should see the chat
 page with the corpus summary ("30 reports covering 2025-06-12 to 2025-09-29 ...") in
 the header and suggested questions to click. Ctrl+C stops the server; `make demo`
@@ -87,7 +88,7 @@ starts it again (already-done steps are skipped).
 To double-check the stack at any point:
 
 ```bash
-make doctor                                    # 12 checks, zero API cost → "Environment ready ✓"
+make doctor                                    # environment checkup, zero API cost → "Environment ready ✓"
 .venv/bin/python manage.py doctor --probe      # + one ~$0.0001 live call proving YOUR key works
 ```
 
@@ -156,7 +157,7 @@ nothing is hardcoded and no key is ever committed.
 ## Tests & evaluation
 
 ```bash
-make test                             # 45 tests; deterministic core needs no API key
+make test                             # full test suite; the deterministic core needs no API key
 .venv/bin/python manage.py evaluate   # retrieval ablation + 6-dimension behavior validation
 ```
 
@@ -177,8 +178,10 @@ research/            the app
   management/commands/evaluate.py   ablation + behavior validation → report
 bench/               transcription benchmark (20 pages × DPI tiers, ground truth)
 eval/                golden set, results, validation report
-fixtures/            committed index fixture (make demo)
-case_study/          the source PDFs
+page_assets/         rendered page PNGs — created by `make demo`/`make render`, git-ignored
+fixtures/            index fixture — in the submission package; git-ignored in the public repo
+case_study/          the source PDFs — in the submission package; put your own PDFs here
+.env.example         template for the one secret (OPENAI_API_KEY → your .env)
 ```
 
 ## Local development without Docker
