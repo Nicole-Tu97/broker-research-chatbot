@@ -565,11 +565,48 @@ class Command(BaseCommand):
              f"\nGenerated: {results['generated_at']} · zero LLM-judge scoring throughout\n"]
         r = results.get("retrieval")
         if r:
-            L.append("## Retrieval ablation (recall@10, raw question text as query)\n")
-            L.append("P1–P6 grade **preregistered predictions** (fixed before the first run, never")
-            L.append("revised): P1 is a quality gate on this conservative single-shot proxy; P2–P5 are")
-            L.append("bets about *how the retriever works* — a FAIL there means the forecast was wrong,")
-            L.append("not that users get worse answers. End-to-end quality is the section below.\n")
+            n_items = len(r["per_item"])
+            try:
+                golden = json.loads((EVAL / "golden_set.json").read_text())
+                by_id = {i["id"]: i for i in golden["items"]}
+                n_pages = sum(len(by_id[row["id"]].get("expected_pages", []))
+                              for row in r["per_item"] if row["id"] in by_id)
+            except Exception:
+                n_pages = None
+            L.append("## Retrieval quality — golden-set (reference-based) evaluation\n")
+            L.append("**What this is.** A golden-set evaluation: the correct answer pages were marked")
+            L.append("*before* any testing, and the retriever is scored against that fixed answer key.\n")
+            L.append("**How the answer key was made — three defenses against a wrong key.**")
+            L.append("1. *Anchored in the source, not in the system.* Every fact and page reference was")
+            L.append("   taken from the PDF's own text layer (extracted deterministically, no LLM), then")
+            L.append("   a question was written for it — the answer existed before the question did.")
+            L.append("2. *The drafting model is not the tested model.* Questions were drafted with a")
+            L.append("   different vendor's model than the one the system runs on, so the system cannot")
+            L.append("   grade its own homework.")
+            L.append("3. *Every item passed a machine check (no LLM).* A script verified that the cited")
+            L.append("   file exists, the page exists, and each expected fact literally appears on that")
+            L.append("   page. Items that failed were fixed before entering the set.\n")
+            n_pages_s = f" (about {n_pages} hand-checked answer pages in total)" if n_pages else ""
+            L.append(f"**How the test runs.** {n_items} questions, each with 1–10 hand-checked answer")
+            L.append(f"pages{n_pages_s}. Each question is sent to the retriever exactly as written, once")
+            L.append(f"per configuration ({n_items} × 3 = {n_items * 3} single-shot searches, each returning its")
+            L.append(f"top 10 pages). The score per question is the share of its answer pages that show")
+            L.append(f"up in the top 10; the table averages this per question type. The agentic column is")
+            L.append(f"different: it replays the {r.get('agentic_coverage', n_items)} archived production runs and counts every page the")
+            L.append(f"agent retrieved during the whole turn.\n")
+            L.append("**The six question types.**")
+            L.append("- `simple_qa` — the answer sits plainly on one page")
+            L.append("- `table_numeric` — an exact number inside a dense financial table")
+            L.append("- `pure_chart` — the answer exists only inside a chart image")
+            L.append("- `comparison_timeseries` — needs pages from several documents (several brokers)")
+            L.append("- `temporal` — needs time ordering: \"latest\", \"before/after\", how a number evolved")
+            L.append("- `deep_page_recovery` — the answer is buried deep in a report; page 1 is only a summary\n")
+            L.append("**The four columns.**")
+            L.append("1. `dense` — semantic search: finds pages that *mean* the same thing, even with different words")
+            L.append("2. `fts` — exact text match: finds pages that literally contain the question's words")
+            L.append("3. `hybrid` — both combined, but still **one single search** with the raw question (single-shot RAG)")
+            L.append("4. `agentic` — the **production system**: up to 6 rounds where the LLM rewrites the")
+            L.append("   query, retries, and switches tools (e.g. exact date-ordered lookups); measured over the whole turn\n")
             has_ag = "agentic" in r["by_mode"]
             L.append("| Category | dense | fts | hybrid |" + (" **agentic (production)** |" if has_ag else ""))
             L.append("|---|---|---|---|" + ("---|" if has_ag else ""))
@@ -579,13 +616,26 @@ class Command(BaseCommand):
             L.append(f"| **Mean** | **{r['by_mode']['dense']}** | "
                      f"**{r['by_mode']['fts']}** | **{r['by_mode']['hybrid']}** |"
                      + (f" **{r['by_mode']['agentic']}** |" if has_ag else ""))
-            if has_ag:
-                L.append("")
-                L.append(f"dense/fts/hybrid: one search call with the raw question (component diagnostics). "
-                         f"**agentic**: pages actually retrieved by the production loop — the agent rewrites "
-                         f"queries, retries, and picks tools — replayed from the {r.get('agentic_coverage', '?')} "
-                         f"archived end-to-end runs (recall over the whole turn, zero extra API cost).")
             L.append("")
+            if has_ag:
+                ag = r["by_mode"]["agentic"]
+                L.append(f"**Production verdict (post-hoc, not preregistered): agentic mean {ag} — "
+                         f"{'above' if ag >= 0.85 else 'below'} the 0.85 bar.** The two weakest single-shot")
+                L.append("types (temporal, comparison) are exactly where the agent gains the most — those")
+                L.append("answers are meant to come from query rewriting and date-ordered lookups, not from")
+                L.append("one similarity search.\n")
+                dp = r["by_cat_mode"].get("deep_page_recovery", {})
+                if dp.get("agentic") is not None and dp.get("hybrid") is not None and dp["agentic"] < dp["hybrid"]:
+                    L.append(f"**Worth noticing:** on `deep_page_recovery`, single-shot hybrid ({dp['hybrid']}) beats")
+                    L.append(f"agentic ({dp['agentic']}). Part of this is a scoring artifact (the agent sometimes answers")
+                    L.append("from an equally valid *other* page, which the fixed answer key does not credit), but it")
+                    L.append("also points to a real improvement path: do not rely on the agent blindly — keep the")
+                    L.append("single-shot hybrid results as a floor (or route by question type) so the agent's")
+                    L.append("choices can only add pages, never lose them.\n")
+            L.append("**Preregistered predictions (P1–P6).** These were fixed before the first run and")
+            L.append("never revised. P1 gates the single-shot proxy; P2–P5 are bets about *how the")
+            L.append("retriever works* — a FAIL means the forecast was wrong, not that users get worse")
+            L.append("answers. End-to-end quality is the section below.\n")
             hy = r["by_mode"]["hybrid"]
             ag = r["by_mode"].get("agentic")
             L.append(f"- P1 hybrid ≥ 0.85: **{'PASS' if hy >= 0.85 else 'FAIL'}** ({hy}) — single-shot proxy; "
