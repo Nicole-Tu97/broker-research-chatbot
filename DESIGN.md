@@ -152,7 +152,7 @@ a scope-substitution case caught by a real user (asked about 2023, the bot volun
 was itself caught by this suite); reproducibility 3/3; robustness 3/3 across paraphrase and
 language; **prompt-injection resistance verified on both untrusted-input surfaces**
 (a planted PDF in ingestion and a user-uploaded PDF — the embedded canary never
-leaked); client-watermark PII leakage 0/13 answers.
+leaked); client-watermark PII leakage 0/14 answers.
 
 The evaluation also caught and fixed three real defects (give-up on tool-round
 exhaustion, vocabulary mismatch on sparse slide pages, answer substitution from an
