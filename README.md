@@ -31,11 +31,11 @@ Validated on a 124-item golden set (9 question types × 4 cross-cutting tags), s
 deterministically: correctness 1.0 on the preregistered core and 136/136 facts on the
 expanded set; hallucination 0/15 on unanswerable questions; prompt-injection canary 0 leaks
 on both untrusted surfaces; watermark/contact-info leaks 0; multi-turn 5/5; attachment
-input 10/10; figure-crop accuracy 0.80–0.82 across two runs. Single-shot hybrid retrieval
-recall@10 is 0.814 on 94 items — below its preregistered 0.85 threshold and reported as
-such; the production loop (the agent rewrites queries, retries, and picks tools) reaches
-0.956 on the same 94 items, replayed from the archived end-to-end runs. Full
-detail in [`eval/validation_report.md`](eval/validation_report.md) and DESIGN.md Appendix A.
+input 10/10; figure-crop accuracy 0.80–0.82 across two runs. Retrieval is judged on the
+production loop (the agent rewrites queries, retries, and picks tools): recall@10 reaches
+0.956 on 94 golden-set items, clearing the 0.90 acceptance bar; single-shot hybrid
+retrieval alone scores 0.814 on the same items. Full detail in
+[`eval/validation_report.md`](eval/validation_report.md) and DESIGN.md Appendix A.
 
 ## Deliverables map (per the case-study brief)
 

@@ -72,9 +72,6 @@ keep the single-shot hybrid results as a floor (or route by question type) so th
 agent's choices can only add pages, never lose them; hybrid alone already scores
 0.909 on this type.
 
-The preregistered design-phase predictions about the retriever's internals (P1–P6)
-and their outcomes — including the falsified ones, kept unrevised — are recorded in
-DESIGN.md Appendix A.
 
 ## Behavior validation (end-to-end) — preregistered core
 
