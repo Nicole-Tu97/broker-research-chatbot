@@ -347,6 +347,14 @@ harder keynote passes at 52), not direct sampling. Measured behavior numbers liv
   lexical leg contributes off-English only through embedded English terms.
 - **A reranker only if the miss profile changes** — it earns a place when candidates
   are present but misranked; today every miss is candidate absence.
+- **A larger golden set — every category, not just the figure questions.** 124
+  items catch the big failure modes; more items per category tighten the error
+  bars and surface rarer ones. The harness and the answer-key rules are settled,
+  so growing the set is data entry, not code.
+- **Production hardening re-adds the §6 cuts as their triggers fire** —
+  auth/multi-tenancy first for any multi-user deployment, an ingestion queue at
+  volume, a facts table and reranker on the conditions above; each cut in §6
+  carries its re-entry condition.
 - **Operational scaling** (batch ingestion, object storage for page assets, a
   dedicated lexical engine) is an operations path, mapped in the README under
   "Adding more documents".
