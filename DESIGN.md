@@ -322,19 +322,25 @@ earned its shape.
 
 **Limits:**
 
-- The corpus window is 3.5 months — the system says so rather than extrapolating.
-- No live data: answers stop at the corpus. The newest fact is dated 2025-09-29,
-  so "today's price" is out of scope by design.
-- Targeted questions, not corpus-wide analytics: retrieval returns the top-ranked
-  pages, so "summarize all 30 reports" or "count every mention across 423 pages"
-  exceeds the tool budget.
-- It reproduces original figures; it does not draw new ones. Ask for a chart of the
-  price-target trajectory and the answer is a cited table — generating new
-  visualizations is out of scope.
-- One conversation at a time: the page holds a single running chat, and a refresh
-  starts a new one — there is no conversation list to switch or resume, and nothing
-  carries over between conversations. (Transcripts are stored in the database; what
-  is missing is the management UI.)
+- **A 3.5-month corpus window.** Coverage runs 2025-06-12 to 2025-09-29; the system
+  declares this boundary rather than extrapolating beyond it.
+- **No live market data.** Answers stop at the corpus — the newest fact is dated
+  2025-09-29, so "today's price" is out of scope by design.
+- **Targeted questions, not corpus-wide analytics.** Retrieval returns the
+  top-ranked pages, so "summarize all 30 reports" or "count every mention across
+  423 pages" exceeds the tool budget.
+- **Original figures only.** It reproduces charts from the reports; it does not
+  draw new ones — ask for a chart of the price-target trajectory and the answer is
+  a cited table.
+- **A single running conversation.** A refresh starts a new chat; there is no
+  conversation list to switch or resume, and nothing carries over between
+  conversations. (Transcripts are stored in the database; what is missing is the
+  management UI.)
+- **Verification covers numbers, not prose.** The badge can prove a cited number
+  exists on the page; a qualitative claim ("management sounded confident") has no
+  mechanical check and rests on the model's faithfulness alone.
+- **Answers take seconds, not milliseconds.** A question can run up to six tool
+  rounds; latency and cost are shown live under every answer rather than hidden.
 
 **Future directions — each anchored in data already collected:**
 
