@@ -277,9 +277,11 @@ Several of these are reversals of my own earlier designs — those stories are i
 ## 7. What I tried that didn't work — and what fixed it
 
 Twelve predictions with fixed thresholds were registered before the first evaluation
-run; results never revised a prediction. Ten held; two were falsified, and the record
-is kept unrevised — an evaluation that can prove itself wrong is the only kind worth
-trusting.
+run; results never revised a prediction. In plain terms: I wrote down what I expected
+and what score would count as a pass *before* any test ran — so a wrong bet stays on
+the record as wrong, instead of the bar quietly moving to fit the result. Ten held;
+two were falsified, and the record is kept unrevised — an evaluation that can prove
+itself wrong is the only kind worth trusting.
 
 - **Websearch AND-semantics killed full-text search on real questions** (a falsified
   prediction: I expected the lexical leg to win on exact-number table questions).
