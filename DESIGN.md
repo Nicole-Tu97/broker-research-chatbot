@@ -281,21 +281,21 @@ Every item below followed the same loop: try → measure → root-cause → fix 
 re-verify. The failures stay on the record deliberately — they are where the design
 earned its shape.
 
-- **Websearch AND-semantics killed full-text search on real questions.** I had
-  expected the lexical leg to win on exact-number table questions; the data said
+- **Keyword search demanded every word to match — so real questions matched almost
+  nothing.** I had expected the lexical leg to win on exact-number table questions; the data said
   otherwise. FTS-only recall was 0.094 on 94 items — a long natural-language question fails an
   AND of all its terms — and its noise votes slightly hurt fusion. Fix: OR semantics
   ranked by `ts_rank_cd` → FTS-only 0.681, hybrid 0.761 → 0.814, and the behavior
   round re-passed at a third of the previous cost ($2.43 vs $7.17) because the agent
   now lands on the right page in fewer rounds.
-- **Answers first attached whole-page screenshots for every citation.** It looked
+- **Every citation used to ship a full-page screenshot.** It looked
   helpful and was actually noise: the cover page of a text report, embedded as an
   image, adds nothing an analyst can use. The rule that replaced it (§4.3): attach a
   figure only when the figure itself is the evidence — crop the specific chart when
   one exists, embed the full page only when the page IS the chart (a slide), and
   attach nothing when the answer is summarizable from text — the citation link
   suffices. The figure-crop metric exists to keep exactly this honest.
-- **The first figure-crop probe scored 1/3.** What earned its keep: the three-way
+- **The first attempt at figure cropping mostly missed (1 of 3).** What earned its keep: the three-way
   decision in §4.3, deterministic coordinate validation with full-page fallback, and
   the pixel-dominance gate so text pages never ship as screenshots. What did not: a
   prompt hint that failed to fix its target case and coincided with regressions —
@@ -305,13 +305,13 @@ earned its shape.
   round. Fixes: the tool now returns an explicit warning when a date filter excluded
   undated documents; images are deduplicated within a turn (115 → 37); the cost
   footer prices cached tokens correctly.
-- **A real user caught scope substitution** — asked about 2023, the bot volunteered
-  2025 data. Fixed with an overlap-based boundary rule (rule 1 in §4.4); the first
+- **Asked about 2023, the bot answered with 2025 data.** A real user caught this
+  scope substitution. Fixed with an overlap-based boundary rule (rule 1 in §4.4); the first
   version of the fix regressed elsewhere, and the behavior suite caught that too.
-- **The suite caught three quieter product defects** — giving up on tool-round
+- **Three quiet defects only the test suite noticed** — giving up on tool-round
   exhaustion, vocabulary mismatch on sparse slide pages, answering from an adjacent
   source (now rule 6 in §4.4) — each fixed and re-verified.
-- **The scorer itself had blind spots at scale** — locale-specific numeric scale
+- **The grading script itself judged some correct answers wrong** — locale-specific numeric scale
   words, the multiplication sign, page numbers inside citation labels counted as
   numeric claims, and follow-up answers citing pages from memory marked unverifiable
   (that last one was also a product defect: follow-ups showed a warning badge —
@@ -344,31 +344,37 @@ earned its shape.
 
 **Future directions — four tracks:**
 
-- **Smarter retrieval, from our own data.** Keep the single-shot hybrid results as a
-  floor (deep-page recovery: agentic 0.818 vs hybrid 0.909), or route by question
-  type, so the agent's choices can only add pages, never lose them. The general
-  version is a thoroughness dial: today the agent stops when it judges the evidence
-  sufficient; when accuracy outweighs cost, collect candidates exhaustively and let
-  verification decide what enters the answer. Routing also cuts latency — simple
-  lookups skip the agent rounds. A reranker joins only if the miss profile changes
-  (candidates present but misranked); today every miss is candidate absence, which
-  reranking cannot fix.
-- **Freshness and scale.** Ingestion is idempotent, so a scheduled job keeps the
-  corpus current at ~$0.055/page (live market quotes stay a separate data-feed
-  concern). At thousands of documents the measured migration points fire in order:
-  an ingestion queue, object storage for page images, per-language full-text
-  configs for non-English documents, a dedicated lexical engine, and a structured
-  facts table once `list_reports` matches exceed ~50 reports (below that, full
-  first-page context wins). Precomputed per-document rollups — one offline summary
-  per report, built at ingestion — turn corpus-wide questions ("summarize all 30
-  reports") back into retrieval questions. Production deployment re-adds the §6
-  cuts, auth first;
-  operational detail lives in the README under "Adding more documents".
-- **Wider verification, richer answers.** Extend the badge to prose by requiring a
-  short verbatim quote per qualitative claim and string-matching it against the
-  cited page — still no LLM judging an LLM. Draw simple derived charts (a
-  price-target trajectory line) from numbers that are already verified. Add a
-  conversation list/resume view — transcripts are stored; only the UI is missing.
-- **A deeper golden set.** More items in every category tightens the error bars and
-  surfaces rarer failures; the grading rules are settled, so growing the set is
-  data entry, not code.
+- **Smarter retrieval, from our own data.**
+  - Keep the single-shot hybrid results as a floor (deep-page recovery: agentic
+    0.818 vs hybrid 0.909), or route by question type — the agent's choices can
+    then only add pages, never lose them.
+  - The general version is a thoroughness dial: today the agent stops when it
+    judges the evidence sufficient; when accuracy outweighs cost, collect
+    candidates exhaustively and let verification decide what enters the answer.
+  - Routing also cuts latency — simple lookups skip the agent rounds.
+  - A reranker joins only if the miss profile changes (candidates present but
+    misranked); today every miss is candidate absence, which reranking cannot fix.
+- **Freshness and scale.**
+  - Ingestion is idempotent: a scheduled job keeps the corpus current at
+    ~$0.055/page (live market quotes stay a separate data-feed concern).
+  - At thousands of documents, the measured migration points fire in order: an
+    ingestion queue, object storage for page images, per-language full-text
+    configs, a dedicated lexical engine, and a structured facts table once
+    `list_reports` matches exceed ~50 reports (below that, full first-page
+    context wins).
+  - Precomputed per-document rollups — one offline summary per report, built at
+    ingestion — turn corpus-wide questions ("summarize all 30 reports") back into
+    retrieval questions.
+  - Production deployment re-adds the §6 cuts, auth first; operational detail
+    lives in the README under "Adding more documents".
+- **Wider verification, richer answers.**
+  - Extend the badge to prose: require a short verbatim quote per qualitative
+    claim and string-match it against the cited page — still no LLM judging an LLM.
+  - Draw simple derived charts (a price-target trajectory line) from numbers that
+    are already verified.
+  - Add a conversation list/resume view — transcripts are stored; only the UI is
+    missing.
+- **A deeper golden set.**
+  - More items in every category tightens the error bars and surfaces rarer
+    failures.
+  - The grading rules are settled, so growing the set is data entry, not code.
