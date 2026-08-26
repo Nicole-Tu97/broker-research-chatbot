@@ -114,26 +114,26 @@ adversarial review caught four errors in my own first-round numbers):
 
 ## 4. The architecture core: chunking, embedding, retrieval — and the rules the model answers under
 
-**4.1 Chunking: none — the page is the atomic unit.** The right chunk size is the
-corpus's own unit of self-contained meaning, and in broker research that unit is the
-page: the chart's caption lives in the prose, the table's numbers are discussed in
-the text, the price target sits in a sidebar next to both. Any sub-page cut shatters
-tables, orphans charts, and breaks page-level citations. Dilution risk on dense pages
-is compensated by the full-text leg, and page images ride along as ground truth.
-
-*Why this strategy: tables and charts survive intact, every citation maps to a real
-page, and there is no chunk size to tune wrong.*
-
-**4.2 Parsing: one multimodal call per page.** Page image *and* native text layer go
+**4.1 Parsing: one multimodal call per page.** Page image *and* native text layer go
 into a single transcription call; the prompt pins prose to the text layer (numbers
 must keep their original surface forms) and uses vision for structure and image-only
 content. A benchmarked prompt rule ("cell count must match header count; blank cells
 stay blank — never fill with 0") exists because the benchmark caught exactly that
 failure.
 
-*Why this strategy: one call per page is the cheapest way to capture text, tables,
+*Rationale: one call per page is the cheapest way to capture text, tables,
 and pixel-only charts together — text stays exact, vision fills in what text cannot
 see.*
+
+**4.2 Chunking: none — the page is the atomic unit.** The right chunk size is the
+corpus's own unit of self-contained meaning, and in broker research that unit is the
+page: the chart's caption lives in the prose, the table's numbers are discussed in
+the text, the price target sits in a sidebar next to both. Any sub-page cut shatters
+tables, orphans charts, and breaks page-level citations. Dilution risk on dense pages
+is compensated by the full-text leg, and page images ride along as ground truth.
+
+*Rationale: tables and charts survive intact, every citation maps to a real
+page, and there is no chunk size to tune wrong.*
 
 **4.3 Embedding and storage: one table, three access paths.** Each page's
 transcription is embedded once with text-embedding-3-large — picked for its
@@ -143,7 +143,7 @@ in a single Postgres row next to a DB-generated tsvector and the metadata column
 (broker, date, tickers, png_path). One store, three access paths — semantic, lexical,
 exact SQL — with zero synchronization risk between them.
 
-*Why this strategy: one store means the three search paths can never drift apart,
+*Rationale: one store means the three search paths can never drift apart,
 and one embedding per page keeps index size and cost flat as the corpus grows.*
 
 **4.4 Retrieval: two tools, and the loop is the router.** `search_pages` runs a
@@ -159,7 +159,7 @@ reports whose price target hides deeper than page 1. Cross-lingual behavior
 (measured): non-English questions work end-to-end because the model writes English
 search queries and the embedding space is cross-lingual.
 
-*Why this strategy: the two tools match the two real question shapes — "find pages
+*Rationale: the two tools match the two real question shapes — "find pages
 about X" and "list exactly these reports in date order" — and the agent's loop
 supplies the flexibility a fixed pipeline lacks.*
 
@@ -271,7 +271,7 @@ triggers (§8), and two were closed *with data*.
   belonged in query formulation and were verified end-to-end.
 - **No pre-extracted facts table** — exact SQL over metadata plus full first-page
   context answers comparative/temporal questions without a lossy second store.
-- **No sub-page chunking** (§4.1). **No Celery/Redis queue** at 30 documents. **No
+- **No sub-page chunking** (§4.2). **No Celery/Redis queue** at 30 documents. **No
   Batch API** — measured, not assumed: 423 pages of base64 PNG exceed its 200 MB
   input cap, so the ~$12 saving would have bought a second code path. **No
   prompt-caching engineering** (the system prompt is ~5% of spend). **No frontend
