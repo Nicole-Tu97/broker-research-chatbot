@@ -342,60 +342,30 @@ earned its shape.
 - **Answers take seconds, not milliseconds.** A question can run up to six tool
   rounds; latency and cost are shown live under every answer rather than hidden.
 
-**Future directions.** The first group answers the limits above, one for one; the
-second is triggered by data or scale.
+**Future directions — four tracks:**
 
-*Answering today's limits:*
-
-- **Keep the corpus fresh** (window / live data). Ingestion is idempotent, so a
-  scheduled job that drops new PDFs into the corpus directory and runs `make
-  ingest` narrows staleness at ~$0.055/page; true live quotes are a market-data
-  feed integration, deliberately separate from research-report Q&A.
-- **Corpus-wide analytics** (targeted-only). Precomputed per-document rollups — an
-  offline summary per report, built once at ingestion — would turn "summarize all
-  30 reports" back into a retrieval question.
-- **Draw derived charts** (original figures only). The numbers in a comparison
-  table are already verified, so rendering them as a simple chart (a price-target
-  trajectory line) inherits that trust.
-- **Conversation management** (single conversation). Transcripts are already
-  stored; a list/resume view is pure UI work.
-- **Extend verification to prose** (numbers only). The deterministic route: require
-  a short verbatim quote per qualitative claim and string-match the quote against
-  the cited page — the badge idea applied to words. The heavier route, an
-  entailment/LLM checker, would break the no-LLM-judge property, which is why it
-  was not built.
-- **Fewer rounds for easy questions** (seconds, not milliseconds). Most latency is
-  agent rounds; routing simple lookups to single-shot hybrid (the routing item
-  below) removes them.
-
-*Triggered by data or scale:*
-
-- **Route retrieval by question type, or keep a hybrid floor.** The one production
-  weak spot is deep-page recovery (agentic 0.818 vs single-shot hybrid 0.909): keep
-  the single-shot hybrid results as a floor so the agent's choices can only add
-  pages, never lose them — the validation report's "one weak spot" note, turned into
-  a roadmap item. The general version is a **thoroughness dial**: today the agent
-  stops when it judges the evidence sufficient — a cost-driven satisficing policy
-  (`list_reports` questions are already exhaustive by SQL; the risk sits on the
-  search path). When accuracy outweighs cost, run every answer exhaustively — full
-  sweep on every retrieval leg, maximum agent rounds, union of candidates — and let
-  verification, not early stopping, decide what enters the answer. More context is
-  not automatically better (dilution), so the dial widens *candidate collection*,
-  not the prompt.
-- **A rating facts table once `list_reports` matches exceed ~50 reports** — below
-  that, full first-page context wins.
-- **Per-language tsvector configs** when non-English corpora arrive — today the
-  lexical leg contributes off-English only through embedded English terms.
-- **A reranker only if the miss profile changes** — it earns a place when candidates
-  are present but misranked; today every miss is candidate absence.
-- **A larger golden set — every category, not just the figure questions.** 124
-  items catch the big failure modes; more items per category tighten the error
-  bars and surface rarer ones. The harness and the answer-key rules are settled,
-  so growing the set is data entry, not code.
-- **Production hardening re-adds the §6 cuts as their triggers fire** —
-  auth/multi-tenancy first for any multi-user deployment, an ingestion queue at
-  volume, a facts table and reranker on the conditions above; each cut in §6
-  carries its re-entry condition.
-- **Operational scaling** (batch ingestion, object storage for page assets, a
-  dedicated lexical engine) is an operations path, mapped in the README under
-  "Adding more documents".
+- **Smarter retrieval, from our own data.** Keep the single-shot hybrid results as a
+  floor (deep-page recovery: agentic 0.818 vs hybrid 0.909), or route by question
+  type, so the agent's choices can only add pages, never lose them. The general
+  version is a thoroughness dial: today the agent stops when it judges the evidence
+  sufficient; when accuracy outweighs cost, collect candidates exhaustively and let
+  verification decide what enters the answer. Routing also cuts latency — simple
+  lookups skip the agent rounds. A reranker joins only if the miss profile changes
+  (candidates present but misranked); today every miss is candidate absence, which
+  reranking cannot fix.
+- **Freshness and scale.** Ingestion is idempotent, so a scheduled job keeps the
+  corpus current at ~$0.055/page (live market quotes stay a separate data-feed
+  concern). At thousands of documents the measured migration points fire in order:
+  an ingestion queue, object storage for page images, per-language full-text
+  configs for non-English documents, a dedicated lexical engine, and a structured
+  facts table once `list_reports` matches exceed ~50 reports (below that, full
+  first-page context wins). Production deployment re-adds the §6 cuts, auth first;
+  operational detail lives in the README under "Adding more documents".
+- **Wider verification, richer answers.** Extend the badge to prose by requiring a
+  short verbatim quote per qualitative claim and string-matching it against the
+  cited page — still no LLM judging an LLM. Draw simple derived charts (a
+  price-target trajectory line) from numbers that are already verified. Add a
+  conversation list/resume view — transcripts are stored; only the UI is missing.
+- **A deeper golden set.** More items in every category tightens the error bars and
+  surfaces rarer failures; the grading rules are settled, so growing the set is
+  data entry, not code.
