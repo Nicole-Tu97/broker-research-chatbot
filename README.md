@@ -84,6 +84,16 @@ page with the corpus summary ("30 reports covering 2025-06-12 to 2025-09-29 ..."
 the header and suggested questions to click. Ctrl+C stops the server; `make demo`
 starts it again (already-done steps are skipped).
 
+Three questions worth trying first:
+
+1. *"Compare the change in price target for NVDA between UBS's research and Barclays's
+   research over the past two years."* — the brief's own question: a coverage note, a
+   cited table, ✓ badges on every number.
+2. *"What total market size does the GTC keynote associate with AI factories?"* — the
+   answer exists only inside a slide; the figure is cropped into the reply.
+3. *"What is Goldman Sachs' current rating on NVIDIA?"* — not in the library: the
+   system states the boundary instead of guessing.
+
 To double-check the stack at any point:
 
 ```bash
@@ -157,7 +167,9 @@ nothing is hardcoded and no key is ever committed.
 
 ```bash
 make test                             # full test suite; the deterministic core needs no API key
-.venv/bin/python manage.py evaluate   # retrieval ablation + 6-dimension behavior validation
+.venv/bin/python manage.py evaluate   # CAUTION: re-runs the behavior suite against the
+                                      # live API (~$20 for the full set); the committed
+                                      # eval/results.json + report already hold the results
 ```
 
 Evaluation is pre-registered: see `DESIGN.md` Appendix A for all 12 predictions
@@ -171,12 +183,21 @@ research/            the app
   providers.py       ALL external API calls (OpenAI Responses API, zero SDK deps)
   tools.py           the two retrieval tools + their schemas (same file, no drift)
   chat.py            function-calling loop, grounding badges, recency labels
+  models.py          the three tables: Document / PageTranscription / Conversation
+  views.py, templates/              chat UI and the SSE streaming endpoint
+  metadata.py        filename → broker/date/title parsing
   tickers.py         deterministic ticker alias extraction
   numeric.py         transcription numeric validation (normalized multiset diff)
   management/commands/ingest.py     PDF → render → transcribe → validate → index
-  management/commands/evaluate.py   ablation + behavior validation → report
-bench/               transcription benchmark (20 pages × DPI tiers, ground truth)
-eval/                golden set, results, validation report
+  management/commands/evaluate.py   retrieval ablation + behavior validation → report
+  management/commands/doctor.py     environment checkup, one fix hint per failure
+bench/               transcription benchmark: 20 ground-truth pages rendered at
+                     several DPI tiers → picks the cheapest setting that stays accurate
+eval/
+  golden_set.json        all 124 test questions, each with its grading rule attached
+  results.json           raw outcomes of every evaluation run (per item, per run)
+  validation_report.md   the generated report — regenerate, never edit by hand
+  injection_test.pdf     the planted prompt-injection attachment
 page_assets/         rendered page PNGs — created by `make demo`/`make render`, git-ignored
 fixtures/            index fixture — in the submission package; git-ignored in the public repo
 case_study/          the source PDFs — in the submission package; put your own PDFs here
