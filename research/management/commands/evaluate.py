@@ -244,8 +244,14 @@ class Command(BaseCommand):
         # Multi-turn items have no single question; attachment items need the attachment.
         retrievable = [i for i in items.values() if i.get("expected_pages") and i.get("question")
                        and i.get("cat") not in ("multi_turn", "attachment_input")]
+        agentic = self._agentic_pages_by_question()
         for it in retrievable:
             row = {"id": it["id"], "cat": it["cat"], "recall": {}}
+            got_turn = agentic.get(it["question"])
+            if got_turn is not None:
+                hits = sum(1 for frag, pno in it["expected_pages"]
+                           if any(frag in fn and pno == p for fn, p in got_turn))
+                row["recall"]["agentic"] = round(hits / len(it["expected_pages"]), 3)
             for mode in ("dense", "fts", "hybrid"):
                 res = tools.search_pages(it["question"], k=10, mode=mode)
                 got = set()
@@ -257,17 +263,53 @@ class Command(BaseCommand):
                 row["recall"][mode] = round(hits / len(it["expected_pages"]), 3)
             out["per_item"].append(row)
             self.stdout.write(f"  [R] {it['id']:4s} {row['recall']}")
-        for mode in ("dense", "fts", "hybrid"):
-            vals = [r["recall"][mode] for r in out["per_item"]]
+        for mode in ("dense", "fts", "hybrid", "agentic"):
+            vals = [r["recall"][mode] for r in out["per_item"] if mode in r["recall"]]
+            if not vals:
+                continue
             out["by_mode"][mode] = round(sum(vals) / len(vals), 3)
             for cat in {r["cat"] for r in out["per_item"]}:
-                cv = [r["recall"][mode] for r in out["per_item"] if r["cat"] == cat]
-                out["by_cat_mode"].setdefault(cat, {})[mode] = round(sum(cv) / len(cv), 3)
+                cv = [r["recall"][mode] for r in out["per_item"]
+                      if r["cat"] == cat and mode in r["recall"]]
+                if cv:
+                    out["by_cat_mode"].setdefault(cat, {})[mode] = round(sum(cv) / len(cv), 3)
+        out["agentic_coverage"] = sum(1 for r in out["per_item"] if "agentic" in r["recall"])
         # Non-English items reported separately (PREDICTIONS P3)
         cn = [r for r in out["per_item"]
               if re.search(r"[一-鿿]", items[r["id"]]["question"])]
         out["cn_items_fts_recall"] = round(
             sum(r["recall"]["fts"] for r in cn) / len(cn), 3) if cn else None
+        return out
+
+    def _agentic_pages_by_question(self) -> dict:
+        """Production-path retrieval, at zero API cost: every end-to-end evaluation turn
+        is persisted (Conversation.messages keeps each tool call's returned pages), so
+        the pages the AGENT retrieved — after its own query rewriting, retries, and tool
+        choice — are replayed from the archive. Keyed by the turn's first user message."""
+        fn = dict(Document.objects.values_list("id", "filename"))
+        out: dict = {}
+        for conv in Conversation.objects.order_by("updated_at"):
+            msgs = conv.messages
+            if not msgs or msgs[0].get("role") != "user":
+                continue
+            try:
+                q = msgs[0]["content"][0]["text"]
+            except (KeyError, IndexError, TypeError):
+                continue
+            got: set = set()
+            for m in msgs:
+                if m.get("type") != "function_call_output":
+                    continue
+                try:
+                    o = json.loads(m.get("output_text") or "{}")
+                except ValueError:
+                    continue
+                rows = o.get("results", []) + [r["first_page"] for r in o.get("reports", [])
+                                               if r.get("first_page")]
+                for r in rows:
+                    if r and r.get("document_id"):
+                        got.add((fn.get(r["document_id"], ""), r["page_number"]))
+            out[q] = got  # later conversations overwrite earlier ones (most recent run wins)
         return out
 
     # ---- Behavior validation ----
@@ -528,17 +570,27 @@ class Command(BaseCommand):
             L.append("revised): P1 is a quality gate on this conservative single-shot proxy; P2–P5 are")
             L.append("bets about *how the retriever works* — a FAIL there means the forecast was wrong,")
             L.append("not that users get worse answers. End-to-end quality is the section below.\n")
-            L.append("| Category | dense | fts | hybrid |")
-            L.append("|---|---|---|---|")
+            has_ag = "agentic" in r["by_mode"]
+            L.append("| Category | dense | fts | hybrid |" + (" **agentic (production)** |" if has_ag else ""))
+            L.append("|---|---|---|---|" + ("---|" if has_ag else ""))
             for cat, modes in sorted(r["by_cat_mode"].items()):
-                L.append(f"| {cat} | {modes['dense']} | {modes['fts']} | {modes['hybrid']} |")
+                L.append(f"| {cat} | {modes['dense']} | {modes['fts']} | {modes['hybrid']} |"
+                         + (f" **{modes.get('agentic', '—')}** |" if has_ag else ""))
             L.append(f"| **Mean** | **{r['by_mode']['dense']}** | "
-                     f"**{r['by_mode']['fts']}** | **{r['by_mode']['hybrid']}** |")
+                     f"**{r['by_mode']['fts']}** | **{r['by_mode']['hybrid']}** |"
+                     + (f" **{r['by_mode']['agentic']}** |" if has_ag else ""))
+            if has_ag:
+                L.append("")
+                L.append(f"dense/fts/hybrid: one search call with the raw question (component diagnostics). "
+                         f"**agentic**: pages actually retrieved by the production loop — the agent rewrites "
+                         f"queries, retries, and picks tools — replayed from the {r.get('agentic_coverage', '?')} "
+                         f"archived end-to-end runs (recall over the whole turn, zero extra API cost).")
             L.append("")
             hy = r["by_mode"]["hybrid"]
+            ag = r["by_mode"].get("agentic")
             L.append(f"- P1 hybrid ≥ 0.85: **{'PASS' if hy >= 0.85 else 'FAIL'}** ({hy}) — single-shot proxy; "
-                     f"the production path (agent rewrites queries and retries) recovered every miss "
-                     f"(agentic recall 0.9 strict)")
+                     f"the production path (agent rewrites queries and retries) recovers the misses"
+                     + (f" (agentic mean {ag})" if ag else ""))
             L.append(f"- P2 hybrid ≥ both single modes: **{'PASS' if hy >= max(r['by_mode']['dense'], r['by_mode']['fts']) else 'FAIL'}**")
             if r["cn_items_fts_recall"] is not None:
                 p3 = r['cn_items_fts_recall']

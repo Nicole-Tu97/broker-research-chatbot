@@ -135,8 +135,10 @@ leg now uses OR semantics ranked by `ts_rank_cd` — FTS-only 0.094 → 0.681, h
 **0.814** (> dense 0.773; pure_chart 0.81 → 0.94, table 0.71 → 0.83). The preregistered
 core behavior round was re-run after the change: all six dimensions still pass, at a
 third of the previous cost ($2.43 vs $7.17) because the agent now lands on the right
-page in fewer rounds. Agentic recall on the production path: 0.9 strict on the 10
-end-to-end items, 10/10 once an equally valid newer source is credited. Two
+page in fewer rounds. Agentic recall on the production path — pages actually retrieved
+over the whole turn, replayed from the 94 archived end-to-end runs — is **0.956**
+(temporal 1.0, comparison 0.99 per category; the single-shot ablation deliberately
+denies the agent its rewriting and tool choice, which is why its numbers sit lower). Two
 original predictions were falsified, and I kept the receipts: FTS dies on
 natural-language sentences (websearch AND-semantics) long before term precision can
 matter — its value is on model-written keyword queries. The reranker decision closed with data: every miss

@@ -1,6 +1,6 @@
 # Validation Report (deterministic scoring against the preregistered thresholds in DESIGN.md Appendix A)
 
-Generated: 2026-08-25 21:30 · zero LLM-judge scoring throughout
+Generated: 2026-08-26 16:45 · zero LLM-judge scoring throughout
 
 ## Retrieval ablation (recall@10, raw question text as query)
 
@@ -9,17 +9,19 @@ revised): P1 is a quality gate on this conservative single-shot proxy; P2–P5 a
 bets about *how the retriever works* — a FAIL there means the forecast was wrong,
 not that users get worse answers. End-to-end quality is the section below.
 
-| Category | dense | fts | hybrid |
-|---|---|---|---|
-| comparison_timeseries | 0.587 | 0.426 | 0.541 |
-| deep_page_recovery | 1.0 | 0.818 | 0.909 |
-| pure_chart | 0.812 | 0.625 | 0.938 |
-| simple_qa | 0.95 | 0.85 | 0.925 |
-| table_numeric | 0.708 | 0.708 | 0.833 |
-| temporal | 0.5 | 0.55 | 0.6 |
-| **Mean** | **0.773** | **0.681** | **0.814** |
+| Category | dense | fts | hybrid | **agentic (production)** |
+|---|---|---|---|---|
+| comparison_timeseries | 0.587 | 0.426 | 0.541 | **0.992** |
+| deep_page_recovery | 1.0 | 0.818 | 0.909 | **0.818** |
+| pure_chart | 0.812 | 0.625 | 0.938 | **1.0** |
+| simple_qa | 0.95 | 0.85 | 0.925 | **1.0** |
+| table_numeric | 0.708 | 0.708 | 0.833 | **0.917** |
+| temporal | 0.5 | 0.55 | 0.6 | **1.0** |
+| **Mean** | **0.773** | **0.681** | **0.814** | **0.956** |
 
-- P1 hybrid ≥ 0.85: **FAIL** (0.814) — single-shot proxy; the production path (agent rewrites queries and retries) recovered every miss (agentic recall 0.9 strict)
+dense/fts/hybrid: one search call with the raw question (component diagnostics). **agentic**: pages actually retrieved by the production loop — the agent rewrites queries, retries, and picks tools — replayed from the 94 archived end-to-end runs (recall over the whole turn, zero extra API cost).
+
+- P1 hybrid ≥ 0.85: **FAIL** (0.814) — single-shot proxy; the production path (agent rewrites queries and retries) recovers the misses (agentic mean 0.956)
 - P2 hybrid ≥ both single modes: **PASS**
 - P3 non-English items FTS-only ≤ 0.2: **FAIL** (0.624) — a design-assumption bet that the lexical leg would be useless off-English; falsified in the GOOD direction (English tickers/terms inside non-English questions still match). Non-English items score 1.0 correctness end-to-end
 - P4 table_numeric dense < fts: **FAIL** (0.708 vs 0.708) — a which-leg-is-stronger bet, falsified; the fused result on these items is 0.833

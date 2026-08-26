@@ -33,7 +33,8 @@ expanded set; hallucination 0/15 on unanswerable questions; prompt-injection can
 on both untrusted surfaces; watermark/contact-info leaks 0; multi-turn 5/5; attachment
 input 10/10; figure-crop accuracy 0.80–0.82 across two runs. Single-shot hybrid retrieval
 recall@10 is 0.814 on 94 items — below its preregistered 0.85 threshold and reported as
-such (the agent's own query rewriting recovers the misses: agentic recall 0.9). Full
+such; the production loop (the agent rewrites queries, retries, and picks tools) reaches
+0.956 on the same 94 items, replayed from the archived end-to-end runs. Full
 detail in [`eval/validation_report.md`](eval/validation_report.md) and DESIGN.md Appendix A.
 
 ## Deliverables map (per the case-study brief)
