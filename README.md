@@ -47,34 +47,78 @@ detail in [`eval/validation_report.md`](eval/validation_report.md) and DESIGN.md
 | References back to the original page/figure | every answer cites `[broker, date, p.N]`, links into the PDF at that page, and embeds the located figure |
 | Instructions to run locally | this README (Quick start · Full ingestion · Local development) |
 
-## Quick start (fixture path — no ingestion cost, ~3 minutes)
+## Requirements
+
+| What | Version / note |
+|---|---|
+| macOS or Linux | Windows works via WSL2 (`make` and the commands below assume a Unix shell) |
+| Python **3.13** | `brew install python@3.13` / `apt install python3.13` — `make venv` fails without it |
+| Docker Desktop (running) | only used for the Postgres 17 + pgvector container; alternatively see "Local development without Docker" below |
+| An **OpenAI API key of your own** | create one at <https://platform.openai.com/api-keys>; the account needs a small credit balance. Typical spend: a chat question $0.05–0.5, the key-check probe ~$0.0001, a full re-ingestion of the corpus ~$23.5. Chat and ingestion call the API; everything else (tests, doctor, page rendering) is free and offline |
+
+## Quick start (~5 minutes, no ingestion cost)
+
+This is the path for the **submission package** (it contains `fixtures/corpus.json.gz`
+and the 30 PDFs in `case_study/`). Cloned the public repo instead? Skip to
+"Building the index yourself" below.
 
 ```bash
-make venv                     # local Python 3.13 virtualenv
-cp .env.example .env          # add your OpenAI API key
+# 1. Python env (creates .venv and installs requirements)
+make venv
+
+# 2. Your API key — the ONLY secret, lives only in .env (git-ignored)
+cp .env.example .env
+#    → edit .env: OPENAI_API_KEY=sk-your-own-key
 export $(grep -v '^#' .env | xargs)
-make demo                     # db + migrate + load index fixture + re-render PNGs + server
-make doctor                   # verify the whole stack is ready (zero API cost)
+
+# 3. Database + index + page images + server (Docker must be running)
+make demo
 ```
 
-Open http://127.0.0.1:8000 .
+What `make demo` does, in order: starts the Postgres container → applies migrations →
+loads the prebuilt index (453 objects: 30 documents, 423 page transcriptions with
+embeddings) → re-renders page PNGs locally from the PDFs (~1–2 min, free) → starts the
+server. Leave it running and open **http://127.0.0.1:8000** — you should see the chat
+page with the corpus summary ("30 reports covering 2025-06-12 to 2025-09-29 ...") in
+the header and suggested questions to click. Ctrl+C stops the server; `make demo`
+starts it again (already-done steps are skipped).
 
-> **Corpus & fixture note:** the source PDFs are licensed broker research, and the
-> 2.6 MB index fixture embeds their transcribed content — so neither is committed
-> here. Both ship in the private submission package. With the fixture in `fixtures/`
-> and the PDFs in `case_study/`, `make demo` gives the full experience (fixture →
-> instant index; PDFs → page images via `make render`, local and free). Without
-> them, point the pipeline at any research PDFs of your own and rebuild with
-> `make ingest`.
+To double-check the stack at any point:
 
-## Full ingestion path (rebuilds the index from PDFs, ~1 h / ~$23.5)
+```bash
+make doctor                                    # 12 checks, zero API cost → "Environment ready ✓"
+.venv/bin/python manage.py doctor --probe      # + one ~$0.0001 live call proving YOUR key works
+```
+
+> **Why the public repo has no fixture/PDFs:** the source PDFs are licensed broker
+> research and the 2.6 MB index fixture embeds their transcribed content, so neither
+> is committed publicly. Both are included in the private submission package.
+
+## Building the index yourself (~1 h / ~$23.5, or your own PDFs)
+
+If you don't have the submission package: put research PDFs into `case_study/`
+(any PDFs work), then:
 
 ```bash
 make venv && cp .env.example .env   # add your key, then:
 export $(grep -v '^#' .env | xargs)
 docker compose up -d db
-make migrate ingest
+make migrate ingest                 # renders, transcribes, validates, indexes every page
+.venv/bin/python manage.py runserver
 ```
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `make venv` → `python3.13: command not found` | install Python 3.13 (see Requirements) |
+| `make demo` → `Cannot connect to the Docker daemon` | start Docker Desktop first |
+| Postgres port conflict (`5432 already in use`) | stop the local Postgres, or run without Docker (section below) |
+| Chat answers fail with `Upstream call failed` | key missing/invalid or no credit — run `manage.py doctor --probe`; every check prints a `↳ fix` hint |
+| Page images/thumbnails missing | `make render` (re-renders locally from the PDFs, free) |
+| Header says the knowledge base is empty | the index isn't loaded — run `make demo` (fixture path) or `make ingest` |
+
+`make doctor` diagnoses all of the above in one shot and prints a fix hint per failure.
 
 ## Adding more documents
 
