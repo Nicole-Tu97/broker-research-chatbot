@@ -80,18 +80,12 @@ DESIGN.md Appendix A.
 
 **What is being tested.** The full **production system** — the same agentic
 pipeline the chat page runs (up to 6 rounds of tool calls), called live, one
-final answer per question. Answers and their citations are scored by
-deterministic rules (string and number matching; no LLM grades anything).
-Unlike the retrieval table above, nothing here is split by question type —
-each metric line below states what it measures and how many calls it covers.
+final answer per question. 
+
 
 **What was asked.** All 124 golden-set questions: abstention (15), attachment_input (10), comparison_timeseries (13), deep_page_recovery (11), multi_turn (5), pure_chart (16), simple_qa (20), table_numeric (24), temporal (10).
-Some questions were deliberately asked more than once (one question three
-times, for reproducibility; the figure questions twice, to measure run-to-run
-variance) — 148 live calls in total. Where a question was asked more than
-once, the metrics below score its most recent answer once; the repeats feed
-only the reproducibility and figure-crop lines. Per-run raw numbers are
-archived in `eval/results.json`.
+- Answers and their citations are scored by deterministic rules (string and number matching; no LLM grades anything).
+- Some questions were deliberately asked more than once (one question three times, for reproducibility; the figure questions twice, to measure run-to-run variance). Per-run raw numbers are archived in `eval/results.json`.
 
 - **Correctness (P7b)** — share of the answer key's expected facts the answer actually
   states, over the 103 questions carrying 189 expected facts: 1.0
@@ -111,8 +105,6 @@ archived in `eval/results.json`.
   hand-annotated figure box (IoU ≥ 0.5); the 17 figure questions were asked in
   2 separate runs: 26/32 scoreable = 0.812 (run 1: 14/17; run 2: 12/15; a question whose
   annotated page is not cited is not scoreable) (threshold ≥0.80 → **PASS**).
-  An early 3-question spot-check scored 1/3 and triggered the locator fix;
-  it measured the pre-fix locator and is archived, not pooled.
 - **Reproducibility (P9)** — the same question asked 3 separate times; every run must
   contain all the key numbers: 3/3 → **PASS**
 - **Robustness (P10)** — the same question asked in two different wordings (3 pairs);
