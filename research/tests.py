@@ -627,7 +627,7 @@ class ValidationReportTemplateTests(SimpleTestCase):
         "**Acceptance bar — judged on the production (agentic) column.**",
         "- Overall mean ≥ 0.90:",
         "**One weak spot to note.**",
-        "DESIGN.md Appendix A.",
+        "DESIGN.md §7",
         "## Behavior validation (end-to-end)",
         "**What is being tested.**",
         "**What was asked.**",

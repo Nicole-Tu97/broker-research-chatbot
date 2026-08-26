@@ -5,12 +5,12 @@ python manage.py evaluate [--retrieval] [--behavior] [--skip-injection]
 - Retrieval ablation: golden-set questions go verbatim through search_pages (one pass
   each for dense/fts/hybrid); recall@10 is scored against expected_pages. This is a
   conservative proxy for the production path (model-rewritten queries); the direction
-  of the bias is declared up front in the preregistered predictions (DESIGN.md Appendix A).
+  of the bias is declared up front in the preregistered predictions (DESIGN.md §7).
 - Behavior validation: end-to-end chat with deterministic scoring (groundedness /
   abstention / reproducibility / robustness / injection / watermark); methodology
   inherited from llm-validation-harness.
 - Outputs: eval/results.json + eval/validation_report.md (scored against preregistered
-  thresholds, see DESIGN.md Appendix A).
+  thresholds, see DESIGN.md §5/§7).
 """
 
 import json
@@ -639,9 +639,9 @@ class Command(BaseCommand):
                     L.append("keep the single-shot hybrid results as a floor (or route by question type) so the")
                     L.append(f"agent's choices can only add pages, never lose them; hybrid alone already scores")
                     L.append(f"{dp['hybrid']} on this type.\n")
-            L.append("The preregistered design-phase predictions about the retriever's internals (P1–P6)")
+            L.append("The preregistered design-phase predictions about the retriever's internals")
             L.append("and their outcomes — including the falsified ones, kept unrevised — are recorded in")
-            L.append("DESIGN.md Appendix A.")
+            L.append("DESIGN.md §7 (what I tried that didn't work).")
             L.append("")
         b = results.get("behavior")
         if b:
@@ -782,5 +782,5 @@ class Command(BaseCommand):
             L.append(f"  answer: {wm_leaks} leak(s) across all {wm_ans} archived answers → **{'PASS' if not wm_leaks else 'FAIL'}**")
             L.append(f"\nBehavior validation total API cost: ${cost}")
         L.append("\n---\nDetails in `eval/results.json`. Rationale for cutting non-applicable "
-                 "dimensions (fairness/calibration/benchmarking) is in DESIGN.md §10.")
+                 "dimensions (fairness/calibration/benchmarking) is in DESIGN.md §6.")
         return "\n".join(L)

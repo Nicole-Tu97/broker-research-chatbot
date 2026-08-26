@@ -35,7 +35,7 @@ leaks 0 across 145 answers; multi-turn 5/5; attachment input 10/10; figure-crop 
 production loop (the agent rewrites queries, retries, and picks tools): recall@10 reaches
 0.956 on 94 golden-set items, clearing the 0.90 acceptance bar; single-shot hybrid
 retrieval alone scores 0.814 on the same items. Full detail in
-[`eval/validation_report.md`](eval/validation_report.md) and DESIGN.md Appendix A.
+[`eval/validation_report.md`](eval/validation_report.md) and DESIGN.md.
 
 ## Deliverables map (per the case-study brief)
 
@@ -43,7 +43,7 @@ retrieval alone scores 0.814 on the same items. Full detail in
 |---|---|
 | Django app with a functional chatbot interface | `research/` app — chat UI at `/` (SSE streaming, page-level citations, inline figures) |
 | Data pipeline: how PDFs are processed and indexed | `research/management/commands/ingest.py` (discover → render → transcribe → validate → index) + transcription benchmark in `bench/` |
-| Documentation: choices, trade-offs, what didn't work, deliberate omissions | [`DESIGN.md`](DESIGN.md) — incl. §10 deliberately-not-built, §11 known limits, Appendix A with two falsified predictions kept as-is |
+| Documentation: choices, trade-offs, what didn't work, deliberate omissions | [`DESIGN.md`](DESIGN.md) — incl. §6 simplified-for-clarity, §7 what didn't work, §8 known limits & future directions |
 | Retrieval quality evidence | `manage.py evaluate` → [`eval/validation_report.md`](eval/validation_report.md) (retrieval ablation + 6 behavior dimensions) |
 | References back to the original page/figure | every answer cites `[broker, date, p.N]`, links into the PDF at that page, and embeds the located figure |
 | Instructions to run locally | this README (Quick start · Full ingestion · Local development) |
@@ -144,8 +144,13 @@ The corpus is a directory of PDFs — expanding it is an operation, not a code c
 3. Nothing else to update: the corpus boundary in the system prompt, broker lists, and
    ticker page hints are computed from the database at request time.
 
-Scaling beyond thousands of documents (batch ingestion, index partitioning, when a
-pre-extracted facts table starts to pay) is mapped out in DESIGN.md §9.
+Scaling beyond thousands of documents — the measured migration points, in order:
+batch ingestion (Celery) once single-process ingest becomes the bottleneck; object
+storage for page assets (`png_path` is already relative); per-language full-text
+configs for non-English corpora; a dedicated lexical engine (BM25/Elasticsearch)
+when keyword search outgrows Postgres; a rating facts table once `list_reports`
+matches exceed ~50 reports. The design reasoning behind each trigger is in
+DESIGN.md §8.
 
 ## Configuration — API key and models
 
@@ -172,8 +177,8 @@ make test                             # full test suite; the deterministic core 
                                       # eval/results.json + report already hold the results
 ```
 
-Evaluation is pre-registered: see `DESIGN.md` Appendix A for all 12 predictions
-vs. outcomes — including the two the data went on to falsify.
+Evaluation is pre-registered — twelve predictions with fixed thresholds, registered
+before the first run; the two the data falsified are kept, unrevised, in DESIGN.md §7.
 
 ## Layout
 

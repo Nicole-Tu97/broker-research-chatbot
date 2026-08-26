@@ -12,7 +12,7 @@ Rules: symbols match case-sensitively (guards against uppercased common words li
 "AI"/"ON"); company names match case-insensitively. Semantics are mentioned tickers
 (tag on any mention); combined with ticker_pages, the model reading the source text
 judges relevance itself. At thousand-document scale, the migration point is wiring
-in a security master (DESIGN.md §9).
+in a security master (DESIGN.md §8).
 """
 
 import re

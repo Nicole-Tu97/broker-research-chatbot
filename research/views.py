@@ -35,7 +35,7 @@ def index(request):
                   {"boundary": chat_mod.corpus_boundary()})
 
 
-@csrf_exempt  # internal demo, no auth surface (DESIGN.md §10)
+@csrf_exempt  # internal demo, no auth surface (DESIGN.md §6)
 @require_POST
 def chat_api(request):
     text = (request.POST.get("message") or "").strip()

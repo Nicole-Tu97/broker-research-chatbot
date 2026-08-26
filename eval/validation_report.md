@@ -59,9 +59,9 @@ keep the single-shot hybrid results as a floor (or route by question type) so th
 agent's choices can only add pages, never lose them; hybrid alone already scores
 0.909 on this type.
 
-The preregistered design-phase predictions about the retriever's internals (P1–P6)
+The preregistered design-phase predictions about the retriever's internals
 and their outcomes — including the falsified ones, kept unrevised — are recorded in
-DESIGN.md Appendix A.
+DESIGN.md §7 (what I tried that didn't work).
 
 ## Behavior validation (end-to-end)
 
@@ -131,4 +131,4 @@ so every score is exactly reproducible.
 Behavior validation total API cost: $20.34
 
 ---
-Details in `eval/results.json`. Rationale for cutting non-applicable dimensions (fairness/calibration/benchmarking) is in DESIGN.md §10.
+Details in `eval/results.json`. Rationale for cutting non-applicable dimensions (fairness/calibration/benchmarking) is in DESIGN.md §6.
