@@ -29,6 +29,67 @@ pgvector, single LLM vendor (OpenAI Responses API — the only API shape whose
 `function_call_output` carries images, verified live). Two Docker services. Three
 tables. Two tools. No queue, no reranker, no fact table, no framework.
 
+The same architecture as one picture (red edges mark the agentic decision
+surface — where the LLM, not fixed code, decides what happens next):
+
+```mermaid
+flowchart TB
+    subgraph SEED["OFFLINE — Seeding the knowledge base (runs once)"]
+        direction TB
+        DOCS[/"30 PDFs · 423 pages"/]
+        DOCS --> P0["Parsing:<br/>full-page PNG + native text layer<br/>→ per-page markdown transcription"]
+        P0 --> P1["Chunking: none —<br/>one page = one retrieval unit"]
+        P1 --> P2["Embedding per page<br/>+ metadata extraction + numeric validation"]
+    end
+
+    PG[("Postgres — ONE hybrid store per page:<br/>vector (semantic) · full-text (keywords) ·<br/>metadata columns (broker · date · tickers · png_path …)")]
+    IMG[("Page-image store (page_assets/) — one PNG<br/>per page, referenced by png_path in Postgres")]
+
+    A(("LLM AGENT<br/>system prompt carries live corpus<br/>boundary + behavior rules"))
+
+    subgraph TOOLS["RETRIEVAL TOOLS — picked by the agent (single or combined)"]
+        direction TB
+        SP["search_pages — thematic /<br/>specific-fact questions:<br/>hybrid retrieval (semantic + full-text)"]
+        LRT["list_reports — comparative /<br/>temporal questions:<br/>exact SQL over metadata (broker/ticker/date …),<br/>all matches guaranteed"]
+    end
+
+    U["USER — web chat<br/>text · image · PDF"]
+
+    CK["DETERMINISTIC CHECKS — code-based guardrails, no LLM:<br/>grounding badges (every number vs its cited page)<br/>+ recency labels for superseded reports"]
+    FIG["FIGURE LOCATOR — one vision call: locates and<br/>crops relevant figures from cited pages (max 2)"]
+
+    SEED -- "seeding" --> PG
+    SEED -- "renders one PNG per page" --> IMG
+    U -- "ask a question" --> A
+    A -- "tool calls: the agent writes its own<br/>search words, picks the tool, sets filters" --> TOOLS
+    TOOLS -- "retrieved results + ORIGINAL page images —<br/>the agent judges and repeats (up to 6 rounds) until enough" --> A
+    PG <-- "semantic search /<br/>exact SQL" --> TOOLS
+    IMG -. "ORIGINAL page image, fetched via the<br/>png_path on the retrieved row,<br/>attached to tool results" .-> TOOLS
+    A -- "draft answer" --> CK
+    CK -- "streamed, cited answer + final payload" --> U
+    CK -. "cited visual pages" .-> FIG
+    FIG -. "cropped figure shown in the answer" .-> U
+    SEED ~~~ U
+
+    %% Red edges = the agentic decision surface: outbound, the agent phrases its own
+    %% queries, picks tools and filters; on the return, it judges sufficiency and repeats.
+    %% linkStyle indexes edges in order of appearance (subgraph-internal edges included).
+    linkStyle 6,7 stroke:#EC111A,stroke-width:2.5px;
+
+    classDef user fill:#e8f5e9,stroke:#2e7d32,color:#1f2329;
+    classDef tool fill:#fff7e6,stroke:#b45309,color:#1f2329;
+    classDef agent fill:#FDF0F0,stroke:#EC111A,stroke-width:2.5px,color:#1f2329;
+    classDef store fill:#eef2f7,stroke:#5f6b7a,color:#1f2329;
+    classDef det fill:#ffffff,stroke:#0e7a3d,stroke-dasharray:6 4,color:#1f2329;
+    classDef llm fill:#FDF0F0,stroke:#EC111A,stroke-dasharray:4 3,color:#1f2329;
+    class U user;
+    class SP,LRT tool;
+    class A agent;
+    class DOCS,PG,IMG store;
+    class CK det;
+    class FIG llm;
+```
+
 ## 3. Measure first: what the corpus actually is
 
 I measured all 30 PDFs page-by-page before designing (and re-measured after an
