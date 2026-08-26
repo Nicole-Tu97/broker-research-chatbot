@@ -92,10 +92,26 @@ The corpus is a directory of PDFs — expanding it is an operation, not a code c
 Scaling beyond thousands of documents (batch ingestion, index partitioning, when a
 pre-extracted facts table starts to pay) is mapped out in DESIGN.md §9.
 
+## Configuration — API key and models
+
+All runtime configuration is environment variables (read in `config/settings.py`);
+nothing is hardcoded and no key is ever committed.
+
+- **Use your own OpenAI key:** `cp .env.example .env`, set `OPENAI_API_KEY=sk-...`,
+  then `export $(grep -v '^#' .env | xargs)`. To change the key later, edit `.env`
+  and re-export (or restart the server) — that is the only place it lives.
+- **Verify it works:** `make doctor` (free stack check) or
+  `.venv/bin/python manage.py doctor --probe` (one ~$0.0001 live API call).
+- **Swap models:** `OPENAI_VISION_MODEL` (chat + transcription) is drop-in.
+  `OPENAI_EMBED_MODEL` / embedding dimensions are **not** drop-in — vectors from a
+  different embedding model are incompatible, so changing them means re-running
+  `make ingest`.
+- Every external call lives in one file: `research/providers.py`.
+
 ## Tests & evaluation
 
 ```bash
-make test                             # 42 tests; deterministic core needs no API key
+make test                             # 45 tests; deterministic core needs no API key
 .venv/bin/python manage.py evaluate   # retrieval ablation + 6-dimension behavior validation
 ```
 
