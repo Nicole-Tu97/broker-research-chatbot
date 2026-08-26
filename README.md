@@ -104,7 +104,9 @@ make doctor                                    # environment checkup, zero API c
 
 > **Why the public repo has no fixture/PDFs:** the source PDFs are licensed broker
 > research and the 2.6 MB index fixture embeds their transcribed content, so neither
-> is committed publicly. Both are included in the private submission package.
+> is committed publicly — and the transcription benchmark's ground-truth answer key
+> (verbatim content of 20 pages) is kept out for the same reason. All three are
+> included in the private submission package.
 
 ## Building the index yourself (~1 h / ~$23.5, or your own PDFs)
 
@@ -198,7 +200,8 @@ research/            the app
   management/commands/evaluate.py   retrieval ablation + behavior validation → report
   management/commands/doctor.py     environment checkup, one fix hint per failure
 bench/               transcription benchmark: 20 ground-truth pages rendered at
-                     several DPI tiers → picks the cheapest setting that stays accurate
+                     several DPI tiers → picks the cheapest setting that stays
+                     accurate (the answer key ships in the submission package)
 eval/
   golden_set.json        all 124 test questions, each with its grading rule attached
   results.json           raw outcomes of every evaluation run (per item, per run)
