@@ -146,9 +146,9 @@ class Command(BaseCommand):
                 doc.published_date = content_date
                 self.stdout.write(f"  [meta] date backfilled from page 1: {content_date}")
             elif content_date and doc.published_date and content_date != doc.published_date:
-                self.stderr.write(
-                    f"  [meta] date mismatch: filename {doc.published_date} vs page 1 {content_date}"
-                    " (keeping filename value; logged)")
+                self.stdout.write(
+                    f"  [meta] note: filename date {doc.published_date} differs from the page-1 date"
+                    f" {content_date} - keeping the filename value (report date vs. distribution date)")
 
         # Only advance a PENDING document; --render-only on a loaded fixture must not
 
