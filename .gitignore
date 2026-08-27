@@ -26,3 +26,6 @@ fixtures/
 # benchmark answer key — verbatim content of 20 licensed pages; ships in the
 # private submission package, not the public repo (same policy as fixtures/)
 bench/ground_truth.md
+
+# local demo material: sample transcriptions (licensed page content, not published)
+transcription-samples/
