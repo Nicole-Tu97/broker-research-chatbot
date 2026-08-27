@@ -68,7 +68,8 @@ and the 30 PDFs in `case_study/`). Cloned the public repo instead? Skip to
 # 0. One-time prerequisites (macOS with Homebrew shown; Linux: apt install python3.13 + Docker Engine)
 brew install python@3.13
 brew install --cask docker
-#    → launch Docker Desktop once and leave it running
+#    → Homebrew asks for your Mac login password here (typing is invisible) to link the docker command
+#    → then launch Docker Desktop once and leave it running
 unzip broker-research-chatbot.zip
 cd broker-research-chatbot
 
