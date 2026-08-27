@@ -37,12 +37,12 @@ flowchart TB
     subgraph SEED["OFFLINE — Seeding the knowledge base (runs once)"]
         direction TB
         DOCS[/"30 PDFs · 423 pages"/]
-        DOCS --> P0["Parsing:<br/>full-page PNG + native text layer<br/>→ per-page markdown transcription"]
+        DOCS --> P0["Parsing:<br/>full-page PNG + native text layer<br/>→ per-page markdown transcription<br/>+ has_visual flag (the model marks pages that carry a chart, table or image)"]
         P0 --> P1["Chunking: none —<br/>one page = one retrieval unit"]
         P1 --> P2["Embedding per page<br/>+ metadata extraction + numeric validation"]
     end
 
-    PG[("Postgres — three tables<br/>Document: broker · date · title · tickers<br/>Page: document_id (→ Document) · page no. · transcription · embedding · full-text · png_path<br/>Conversation: id · messages")]
+    PG[("Postgres — three tables<br/>Document: broker · date · title · tickers<br/>Page: document_id (→ Document) · page no. · transcription · has_visual · embedding · full-text · png_path<br/>Conversation: id · messages")]
     IMG[("Page-image store (page_assets/) — one PNG<br/>per page, referenced by png_path in Postgres")]
 
     A(("LLM AGENT<br/>system prompt carries live corpus<br/>boundary + behavior rules"))
@@ -67,7 +67,7 @@ flowchart TB
     IMG -. "ORIGINAL page image, fetched via the<br/>png_path on the retrieved row,<br/>attached to tool results" .-> TOOLS
     A -- "draft answer" --> CK
     CK -- "streamed, cited answer + final payload" --> U
-    CK -. "cited visual pages" .-> FIG
+    CK -. "only cited pages whose stored<br/>has_visual flag is true" .-> FIG
     FIG -. "cropped figure shown in the answer" .-> U
     SEED ~~~ U
 
@@ -161,8 +161,10 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 - *In model context:* pages with visuals return their original image inside the tool
   result (Responses API), for both tools — so a transcription omission is
   recoverable at query time.
-- *In the answer:* one isolated vision call per cited visual page (capped at 2)
-  makes a three-way call — a question-relevant chart/table exists → its bounding box
+- *In the answer:* one isolated vision call per cited page whose `has_visual` flag —
+  set by the model at transcription time and stored on the Page row — is true (capped at 2);
+  text-only pages never trigger the locator. The call
+  is a three-way decision — a question-relevant chart/table exists → its bounding box
   is located and the server re-renders just that region from the PDF (PyMuPDF clip;
   no new dependency, no new storage) as an inline card; the page as a whole IS the
   visual (a chart slide) → the full page embeds; the page's contribution is textual
