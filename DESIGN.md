@@ -42,7 +42,7 @@ flowchart TB
         P1 --> P2["Embedding per page<br/>+ metadata extraction + numeric validation"]
     end
 
-    PG[("Postgres — three tables<br/>Document: broker · date · title · tickers<br/>Page: transcription · embedding · full-text · png_path<br/>Conversation: id · messages")]
+    PG[("Postgres — three tables<br/>Document: broker · date · title · tickers<br/>Page: document_id (→ Document) · page no. · transcription · embedding · full-text · png_path<br/>Conversation: id · messages")]
     IMG[("Page-image store (page_assets/) — one PNG<br/>per page, referenced by png_path in Postgres")]
 
     A(("LLM AGENT<br/>system prompt carries live corpus<br/>boundary + behavior rules"))
