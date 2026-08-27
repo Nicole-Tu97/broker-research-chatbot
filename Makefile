@@ -24,7 +24,8 @@ render:        ## Only re-render page PNGs (use after loaddata, zero API calls)
 demo:          ## Shortest path after clone: database + migrate + fixture + re-render PNGs + serve
 	@test -f fixtures/corpus.json.gz || \
 		(echo "fixture ships with the delivery package (contains licensed content, kept out of the public repo) — or build your own with make ingest"; exit 1)
-	docker compose up -d db
+	@if command -v docker >/dev/null 2>&1; then docker compose up -d db; \
+	else echo "docker not found — assuming a local Postgres on 127.0.0.1:5432 (README: Local development without Docker)"; fi
 	$(PY) manage.py migrate
 	$(PY) manage.py loaddata fixtures/corpus.json.gz
 	$(PY) manage.py ingest --render-only

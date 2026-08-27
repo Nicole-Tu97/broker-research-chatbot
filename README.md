@@ -127,6 +127,7 @@ make migrate ingest                 # renders, transcribes, validates, indexes e
 |---|---|
 | `make venv` → `python3.13: command not found` | install Python 3.13 (see Requirements) |
 | `make demo` → `Cannot connect to the Docker daemon` | start Docker Desktop first |
+| `make demo` → `make: docker: No such file or directory` | Docker isn't installed. Either install Docker Desktop, or run Postgres locally ("Local development without Docker" below) — `make demo` then skips the container step by itself |
 | Postgres port conflict (`5432 already in use`) | stop the local Postgres, or run without Docker (section below) |
 | Chat answers fail with `Upstream call failed` | key missing/invalid or no credit — run `manage.py doctor --probe`; every check prints a `↳ fix` hint |
 | Page images/thumbnails missing | `make render` (re-renders locally from the PDFs, free) |
@@ -222,7 +223,13 @@ brew install postgresql@17 pgvector
 LC_ALL=en_US.UTF-8 /opt/homebrew/opt/postgresql@17/bin/pg_ctl -D /opt/homebrew/var/postgresql@17 start
 createdb research && psql research -c "CREATE EXTENSION vector"
 make venv migrate test
+.venv/bin/python manage.py loaddata fixtures/corpus.json.gz   # submission package only
+make render
+.venv/bin/python manage.py runserver
 ```
+
+With a local Postgres running, plain `make demo` works too — without Docker it skips
+the container step and uses the database on 127.0.0.1:5432.
 
 ## License
 
