@@ -65,12 +65,20 @@ and the 30 PDFs in `case_study/`). Cloned the public repo instead? Skip to
 "Building the index yourself" below.
 
 ```bash
+# 0. One-time prerequisites (macOS with Homebrew shown; Linux: apt install python3.13 + Docker Engine)
+brew install python@3.13
+brew install --cask docker
+#    → launch Docker Desktop once and leave it running
+unzip broker-research-chatbot.zip
+cd broker-research-chatbot
+
 # 1. Python env (creates .venv and installs requirements)
 make venv
 
 # 2. Your API key — the ONLY secret, lives only in .env (git-ignored)
 cp .env.example .env
 #    → edit .env: OPENAI_API_KEY=sk-your-own-key
+#      (the submission package ships with a key already filled in — nothing to edit)
 export $(grep -v '^#' .env | xargs)
 
 # 3. Database + index + page images + server (Docker must be running)
