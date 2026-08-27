@@ -58,35 +58,68 @@ retrieval alone scores 0.814 on the same items. Full detail in
 | Docker Desktop (running) | only used for the Postgres 17 + pgvector container; alternatively see "Local development without Docker" below |
 | An **OpenAI API key of your own** | create one at <https://platform.openai.com/api-keys>; the account needs a small credit balance. Typical spend: a chat question $0.05–0.5, the key-check probe ~$0.0001, a full re-ingestion of the corpus ~$23.5. Chat and ingestion call the API; everything else (tests, doctor, page rendering) is free and offline |
 
-## Quick start (~5 minutes, no ingestion cost)
+## Quick start (~5 minutes after the one-time installs, no ingestion cost)
 
 This is the path for the **submission package** (it contains `fixtures/corpus.json.gz`
 and the 30 PDFs in `case_study/`). Cloned the public repo instead? Skip to
-"Building the index yourself" below.
+"Building the index yourself" below. Every command below is meant to be pasted on its
+own line; nothing else is required beyond what is written here.
+
+**Step 0 — one-time installs** (macOS with Homebrew shown; Linux: `apt install
+python3.13` and Docker Engine; Windows: use WSL2). Homebrew asks for your Mac login
+password once — typing is invisible, press Enter when done.
 
 ```bash
-# 0. One-time prerequisites (macOS with Homebrew shown; Linux: apt install python3.13 + Docker Engine)
 brew install python@3.13
 brew install --cask docker
-#    → Homebrew asks for your Mac login password here (typing is invisible) to link the docker command
-#    → then launch Docker Desktop once and leave it running
+```
+
+**Step 1 — start Docker Desktop and wait until it is running.** Open it (command
+below, or click it in Launchpad). On first launch accept the terms; signing in is
+optional — skip it. Wait until the whale icon in the menu bar stops animating.
+
+```bash
+open -a Docker
+```
+
+Confirm Docker is ready — this must print a version, not an error, before you continue:
+
+```bash
+docker compose version
+```
+
+**Step 2 — open a terminal inside the project folder.** Either double-click the ZIP in
+Finder and open a terminal in the `broker-research-chatbot` folder it creates, or:
+
+```bash
+cd ~/Downloads
 unzip broker-research-chatbot.zip
 cd broker-research-chatbot
+```
 
-# 1. Python env (creates .venv and installs requirements)
+**Step 3 — Python environment** (creates `.venv` and installs the five requirements):
+
+```bash
 make venv
+```
 
-# 2. Your API key — the ONLY secret, lives only in .env (git-ignored)
+**Step 4 — activate the API key.** The submission package ships with a temporary key
+already filled in, so this just activates it. (Using your own key instead? After the
+`cp`, edit `.env` and set `OPENAI_API_KEY=sk-your-own-key`, then run the `export`.)
+
+```bash
 cp .env.example .env
-#    → edit .env: OPENAI_API_KEY=sk-your-own-key
-#      (the submission package ships with a key already filled in — nothing to edit)
 export $(grep -v '^#' .env | xargs)
+```
 
-# 3. Database + index + page images + server (Docker must be running)
+**Step 5 — database, index, page images, server:**
+
+```bash
 make demo
 ```
 
-What `make demo` does, in order: starts the Postgres container → applies migrations →
+What `make demo` does, in order: starts the Postgres container (the first run also
+downloads its image, ~1 min) → applies migrations →
 loads the prebuilt index (453 objects: 30 documents and 423 page
 transcriptions) → re-renders page PNGs locally from the PDFs (~1–2 min, free) → starts the
 server. Leave it running and open **http://127.0.0.1:8000** — you should see the chat
@@ -136,6 +169,7 @@ make migrate ingest                 # renders, transcribes, validates, indexes e
 |---|---|
 | `make venv` → `python3.13: command not found` | install Python 3.13 (see Requirements) |
 | `make demo` → `Cannot connect to the Docker daemon` | start Docker Desktop first |
+| `make demo` → `unknown shorthand flag: 'd' in -d` or `unknown command: docker compose` | Docker Desktop is installed but has never been started — `open -a Docker`, wait for the whale icon, then re-run |
 | `make demo` → `make: docker: No such file or directory` | Docker isn't installed. Either install Docker Desktop, or run Postgres locally ("Local development without Docker" below) — `make demo` then skips the container step by itself |
 | Postgres port conflict (`5432 already in use`) | stop the local Postgres, or run without Docker (section below) |
 | Chat answers fail with `Upstream call failed` | key missing/invalid or no credit — run `manage.py doctor --probe`; every check prints a `↳ fix` hint |
