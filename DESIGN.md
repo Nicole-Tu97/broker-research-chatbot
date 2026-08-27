@@ -37,7 +37,7 @@ flowchart TB
     subgraph SEED["OFFLINE — Seeding the knowledge base (runs once)"]
         direction TB
         DOCS[/"30 PDFs · 423 pages"/]
-        DOCS --> P0["Parsing:<br/>full-page PNG + native text layer<br/>→ per-page markdown transcription<br/>+ has_visual flag (the model marks pages that carry a chart, table or image)"]
+        DOCS --> P0["Parsing:<br/>full-page PNG + native text layer<br/>→ per-page markdown transcription<br/>+ has_visual flag"]
         P0 --> P1["Chunking: none —<br/>one page = one retrieval unit"]
         P1 --> P2["Embedding per page<br/>+ metadata extraction + numeric validation"]
     end
@@ -55,7 +55,7 @@ flowchart TB
 
     U["USER — web chat<br/>text · image · PDF"]
 
-    CK["DETERMINISTIC CHECKS — code-based guardrails, no LLM:<br/>grounding badges (every number vs its cited page)<br/>+ recency labels for superseded reports"]
+    CK["DETERMINISTIC CHECKS — code-based guardrails:<br/>every number vs its cited page <br/>+ recency labels for superseded reports"]
     FIG["FIGURE LOCATOR — one vision call: locates and<br/>crops relevant figures from cited pages (max 2)"]
 
     SEED -- "seeding" --> PG
@@ -95,22 +95,26 @@ flowchart TB
 I measured all 30 PDFs page-by-page before designing (and re-measured after an
 adversarial review caught four errors in my own first-round numbers):
 
-- **423 pages.** Filename page counts are systematically wrong (12→6, 18→8, 40→32) —
-  metadata must be content-verified, never trusted from names.
-- **The GTC keynote breaks text-only pipelines**: 23 of 70 pages have a completely
-  empty text layer, 58 are near-empty; a load-bearing `$100T` figure exists only as
-  pixels. Multimodal ingestion is a hard requirement, not a nice-to-have.
-- **Chart numbers in broker reports live in the text layer** (one UBS page has 417
-  numeric tokens) — enabling deterministic transcription validation on 350/423 pages.
-- **Six physical size classes**, three documents mix sizes internally (one keynote
-  page is 53.3×30″) — render DPI must be computed per page.
-- **Ticker surface forms**: literal "NVDA" appears in only 21/30 documents; the
-  NVIDIA decks and multi-industry reports say only "NVIDIA". Uppercase "AI" (a real
-  ticker) appears in 29/30. Extraction therefore uses a curated alias dictionary —
-  symbols case-sensitive, company names case-insensitive — never bare symbol matching.
-- **Corpus window is 3.5 months (2025-06-12 → 09-29), not two years; UBS has 1 report.**
-  The honest answer to the exemplar question *declares this boundary* — injected into
-  the system prompt as fact, so "knowing what it doesn't know" is default behavior.
+- **Metadata must be content-verified, never trusted from filenames.** 423 pages in
+  total; the page counts in filenames are systematically wrong (12→6, 18→8, 40→32).
+- **Many pages have no text layer, so ingestion must be multimodal to capture
+  everything — including what exists only inside images.** 23 of the keynote's 70
+  pages have a completely empty text layer and 58 are near-empty; a load-bearing
+  `$100T` figure exists only as pixels. Text-only pipelines miss it entirely.
+- **Transcribed numbers can be verified deterministically, because broker charts keep
+  their numbers in the text layer.** One UBS page carries 417 numeric tokens; the
+  check applies to 350 of 423 pages.
+- **Render resolution must be computed per page, not set once globally.** Six physical
+  page-size classes, and three documents mix sizes internally (one keynote page is
+  53.3×30″).
+- **Ticker extraction needs a curated alias dictionary, not bare symbol matching.**
+  Literal "NVDA" appears in only 21/30 documents — the NVIDIA decks and multi-industry
+  reports say only "NVIDIA" — while uppercase "AI" (a real ticker) appears in 29/30.
+  Symbols match case-sensitively, company names case-insensitively.
+- **The corpus covers 3.5 months, not two years — so declaring the boundary is the
+  default behavior.** 2025-06-12 → 09-29, and UBS has a single report. The window is
+  injected into the system prompt as fact; the honest answer to the exemplar question
+  *declares* it instead of extrapolating.
 
 ## 4. The architecture core: chunking, embedding, retrieval — and the rules the model answers under
 
