@@ -42,7 +42,7 @@ flowchart TB
         P1 --> P2["Embedding per page<br/>+ metadata extraction + numeric validation"]
     end
 
-    PG[("Postgres — three tables<br/>Document (one row per report): filename · content hash · broker · date · title · tickers · ticker→pages map · page count · status<br/>Page (one row per page): document · page no. · raw text · markdown transcription · has_visual · png_path · embedding (1024-d vector) · search_vector (full text) · numeric flags<br/>Conversation (one row per chat): id · messages · created / updated")]
+    PG[("Postgres — three tables<br/>Document (one row per report): filename · content hash · broker ·<br/>date · title · tickers · ticker→pages map · page count · status<br/>Page (one row per page): document · page no. · raw text · markdown<br/>transcription · has_visual · png_path · embedding (1024-d vector) ·<br/>search_vector (full text) · numeric flags<br/>Conversation (one row per chat): id · messages · created / updated")]
     IMG[("Page-image store (page_assets/) — one PNG<br/>per page, referenced by png_path in Postgres")]
 
     A(("LLM AGENT<br/>system prompt carries live corpus<br/>boundary + behavior rules"))
