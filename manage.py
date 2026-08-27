@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""Django command-line entry point.
+
+Every management command runs through here: migrate, runserver, test, and this
+project's own commands - ingest (PDF -> index), evaluate (golden-set validation),
+doctor (environment checkup).
+"""
 import os
 import sys
 

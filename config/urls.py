@@ -1,3 +1,9 @@
+"""URL routing.
+
+Maps every path the app serves to its view: the chat page, the SSE chat API, page
+images (full or cropped) for citations and figure cards, the original PDF for
+click-through, and a health check.
+"""
 from django.http import JsonResponse
 from django.urls import path
 
