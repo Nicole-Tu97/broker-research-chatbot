@@ -232,27 +232,31 @@ DESIGN.md (§5 method, §7 what didn't work).
 ```
 config/              Django project (settings / urls / asgi)
 research/            the app
+  models.py          the three tables: Document / Page / Conversation
   providers.py       ALL external API calls (OpenAI Responses API, zero SDK deps)
   tools.py           the two retrieval tools + their schemas (same file, no drift)
-  chat.py            function-calling loop, grounding badges, recency labels
-  models.py          the three tables: Document / PageTranscription / Conversation
-  views.py, templates/              chat UI and the SSE streaming endpoint
+  chat.py            function-calling loop, grounding badges, recency labels, figure locator
+  views.py           chat page, the SSE streaming chat API, page-image and PDF endpoints
+  templates/         chat.html — the single-page chat UI (streaming, citations, figure cards)
   metadata.py        filename → broker/date/title parsing
   tickers.py         deterministic ticker alias extraction
   numeric.py         transcription numeric validation (normalized multiset diff)
-  management/commands/ingest.py     PDF → render → transcribe → validate → index
-  management/commands/evaluate.py   retrieval ablation + behavior validation → report
-  management/commands/doctor.py     environment checkup, one fix hint per failure
-bench/               transcription benchmark: 20 ground-truth pages rendered at
+  tests.py           test suite: pure-function checks + report structure lock (no API key needed)
+  migrations/        database schema history (incl. enabling the pgvector extension)
+  management/commands/
+    ingest.py        PDF → render → transcribe → validate → index
+    evaluate.py      retrieval ablation + behavior validation → report
+    doctor.py        environment checkup, one fix hint per failure
+bench/               parsing (transcription) benchmark: 20 ground-truth pages rendered at
                      several DPI tiers → picks the cheapest setting that stays
-                     accurate (the answer key ships in the submission package)
+                     accurate
 eval/
   golden_set.json        all 124 test questions, each with its grading rule attached
   results.json           raw outcomes of every evaluation run (per item, per run)
   validation_report.md   the generated report — regenerate, never edit by hand
   injection_test.pdf     the planted prompt-injection attachment
 page_assets/         rendered page PNGs — created by `make demo`/`make render`, git-ignored
-fixtures/            index fixture — in the submission package; git-ignored in the public repo
+fixtures/            index fixture — stores ready-to-load data for the chatbot
 case_study/          the source PDFs — in the submission package; put your own PDFs here
 .env.example         template for the one secret (OPENAI_API_KEY → your .env)
 ```
