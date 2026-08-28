@@ -223,7 +223,7 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 Every removal traded machinery for legibility; the reversible ones have re-entry
 triggers (§8), and two were closed *with data*.
 
-- **No framework** (LangChain/LlamaIndex) — two tools and one table do not need an
+- **No framework** (LangChain/LlamaIndex) — two retrieval tools and three tables do not need an
   abstraction layer over the abstraction layer.
 - **No planner layer.** Many agentic-RAG stacks add a separate planning/routing step:
   an extra LLM call that decomposes the question and schedules tools before anything
