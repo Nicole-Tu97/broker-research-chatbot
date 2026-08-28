@@ -351,14 +351,16 @@ earned its shape.
 
 **6. The grading script itself judged some correct answers wrong.**
 
-- *What happened:* **Four kinds of correct answer were being marked wrong,** which
-  only became visible once the test set reached 124 questions.
+- *What happened:* **Correct answers written in a different notation were being
+  marked wrong,** which only became visible once the test set reached 124 questions.
 - *Why:* **Same meaning, different notation — and the script treated them as
-  different things.** "17,500 million" versus "17.5 billion"; "3×" versus "3x";
-- *The fix:* **Rules that cover the whole class of notation, not just the four cases
-  seen.** Before comparing, the script converts every number to one standard form
-  (so any "17.5 billion" equals any "17,500 million"), treats × and x as the same
-  character. 
+  different things.** "17,500 million" versus "17.5 billion"; "3×" versus "3x". The
+  answers were right; only the way the number was written differed.
+- *The fix:* **Rules that cover the whole class of notation, not just the cases seen.**
+  Before comparing, the script converts every number to one standard form (so any
+  "17.5 billion" equals any "17,500 million") and treats × and x as the same
+  character. Plain rules, not a model: they cover every instance of these notation
+  types; a genuinely new type of notation would need one more rule.
 - *Verified:* **Every stored answer was re-scored under the corrected rules, in the
   open.** The rules are in the code for anyone to read.
 
