@@ -397,37 +397,29 @@ earned its shape.
 **Future directions — four tracks:**
 
 - **Smarter retrieval, from our own data.**
-  - Keep the single-shot hybrid results as a floor (deep-page recovery: agentic
-    0.818 vs hybrid 0.909), or route by question type — the agent's choices can
-    then only add pages, never lose them.
-  - The general version is a thoroughness dial: today the agent stops when it
-    judges the evidence sufficient; when accuracy outweighs cost, collect
-    candidates exhaustively and let verification decide what enters the answer.
-  - Routing also cuts latency — simple lookups skip the agent rounds.
-  - A reranker joins only if the miss profile changes (candidates present but
-    misranked); today every miss is candidate absence, which reranking cannot fix.
+  - **Keep a hybrid floor.** Single-shot hybrid beats the agent on deep pages (0.909
+    vs 0.818); keep its results as a floor so the agent can only add pages, never lose
+    them.
+  - **A thoroughness dial.** When accuracy matters more than cost, collect candidates
+    exhaustively and let verification decide what enters the answer.
+  - **Route simple questions past the agent.** Fewer rounds, lower latency.
+  - **Reranker only if misses change shape.** Today every miss is a page not retrieved
+    at all — reranking cannot fix that.
 - **Freshness and scale.**
-  - Ingestion is idempotent: a scheduled job keeps the corpus current at
-    ~$0.055/page (live market quotes stay a separate data-feed concern).
-  - At thousands of documents, the measured migration points fire in order: an
-    ingestion queue, object storage for page images, per-language full-text
-    configs, a dedicated lexical engine, and a structured facts table once
-    `list_reports` matches exceed ~50 reports (below that, full first-page
-    context wins).
-  - Precomputed per-document rollups — one offline summary per report, built at
-    ingestion — turn corpus-wide questions ("summarize all 30 reports") back into
-    retrieval questions.
-  - Production deployment adds auth and per-client isolation first, then re-adds the §6
-    cuts as their triggers fire; operational detail lives in the README under "Adding
-    more documents".
+  - **Scheduled ingestion.** Ingestion is idempotent; a scheduled job keeps the corpus
+    current at ~$0.055/page (live quotes remain a separate data-feed concern).
+  - **Scale in measured steps.** Ingestion queue → object storage for page images →
+    per-language full-text → dedicated lexical engine → facts table once
+    `list_reports` matches exceed ~50 reports.
+  - **Per-report rollups.** One offline summary per report at ingestion, so
+    page-by-page questions become retrieval questions.
+  - **Production hardening.** Auth and per-client isolation first, then the §6 cuts as
+    their triggers fire; operational detail in the README.
 - **Wider verification, richer answers.**
-  - Extend the badge to statements: require a short verbatim quote per qualitative
-    claim and string-match it against the cited page — still no LLM judging an LLM.
-  - Draw simple derived charts (a price-target trajectory line) from numbers that
-    are already verified.
-  - Add a conversation list/resume view — transcripts are stored; only the UI is
-    missing.
+  - **Verify statements too.** Require a short verbatim quote per qualitative claim and
+    string-match it against the cited page — still no LLM judging an LLM.
+  - **Draw derived charts.** A price-target line from numbers already verified.
+  - **A conversation list.** Transcripts are stored; only the UI is missing.
 - **A deeper golden set.**
-  - More items in every category tightens the error bars and surfaces rarer
-    failures.
-  - The grading rules are settled, so growing the set is data entry, not code.
+  - **More items per category.** Tighter error bars, rarer failures surfaced.
+  - **Data entry, not code.** The grading rules are settled.
