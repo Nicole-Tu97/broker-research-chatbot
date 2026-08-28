@@ -267,15 +267,12 @@ earned its shape.
 - *What happened:* the full-text leg scored 0.094 recall on 94 items, and its noise
   votes slightly hurt the fused result.
 - *Why:* the keyword search used AND matching — every word of the question had to
-  appear on the same page — and no page contains every word of a long natural-language
-  question. (I had expected this leg to win on exact-number table questions; the
-  data said otherwise.)
+  appear on the same page 
 - *The fix:* match on *any* word instead (OR), then rank pages by how many of the
-  words they contain and how rare those words are (`ts_rank_cd`).
-- *Verified:* keyword-only recall 0.094 → 0.681, hybrid 0.761 → 0.814. The agent's
-  `search_pages` tool *is* this hybrid search, so the fix flowed straight into
-  production: the end-to-end behavior round re-passed at a third of the previous
-  cost ($2.43 vs $7.17) because the agent now lands on the right page in fewer rounds.
+  words they contain and how rare those words are.
+- *Verified:* FTS-only 0.094 → 0.681, hybrid 0.761 → 0.814; the behavior round
+  re-passed at a third of the previous cost ($2.43 vs $7.17) because the agent now
+  lands on the right page in fewer rounds.
 
 **2. Every citation used to ship a full-page screenshot.**
 
@@ -283,40 +280,29 @@ earned its shape.
   cover page of a text report included.
 - *Why:* "more context cannot hurt" is wrong: irrelevant images dilute the answer
   and add nothing an analyst can use.
-- *The fix:* two parts. At parsing time the model now marks every page with a
-  `has_visual` flag — does this page carry a chart, table or image? — stored on the
-  Page row. On that flag sits the figure locator (§4.3): only cited pages flagged
-  `has_visual` are examined, and for those it crops the specific chart, embeds the
-  whole page when the page *is* the chart, or attaches nothing when the answer is
-  summarizable from text. Pages that should deliver a figure do; pages that should be
-  summarized are.
+- *The fix:* the three-way rule in §4.3 — crop the specific chart when one exists;
+  embed the full page only when the page IS the chart; attach nothing when the
+  answer is summarizable from text.
 - *Verified:* the figure-crop metric exists to keep exactly this honest — 0.824 and
   0.80 across two full runs.
 
-**3. The first attempt at figure cropping mostly missed (1 of 3).**
-
-- *What happened:* the first spot-check cropped 1 of 3 figures correctly.
-- *Why:* a vision model's boxes drift — axis labels cut off, the wrong figure, or
-  coordinates outside the page.
-- *The fix:* deterministic coordinate validation with full-page fallback
-  (out-of-range, degenerate, and <8% / >85% boxes all rejected), plus the
-  pixel-dominance gate. A prompt hint that failed to fix its target case and
-  coincided with regressions was reverted — prompt changes must earn their keep.
-- *Verified:* two full 17-question runs, 0.824 and 0.80, both above the 0.80 bar.
-
-**4. One question cost $4.85.**
+**3. One question cost $4.85.**
 
 - *What happened:* a single date-filtered question burned 13 futile tool calls.
-- *Why:* the date filter silently excluded the undated NVIDIA decks, so the agent
-  kept searching without seeing why nothing came back — while re-attaching the same
-  page images every round (115 attachments for 37 distinct pages).
-- *The fix:* the tool now warns explicitly when a date filter excluded undated
-  documents; images are deduplicated within a turn; the cost footer prices cached
-  tokens correctly.
-- *Verified:* same-shape questions returned to normal cost, and the live footer
-  keeps every answer's spend visible.
+- *Why:* NVIDIA's own decks (the keynote, the quarterly presentations) carry no
+  publication date — not in the filename, not on the page — so their `published_date`
+  is empty in the database. A date filter is a SQL range check, and an empty date never
+  falls inside a range, so those documents silently dropped out of every filtered
+  search. The tool just returned "no results"; the agent read that as bad wording and
+  kept re-phrasing — while re-attaching the same page images every round (115
+  attachments for 37 distinct pages).
+- *The fix:* the tool now says explicitly when a date filter excluded undated
+  documents, so the agent drops the filter and retries; images are deduplicated
+  within a turn; the cost footer prices cached tokens correctly.
+- *Verified:* same-shape questions returned to normal cost, and the live footer keeps
+  every answer's spend visible.
 
-**5. Asked about 2023, the bot answered with 2025 data.**
+**4. Asked about 2023, the bot answered with 2025 data.**
 
 - *What happened:* a real user asked for NVDA's 2023 target trajectory; the bot
   volunteered the 2025 data it did have.
@@ -327,7 +313,7 @@ earned its shape.
 - *Verified:* 0/15 deliberately unanswerable questions answered; the user's exact
   question entered the golden set.
 
-**6. One hard question failed three different ways.**
+**5. One hard question failed three different ways.**
 
 - *What happened:* the keynote's "$100T market" question, asked in adversarial
   wording, failed three times — each failure a distinct defect.
@@ -346,7 +332,7 @@ earned its shape.
 - *Verified:* the question now answers $100 trillion citing the keynote page
   itself, and the whole pure-chart category passes end-to-end.
 
-**7. The grading script itself judged some correct answers wrong.**
+**6. The grading script itself judged some correct answers wrong.**
 
 - *What happened:* at 124-item scale, four scorer blind spots surfaced — each had
   marked a correct answer wrong.
