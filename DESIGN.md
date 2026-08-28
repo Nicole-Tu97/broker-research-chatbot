@@ -426,18 +426,15 @@ earned its shape.
     drawn from already-verified numbers, and a conversation history to resume, rename
     and delete past chats.
 - **Verification — in the product and in the evaluation.**
-  - **Verify statements, not only numbers.** Have the model attach a short supporting
-    quote from the source to each claim, then check with code that the quote really
-    exists on the page.
   - **More questions in every category.** Results get more stable and rare errors
     become easier to spot.
   - **Mostly annotation work from here, not new code.** The evaluation framework is
     built; what remains is writing good questions and marking the correct facts and
     source pages.
-  - **Make the validation itself more complete.** Three additions, in order: confidence
-    intervals, earned by more questions per type and repeated runs, so differences
-    between types can be called real or noise; agent-efficiency metrics — rounds,
+  - **Make the validation itself more complete.** Three additions, in order: **confidence
+    intervals**, earned by more questions per type and repeated runs, so differences
+    between types can be called real or noise; **agent-efficiency metrics** — rounds,
     tool calls and cost per answer — reported as columns, not only shown in the live
-    footer; and conflicting-source tests, where two brokers disagree and the answer
-    must show both sides. A fourth: attacks phrased in the question itself, not only
+    footer; and **conflicting-source tests**, where two brokers disagree and the answer
+    must show both sides. A fourth: **attacks phrased in the question** itself, not only
     hidden inside documents.
