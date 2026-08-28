@@ -393,9 +393,12 @@ earned its shape.
   mechanical check and rests on the model's faithfulness alone.
 - **Answers take seconds, not milliseconds.** A question can run up to six tool
   rounds; latency and cost are shown live under every answer rather than hidden.
-- **The evaluation numbers are point estimates on small samples.** Each question type
-  has 5–24 items and no confidence intervals are reported, so a gap of a few points
-  between two types may be noise rather than a real difference.
+- **The evaluation is not yet complete — bounded by time and budget.** Four pieces are
+  missing: the numbers are point estimates on small samples (5–24 items per type, no
+  confidence intervals, so a few points between two types may be noise); agent
+  efficiency — rounds, tool calls and cost per answer — is shown live but not
+  reported as a metric; there are no tests where two brokers disagree; and attacks
+  were planted only inside documents, never phrased in the question itself.
 
 **Future directions — four tracks:**
 
