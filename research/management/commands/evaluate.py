@@ -700,8 +700,10 @@ class Command(BaseCommand):
             L.append("pipeline the chat page runs (up to 6 rounds of tool calls), called live, one")
             L.append("final answer per question.\n")
             if cat_counts:
-                cats_s = ", ".join(f"{c} ({n})" for c, n in sorted(cat_counts.items()))
-                L.append(f"**What was asked.** All {len(latest)} golden-set questions: {cats_s}.")
+                L.append(f"**What was asked.** All {len(latest)} golden-set questions, across {len(cat_counts)} types:\n")
+                for c, n in sorted(cat_counts.items()):
+                    L.append(f"- `{c}` — {n} questions")
+                L.append("")
             L.append(f"Some questions were deliberately asked more than once (one question three times,")
             L.append(f"for reproducibility; the figure questions twice, to measure run-to-run variance)")
             L.append(f"— {n_calls} live calls in total; the metrics below score each question's most")

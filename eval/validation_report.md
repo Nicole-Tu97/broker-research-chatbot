@@ -70,7 +70,18 @@ what fixed them — is told in DESIGN.md §7 (what I tried that didn't work).
 pipeline the chat page runs (up to 6 rounds of tool calls), called live, one
 final answer per question.
 
-**What was asked.** All 124 golden-set questions: abstention (15), attachment_input (10), comparison_timeseries (13), deep_page_recovery (11), multi_turn (5), pure_chart (16), simple_qa (20), table_numeric (24), temporal (10).
+**What was asked.** All 124 golden-set questions, across 9 types:
+
+- `abstention` — 15 questions
+- `attachment_input` — 10 questions
+- `comparison_timeseries` — 13 questions
+- `deep_page_recovery` — 11 questions
+- `multi_turn` — 5 questions
+- `pure_chart` — 16 questions
+- `simple_qa` — 20 questions
+- `table_numeric` — 24 questions
+- `temporal` — 10 questions
+
 Some questions were deliberately asked more than once (one question three times,
 for reproducibility; the figure questions twice, to measure run-to-run variance)
 — 148 live calls in total; the metrics below score each question's most
