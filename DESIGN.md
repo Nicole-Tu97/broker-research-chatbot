@@ -123,8 +123,8 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 
 | Stage | The choice | Why |
 |---|---|---|
-| **Parsing** | Every page is **converted into text**: one markdown transcription that describes everything on the page — the prose, the tables (rebuilt as markdown tables), and what the charts show. Two inputs feed a single model call: the rendered full-page image, so vision can read what exists only as pixels, and the PDF's native text layer, so every number stays exactly as printed. | Charts and scanned slides become searchable text without losing exact figures. |
-| **Chunking** | None — one page = one retrieval unit. | A broker page is the corpus's unit of self-contained meaning: chart captions live in the prose, table numbers are discussed in the text. Any sub-page cut shatters tables, orphans charts, and breaks page-level citations. Dense-page dilution is covered by the full-text leg — and there is no chunk size to tune wrong. |
+| **Parsing** | Every page is **converted into text**: one markdown transcription that describes everything on the page — the text, the tables (rebuilt as markdown tables), and what the charts show. Two inputs feed a single model call: the rendered full-page image, so vision can read what exists only as pixels, and the PDF's native text layer, so every number stays exactly as printed. | Charts and scanned slides become searchable text without losing exact figures. |
+| **Chunking** | None — one page = one retrieval unit. | A broker page is the corpus's unit of self-contained meaning: chart captions sit in the surrounding text and table numbers are discussed in it. Any sub-page cut shatters tables, orphans charts, and breaks page-level citations. Dense-page dilution is covered by the full-text leg — and there is no chunk size to tune wrong. |
 | **Embedding** | text-embedding-3-large, one vector per page, at **1,024 dimensions** instead of the native 3,072. | Cross-lingual vector space (measured end-to-end, §4.1). The cut is forced: pgvector's HNSW index caps vectors at 2,000 dims, so 3,072 could not be indexed. It is also cheap in quality — the model is Matryoshka-trained, and the vendor's own benchmarks lose only ~0.5 MTEB point from 3,072 to 1,024 — while the index shrinks to a third. API cost is per token, so this saves nothing on spend; it buys index size and speed. |
 | **Storage** | **Two stores.** (1) A relational Postgres database with three tables. **Document** — one row per report: filename, content hash, broker, published date, title, tickers, a ticker→pages map, page count, processing status. **Page** — one row per page: its document and page number, the native raw text, the markdown transcription, `has_visual`, `png_path`, the **embedding** (1024-d vector column), a DB-generated **search_vector** (full text), and suspect-number flags. **Conversation** — one row per chat: id, message history, created/updated timestamps. (2) A page-image store (`page_assets/`): one PNG per page, referenced by `png_path`. | One Page row serves semantic, lexical, and exact-SQL access with zero drift between them; the original pixels stay retrievable for model context, figure crops, and the UI. |
 | **Retrieval** | Two tools, chosen by the agent per round: **`search_pages`** — hybrid semantic + full-text search over page transcriptions, for thematic and specific-fact questions; **`list_reports`** — exact SQL over the metadata columns, ordered by date, *all* matches guaranteed, for comparative and temporal questions. | The two tools match the two real question shapes ("find pages about X" / "list exactly these reports in order"); flexibility comes from the agent loop, not a fixed pipeline. |
@@ -388,8 +388,8 @@ earned its shape.
   conversation list to switch or resume, and nothing carries over between
   conversations. (Transcripts are stored in the database; what is missing is the
   management UI.)
-- **Verification covers numbers, not prose.** The badge can prove a cited number
-  exists on the page; a qualitative claim ("management sounded confident") has no
+- **Verification covers numbers, not statements.** The badge can prove a cited number
+  exists on the page; a qualitative statement ("management sounded confident") has no
   mechanical check and rests on the model's faithfulness alone.
 - **Answers take seconds, not milliseconds.** A question can run up to six tool
   rounds; latency and cost are shown live under every answer rather than hidden.
@@ -421,7 +421,7 @@ earned its shape.
     cuts as their triggers fire; operational detail lives in the README under "Adding
     more documents".
 - **Wider verification, richer answers.**
-  - Extend the badge to prose: require a short verbatim quote per qualitative
+  - Extend the badge to statements: require a short verbatim quote per qualitative
     claim and string-match it against the cited page — still no LLM judging an LLM.
   - Draw simple derived charts (a price-target trajectory line) from numbers that
     are already verified.
