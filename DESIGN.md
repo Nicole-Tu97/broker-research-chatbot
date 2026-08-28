@@ -400,7 +400,7 @@ earned its shape.
   reported as a metric; there are no tests where two brokers disagree; and attacks
   were planted only inside documents, never phrased in the question itself.
 
-**Future directions — four tracks:**
+**Future directions — three tracks:**
 
 - **Smarter retrieval, from our own data.**
   - **Always run one hybrid search first, as a floor.** Whatever it finds stays in;
@@ -422,15 +422,13 @@ earned its shape.
   - **A summary per report, made in advance.** When a user asks about a whole report,
     answer from its summary instead of reading 70 pages on the spot.
   - **Production hardening.** User login, security, background jobs — then grow with
-    the corpus.
-- **Wider verification, richer answers.**
+    the corpus. Plus the small product features users will ask for first: charts
+    drawn from already-verified numbers, and a conversation history to resume, rename
+    and delete past chats.
+- **Verification — in the product and in the evaluation.**
   - **Verify statements, not only numbers.** Have the model attach a short supporting
     quote from the source to each claim, then check with code that the quote really
     exists on the page.
-  - **Draw charts from verified data.** Not only show the charts already in the
-    reports.
-  - **A conversation history.** Resume, rename and delete past chats.
-- **A deeper golden set.**
   - **More questions in every category.** Results get more stable and rare errors
     become easier to spot.
   - **Mostly annotation work from here, not new code.** The evaluation framework is
