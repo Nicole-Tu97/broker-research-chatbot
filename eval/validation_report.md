@@ -7,6 +7,14 @@ Scoring is deterministic throughout — no LLM grades another LLM.
 **What this is.** A golden-set evaluation: the correct answer pages were marked
 *before* any testing, and the retriever is scored against that fixed answer key.
 
+**One golden set, two tests.** Every test question lives in one file (`eval/golden_set.json`, 124 questions).
+Each question carries its own answer key: the pages that hold the answer, the facts
+the answer must state, a forbidden text pattern for questions that must be declined,
+and — for figure questions — a hand-drawn figure box. The retrieval test in this
+section uses the page keys (94 questions have them); the behavior test further
+down uses the fact, pattern and box keys on every question. Nothing is trained on this
+set — it is a fixed ruler, the same questions measured along different dimensions.
+
 **How the test runs.** 94 questions, each with 1–10 hand-checked answer
 pages (about 135 in total). Each question is sent to the retriever exactly as written,
 once per configuration (each returning

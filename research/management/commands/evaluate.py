@@ -576,6 +576,15 @@ class Command(BaseCommand):
             L.append("## Retrieval quality — golden-set (reference-based) evaluation\n")
             L.append("**What this is.** A golden-set evaluation: the correct answer pages were marked")
             L.append("*before* any testing, and the retriever is scored against that fixed answer key.\n")
+            n_golden = len(by_id) if by_id else None
+            L.append("**One golden set, two tests.** Every test question lives in one file"
+                     + (f" (`eval/golden_set.json`, {n_golden} questions)" if n_golden else " (`eval/golden_set.json`)") + ".")
+            L.append("Each question carries its own answer key: the pages that hold the answer, the facts")
+            L.append("the answer must state, a forbidden text pattern for questions that must be declined,")
+            L.append("and — for figure questions — a hand-drawn figure box. The retrieval test in this")
+            L.append(f"section uses the page keys ({n_items} questions have them); the behavior test further")
+            L.append("down uses the fact, pattern and box keys on every question. Nothing is trained on this")
+            L.append("set — it is a fixed ruler, the same questions measured along different dimensions.\n")
             n_pages_s = f" (about {n_pages} in total)" if n_pages else ""
             L.append(f"**How the test runs.** {n_items} questions, each with 1–10 hand-checked answer")
             L.append(f"pages{n_pages_s}. Each question is sent to the retriever exactly as written,")
