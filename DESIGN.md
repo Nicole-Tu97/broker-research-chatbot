@@ -162,7 +162,7 @@ it hold only what a table cannot (mechanics, verification, rules, security):
   broker has a newer report, the citation says so — the costliest analyst mistake,
   prevented for free.
 
-**4.3 Original assets surface twice: in model context and in the answer.**
+**4.3 Charts and figures: the model sees the original page, the user sees the relevant figure.**
 
 - **The agent gets the original page image, not just the transcription.** For pages
   flagged `has_visual`, both retrieval tools attach the page's PNG to their result —
