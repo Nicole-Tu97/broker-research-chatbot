@@ -137,13 +137,15 @@ it hold only what a table cannot (mechanics, verification, rules, security):
   by side, takes the top 50 from each, and merges them with **Reciprocal Rank Fusion
   (RRF)**: a page scores 1/(k + rank) in each list, and the scores are added. k=10 is a
   weight, not a cutoff.
-- **`list_reports` returns whole first pages, not extracted fields.** It lists *every*
-  report matching the broker/ticker/date filter (plain SQL, nothing missed) and
-  returns each one's full first-page transcription — so the reason behind a rating
-  change is kept, not reduced to a `pt=240` row.
+- **`list_reports` guarantees coverage; `search_pages` goes deep — they work as a
+  pair.** `list_reports` lists *every* report matching the broker/ticker/date filter
+  (plain SQL, nothing missed) and returns each one's first page as a whole
+  transcription — not extracted fields, so the reason behind a rating change is kept
+  — plus hints on which other pages mention the ticker. The agent reads those pages
+  first; when the answer is not there, it follows the hints into page 2, 3 or deeper
+  with `search_pages` (2 of 21 reports need that).
 - **The agent routes itself.** Which tool, what wording, which filters, and whether
   to keep searching are the LLM's decisions, guided only by the tool descriptions.
-  When page 1 does not hold the answer, it keeps going (2 of 21 reports need that).
 - **Ask in any language.** The model searches in English (the corpus language) and
   answers in the language of the question. Measured, not assumed.
 
