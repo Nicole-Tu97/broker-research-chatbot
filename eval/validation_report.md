@@ -7,9 +7,9 @@ Scoring is deterministic throughout — no LLM grades another LLM.
 - **124 questions, each with a fixed answer key** (`eval/golden_set.json`): the pages
   that hold the answer, the facts the answer must state, a forbidden text pattern for
   questions that must be declined, and — for figure questions — a hand-drawn figure box.
-- **The answer keys were drafted by an LLM, then checked and double-checked:** every
-  expected fact was verified by code to appear on the expected page, and I manually
-  reviewed a random sample of the keys. The chatbot under test never saw them.
+- **The answer keys were drafted by an LLM and checked by me:** I manually reviewed a
+  random sample of the keys against the source pages. The chatbot under test never
+  saw them.
 - **One set feeds both tests.** The retrieval test uses the page keys
   (94 questions have them); the behavior test uses the fact, pattern and box keys
   on every question.
