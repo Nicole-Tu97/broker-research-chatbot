@@ -246,14 +246,10 @@ triggers (§8), and two were closed *with data*.
 - **No Batch API.** OpenAI's offline batch endpoint processes bulk requests at half
   price, hours later. Measured, not assumed: 423 pages of base64 PNG exceed its
   200 MB input cap, so the ~$12 saving would have bought a second code path.
-- **No prompt-caching engineering.** The *system prompt* is the fixed instruction
-  block the application sends with every request — the rules and corpus boundary in
-  §4.4 — not the user's question. OpenAI (the model provider) bills a repeated prompt
-  prefix at a discount when it is served from cache, and some teams restructure their
-  prompts to maximize those hits. Not worth it here: the system prompt is ~5% of
-  spend. The other ~95% is what the agent reads per question — retrieved page
-  transcriptions and, above all, the original page images attached to tool results —
-  which differs with every question and cannot be cached.
+- **No prompt-caching engineering.** The system prompt (our fixed instructions, not
+  the user's question) can be cached by OpenAI at a discount. It is only ~5% of spend;
+  the other ~95% is what the agent reads per question — page transcriptions and,
+  above all, the attached page images — which changes every time and cannot be cached.
 - **No frontend framework.** React and similar frameworks manage complex interactive
   UIs. A single chat page with streaming and citation cards is served fine by one
   Django template and plain JavaScript.
