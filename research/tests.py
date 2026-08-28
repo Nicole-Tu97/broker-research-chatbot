@@ -617,8 +617,10 @@ class ValidationReportTemplateTests(SimpleTestCase):
     MARKERS = [
         "# Validation Report",
         "## The test set",
-        "**One golden set, two tests.**",
-        "**Where the answer keys come from.**",
+        "questions, each with a fixed answer key**",
+        "- **The answer keys were drafted by an LLM",
+        "- **One set feeds both tests.**",
+        "- **Grading is rule-based against these fixed keys**",
         "## How answers are graded — preset rules, never an LLM judging an LLM",
         "1. **Must contain**",
         "2. **Must NOT contain**",

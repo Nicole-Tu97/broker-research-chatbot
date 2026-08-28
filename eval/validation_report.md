@@ -4,21 +4,17 @@ Scoring is deterministic throughout — no LLM grades another LLM.
 
 ## The test set
 
-**One golden set, two tests.** Every test question lives in one file (`eval/golden_set.json`, 124 questions).
-Each question carries its own answer key: the pages that hold the answer, the facts
-the answer must state, a forbidden text pattern for questions that must be declined,
-and — for figure questions — a hand-drawn figure box. The retrieval test uses the
-page keys (94 questions have them); the behavior test uses the fact, pattern
-and box keys on every question. Nothing is trained on this set — it is a fixed ruler,
-the same questions measured along different dimensions.
-
-**Where the answer keys come from.** Each key was written during development by
-reading the source page, then checked by code: the expected page must exist, and the
-expected fact must actually appear in that page's stored text. The chatbot never saw
-the keys and had no part in writing them — the key and the answer under test come from
-different places, which is what makes the comparison a test. One shared dependency
-remains: keys and chatbot both read the same page transcriptions, so a transcription
-error would affect both; transcription accuracy is measured separately (DESIGN.md §3).
+- **124 questions, each with a fixed answer key** (`eval/golden_set.json`): the pages
+  that hold the answer, the facts the answer must state, a forbidden text pattern for
+  questions that must be declined, and — for figure questions — a hand-drawn figure box.
+- **The answer keys were drafted by an LLM from the source pages, then checked:** every
+  expected fact was verified by code to appear on the expected page, and the keys were
+  spot-checked by hand. The chatbot under test never saw them.
+- **One set feeds both tests.** The retrieval test uses the page keys
+  (94 questions have them); the behavior test uses the fact, pattern and box keys
+  on every question.
+- **Grading is rule-based against these fixed keys** (rules below), so the same set
+  re-scores any future version of the system the same way.
 
 ## How answers are graded — preset rules, never an LLM judging an LLM
 
