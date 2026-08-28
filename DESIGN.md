@@ -132,7 +132,7 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 
 **4.1 Retrieval mechanics: the loop is the router.**
 
-- **Two searches run at once, then their rankings are merged.** `search_pages` runs a
+- **Semantic + Full-text searches run at once, then their rankings are merged.** `search_pages` runs a
   semantic search (vector similarity) and a keyword search (Postgres full text) side
   by side, takes the top 50 from each, and merges them with **Reciprocal Rank Fusion
   (RRF)**: a page scores 1/(k + rank) in each list, and the scores are added. k=10 is a
@@ -374,9 +374,10 @@ earned its shape.
   declares this boundary rather than extrapolating beyond it.
 - **No live market data.** Answers stop at the corpus — the newest fact is dated
   2025-09-29, so "today's price" is out of scope by design.
-- **Targeted questions, not page-by-page analytics.** Each search returns its top 8
-  pages, and an answer reads at most a few dozen pages over its rounds — never all
-  423. Report-level overviews still work, because `list_reports` can return every
+- **Targeted questions, not page-by-page analytics.** Each `search_pages` call (the
+  hybrid semantic + keyword search) returns its top 8 fused pages, and an answer reads
+  at most a few dozen pages over its rounds — never all 423. Report-level overviews
+  still work, because `list_reports` has no such cap and returns every matching
   report's first page; what exceeds the budget is anything that needs every page read
   — "count every mention of Blackwell in the corpus", "summarize every page of the
   keynote".
