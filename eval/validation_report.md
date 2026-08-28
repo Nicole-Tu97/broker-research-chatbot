@@ -9,7 +9,7 @@ Generated: 2026-08-26 16:45 · zero LLM-judge scoring throughout
 
 **How the test runs.** 94 questions, each with 1–10 hand-checked answer
 pages (about 135 in total). Each question is sent to the retriever exactly as written,
-once per configuration (94 × 3 = 282 single-shot searches, each returning
+once per configuration (each returning
 its top 10 pages — a slightly wider window than the live tool's default of 8, which
 the agent can raise). The score per question is the share of its answer pages that
 show up in the top 10; the table averages this per question type.
@@ -51,14 +51,17 @@ marked post-hoc; from here on it is the bar every future run must clear.)
 
 - Overall mean ≥ 0.90: **PASS** (0.956)
 
-**One weak spot to note.** `deep_page_recovery` is the weakest type on the
-agentic column (0.818) — and there, single-shot hybrid (0.909) actually
-beats the agent. Part of this is a scoring artifact (the agent sometimes answers
-from an equally valid *other* page, which the fixed answer key does not credit),
-but it also points to a real improvement path: do not rely on the agent blindly —
-keep the single-shot hybrid results as a floor (or route by question type) so the
-agent's choices can only add pages, never lose them; hybrid alone already scores
-0.909 on this type.
+**One weak spot to note.** `deep_page_recovery` is the weakest type on the agentic
+column (0.818) — and there, single-shot hybrid (0.909) beats the agent. The
+reason is a deliberate cost-saving default: the agent starts from each report's first
+page and stops as soon as what it has read looks sufficient. On deep-page questions the
+first page often holds only a summary, so the agent answers from it and never retrieves
+the deeper page that carries the exact figure — while single-shot hybrid, which does
+not stop early, brings that page back in its top 10. (A few of these misses are the
+agent answering correctly from another valid page that the fixed answer key does not
+credit.) The improvement path: keep the single-shot hybrid results as a floor, so the
+agent's early stop can only add pages, never lose them — hybrid alone already scores
+0.909 on this type — and the stopping threshold itself can be tuned.
 
 How the retriever's design evolved — including the approaches that failed and
 what fixed them — is told in DESIGN.md §7 (what I tried that didn't work).
