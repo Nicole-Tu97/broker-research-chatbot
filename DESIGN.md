@@ -132,28 +132,20 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 
 **4.1 Retrieval mechanics: the loop is the router.**
 
-- **Hybrid search runs two searches at once and merges their rankings.** For every
-  query, `search_pages` runs a semantic-similarity search (pgvector cosine over the
-  page embeddings) and a keyword search (Postgres full text, OR semantics, ranked by
-  `ts_rank_cd`) side by side. Each returns its top 50 pages; the two lists are merged
-  with **Reciprocal Rank Fusion (RRF)**, which scores each page by 1/(k + rank) in
-  each list and adds the scores — k=10 is a weighting constant that softens the gap
-  between rank 1 and rank 2, not a cutoff. Both legs' ranks are logged into a visible
-  retrieval trace.
-- **`list_reports` lists every matching report and returns full first pages, not a
-  few extracted fields.** Filtered by broker, ticker, and date, it returns *all*
-  matching reports (SQL, nothing left out), and for each one the complete first-page
-  transcription. That keeps the context — why a target was raised, what changed —
-  which a pre-extracted row like `pt=240` would throw away.
-- **No routing rule is hard-coded; the agent decides.** Which tool to call, how to
-  phrase the search, whether to add filters, and whether to keep digging are all the
-  LLM's decisions, guided only by the tool descriptions. In practice it recovers in
-  several steps when needed — re-worded searches, filtered follow-ups, page hints —
-  including the 2/21 reports whose price target sits deeper than page 1.
-- **Ask in any language; the system searches in English and answers in yours.** For a
-  non-English question the model writes English search queries (the corpus is
-  English), the embedding space is cross-lingual, and the reply comes back in the
-  language of the question. Measured end-to-end, not assumed.
+- **Two searches run at once, then their rankings are merged.** `search_pages` runs a
+  semantic search (vector similarity) and a keyword search (Postgres full text) side
+  by side, takes the top 50 from each, and merges them with **Reciprocal Rank Fusion
+  (RRF)**: a page scores 1/(k + rank) in each list, and the scores are added. k=10 is a
+  weight, not a cutoff.
+- **`list_reports` returns whole first pages, not extracted fields.** It lists *every*
+  report matching the broker/ticker/date filter (plain SQL, nothing missed) and
+  returns each one's full first-page transcription — so the reason behind a rating
+  change is kept, not reduced to a `pt=240` row.
+- **The agent routes itself.** Which tool, what wording, which filters, and whether
+  to keep searching are the LLM's decisions, guided only by the tool descriptions.
+  When page 1 does not hold the answer, it keeps going (2 of 21 reports need that).
+- **Ask in any language.** The model searches in English (the corpus language) and
+  answers in the language of the question. Measured, not assumed.
 
 **4.2 Numbers: validated at ingestion, verified at answer time.**
 
