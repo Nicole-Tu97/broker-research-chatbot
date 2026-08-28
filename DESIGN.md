@@ -252,6 +252,7 @@ triggers (§8), and two were closed *with data*.
 - **No frontend framework.** React and similar frameworks manage complex interactive
   UIs. A single chat page with streaming and citation cards is served fine by one
   Django template and plain JavaScript.
+
 Several of these are reversals of my own earlier designs — the details are in §7.
 
 ## 7. What I tried that didn't work — and what fixed it
