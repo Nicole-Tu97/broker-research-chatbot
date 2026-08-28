@@ -151,18 +151,16 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 
 **4.2 Numbers: validated at ingestion, verified at answer time.**
 
-- **At ingestion, a numeric cross-check flags suspicious transcriptions.** A
-  normalized multiset diff flags transcription numbers absent from the page's own
-  text layer (~20 lines of code, zero API calls, applicable to 350/423 pages); its
-  blind spots (same-value collisions, zero-count-neutral shifts) are documented and
-  compensated by the original-image feedback in §4.3.
-- **At answer time, every cited number gets a grounding badge.** Every number in
-  every citation is checked against the cited page (✓/⚠). A number the model computes
-  itself (a percent change, an average) appears on no page and therefore shows ⚠ —
-  deliberate conservatism, not an error.
-- **Superseded reports get a recency label.** Added when a cited report is superseded
-  by a newer note from the same broker — one deterministic SQL check per citation;
-  the most expensive mistake an analyst can make, prevented for free.
+- **At ingestion, transcribed numbers are checked against the page's own text.** A
+  small deterministic diff (~20 lines, no API call) flags any number in the
+  transcription that the PDF's text layer does not contain. It covers 350 of 423
+  pages; its known blind spots are covered by the original-image feedback in §4.3.
+- **At answer time, every cited number gets a badge.** Each number in a citation is
+  looked up on the cited page: found → ✓, not found → ⚠. A number the model computed
+  itself (a percent change, an average) is on no page, so it shows ⚠ on purpose.
+- **Superseded reports get a recency label.** One SQL check per citation: if the same
+  broker has a newer report, the citation says so — the costliest analyst mistake,
+  prevented for free.
 - **No LLM judges anything, anywhere.**
 
 **4.3 Original assets surface twice: in model context and in the answer.**
