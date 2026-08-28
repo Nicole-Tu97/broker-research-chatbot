@@ -237,11 +237,24 @@ triggers (§8), and two were closed *with data*.
   corpus grows and near-identical pages multiply.
 - **No pre-extracted facts table** — exact SQL over metadata plus full first-page
   context answers comparative/temporal questions without a lossy second store.
-- **No sub-page chunking** (§4, Chunking row). **No Celery/Redis queue** at 30 documents. **No
-  Batch API** — measured, not assumed: 423 pages of base64 PNG exceed its 200 MB
-  input cap, so the ~$12 saving would have bought a second code path. **No
-  prompt-caching engineering** (the system prompt is ~5% of spend). **No frontend
-  framework, no auth/multi-tenancy.**
+- **No sub-page chunking.** Chunking splits a page into smaller passages for finer
+  retrieval. Here the page itself is the unit of meaning (§4, Chunking row), so
+  splitting would only break tables and page-level citations.
+- **No Celery/Redis queue.** A task queue runs work in the background — many PDFs in
+  parallel, automatic retries. Thirty documents are imported once, in one process;
+  the infrastructure would cost more to run than it saves.
+- **No Batch API.** OpenAI's offline batch endpoint processes bulk requests at half
+  price, hours later. Measured, not assumed: 423 pages of base64 PNG exceed its
+  200 MB input cap, so the ~$12 saving would have bought a second code path.
+- **No prompt-caching engineering.** Structuring prompts so the provider caches the
+  static prefix cuts input cost. The system prompt is ~5% of spend here, so the
+  saving is capped at ~5%.
+- **No frontend framework.** React and similar frameworks manage complex interactive
+  UIs. A single chat page with streaming and citation cards is served fine by one
+  Django template and plain JavaScript.
+- **No auth or multi-tenancy.** Login and per-client data isolation are production
+  requirements. This is a single-user demonstration; they are the first thing to add
+  before real deployment (§8).
 - **No LLM-as-judge** in the product or the evaluation — deterministic checks
   instead; "who validates the validator" terminates.
 - **Evaluation dimensions that do not apply were cut, not faked**: fairness/bias
