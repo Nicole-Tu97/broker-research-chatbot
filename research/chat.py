@@ -122,7 +122,7 @@ def _tool_output_items(call_id: str, payload: dict,
 
 
 def _prior_pages(messages: list[dict]) -> dict[tuple, Page]:
-    """Pages retrieved in EARLIER turns of this conversation, keyed like turn_pages.
+    """Pages retrieved in EARLIER turns of this conversation, keyed (document_id, page_number).
 
     A follow-up ("and what was it before this revision?") is legitimately answered from
     conversation memory without a new tool call; its citations must still verify against
@@ -144,7 +144,7 @@ def _prior_pages(messages: list[dict]) -> dict[tuple, Page]:
     for doc_id, pno in keys:
         p = Page.objects.filter(document_id=doc_id, page_number=pno).select_related("document").first()
         if p:
-            pages[(p.document.broker, str(p.document.published_date), p.page_number)] = p
+            pages[(p.document_id, p.page_number)] = p
     return pages
 
 
@@ -221,10 +221,20 @@ def grounding_badges(answer: str, turn_pages: dict[tuple, Page]) -> list[dict]:
         # own decks, where neither filename nor first page yields a parseable date;
         # then the citation's date cannot be verified and is not treated as a veto).
         want = _date_prefix(date_s)
-        page = next((p for (b, ds, n), p in turn_pages.items()
-                     if broker_frag.lower() in b.lower() and n == page_no
-                     and (want is None or ds in ("None", "")
-                          or ds.startswith(want))), None)
+        # Match on the page's own broker / date / page number (the dict key is only an
+        # identity). Undated decks from one issuer can share broker AND page number
+        # (NVIDIA's four decks all have a p.1): when several pages fit, take the one
+        # whose text shares the most numbers with the answer.
+        fits = [p for p in turn_pages.values()
+                if broker_frag.lower() in (p.document.broker or "").lower()
+                and p.page_number == page_no
+                and (want is None or p.document.published_date is None
+                     or str(p.document.published_date).startswith(want))]
+        page = None
+        if fits:
+            page = max(fits, key=lambda p: len(
+                answer_nums & set(numbers_in(f"{p.raw_text}\n{p.markdown or ''}")))) \
+                if len(fits) > 1 else fits[0]
         if page is None:
             badges.append({"citation": label, "status": "unknown",
                            "note": "cited page not among this turn's retrieved results"})
@@ -378,11 +388,17 @@ def _figure_crops(question: str, badges: list[dict], emit) -> tuple[int, int, in
         u_in += u.get("input_tokens", 0)
         u_out += u.get("output_tokens", 0)
         calls += 1
-        if not box or box.get("no_figure"):
+        if not box:
             continue
         page = Page.objects.filter(document_id=key[0], page_number=key[1]).select_related("document").first()
         pixel_dominant = page is not None and len(page.raw_text or "") <= WHOLE_PAGE_MAX_TEXT_CHARS
-        if box.get("whole_page"):
+        # A page with no text layer at all (a pure-image slide) cannot make a "textual"
+        # contribution — the page IS the visual, so a no_figure verdict there is
+        # overridden deterministically and the whole slide is shown.
+        pixel_only = page is not None and not (page.raw_text or "").strip()
+        if box.get("no_figure") and not pixel_only:
+            continue
+        if box.get("no_figure") or box.get("whole_page"):
             if not pixel_dominant:
                 continue  # text-dominant page: a full-page card adds nothing the answer lacks
             mark = {"show_page": True}
@@ -500,8 +516,7 @@ def run_turn(conversation: Conversation, text: str,
                     p = Page.objects.filter(document_id=r["document_id"],
                                             page_number=r["page_number"]).select_related("document").first()
                     if p:
-                        turn_pages[(p.document.broker,
-                                    str(p.document.published_date), p.page_number)] = p
+                        turn_pages[(p.document_id, p.page_number)] = p
             api_item, store_item = _tool_output_items(fc["call_id"], payload, sent_images)
             api_input.append(api_item)
             new_items.append(store_item)

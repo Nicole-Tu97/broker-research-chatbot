@@ -376,7 +376,12 @@ class ChatPureTests(TestCase):
         # Document itself undated (e.g. NVIDIA's own deck) → the date cannot be
         # checked, so it is not a veto; broker + page number + this turn's retrieval
         # set remain the hard anti-fabrication gate
-        pages_nd = {("NVIDIA", "None", 1): self.p1}
+        from .models import Document, Page
+        nd = Document.objects.create(filename="nd.pdf", content_hash="d" * 64, broker="NVIDIA",
+                                     published_date=None, status=Document.Status.DONE)
+        pnd = Page.objects.create(document=nd, page_number=1, png_path="nd_1.png",
+                                  raw_text="Price Target USD 200.00", markdown="")
+        pages_nd = {(nd.id, 1): pnd}
         badges = grounding_badges("$200 [NVIDIA, September 2025, p.1]", pages_nd)
         self.assertEqual(badges[0]["status"], "grounded")
 
@@ -396,6 +401,57 @@ class ChatPureTests(TestCase):
         badges = grounding_badges("The library is LightOn. [Barclays, 2025-06-17, p.1]", pages)
         self.assertEqual(badges[0]["status"], "grounded")
 
+    def test_undated_same_broker_pages_disambiguated_by_numbers(self):
+        # Observed live: NVIDIA's four undated decks all have a p.1, so a key of
+        # (broker, date, page) silently kept only one of them and "[NVIDIA, n.d., p.1]"
+        # could resolve to the wrong deck (wrong link, badge and figure). Keys are now
+        # per document, and the citation picks the page that shares the answer's numbers.
+        from .chat import grounding_badges
+        from .models import Document, Page
+        a = Document.objects.create(filename="deck-a.pdf", content_hash="a" * 64, broker="NVIDIA",
+                                    status=Document.Status.DONE)
+        b = Document.objects.create(filename="deck-b.pdf", content_hash="b" * 64, broker="NVIDIA",
+                                    status=Document.Status.DONE)
+        pa = Page.objects.create(document=a, page_number=1, png_path="a_1.png", raw_text="Revenue $44.1B", markdown="")
+        pb = Page.objects.create(document=b, page_number=1, png_path="b_1.png", raw_text="TAM $100T", markdown="")
+        pages = {(a.id, 1): pa, (b.id, 1): pb}
+        badges = grounding_badges("The keynote puts the market at $100T [NVIDIA, n.d., p.1]", pages)
+        self.assertEqual(badges[0]["document_id"], b.id)
+        self.assertEqual(badges[0]["status"], "grounded")
+        badges = grounding_badges("Revenue was $44.1B [NVIDIA, n.d., p.1]", pages)
+        self.assertEqual(badges[0]["document_id"], a.id)
+
+    def test_locator_no_figure_on_a_pure_image_slide_shows_the_page(self):
+        # Observed live: the locator answered no_figure on a keynote slide that has no
+        # text layer at all (the $100T sits only in the picture). Such a page cannot
+        # contribute "textually", so the verdict is overridden and the slide is shown whole;
+        # on a page that does have text, no_figure still means no image.
+        import tempfile
+        from pathlib import Path as _P
+        from unittest.mock import patch
+        from django.test import override_settings
+        from .chat import _figure_crops
+        from .models import Document, Page
+        d = Document.objects.create(filename="slides.pdf", content_hash="s" * 64, broker="NVIDIA",
+                                    status=Document.Status.DONE)
+        slide = Page.objects.create(document=d, page_number=16, png_path="s_16.png", has_visual=True,
+                                    raw_text="", markdown="AI FACTORY -> $100T")
+        texty = Page.objects.create(document=d, page_number=2, png_path="s_2.png", has_visual=True,
+                                    raw_text="x" * 900, markdown="body text")
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in ("s_16.png", "s_2.png"):
+                (_P(tmp) / name).write_bytes(b"png")
+            badges = [{"citation": "[NVIDIA, n.d., p.16]", "document_id": d.id, "page_number": 16,
+                       "png_path": "s_16.png", "has_visual": True},
+                      {"citation": "[NVIDIA, n.d., p.2]", "document_id": d.id, "page_number": 2,
+                       "png_path": "s_2.png", "has_visual": True}]
+            with override_settings(PAGE_ASSET_DIR=_P(tmp)), \
+                 patch("research.chat.providers.figure_bbox", return_value=({"no_figure": True}, {})):
+                _figure_crops("market size?", badges, lambda ev: None)
+        self.assertTrue(badges[0].get("show_page"))
+        self.assertNotIn("show_page", badges[1])
+        self.assertNotIn("crop", badges[1])
+
     def test_prior_pages_rebuilt_from_stored_tool_outputs(self):
         # Follow-up turns answered from memory must still verify citations against pages
         # retrieved in earlier turns (otherwise every multi-turn answer gets an unknown badge)
@@ -405,7 +461,7 @@ class ChatPureTests(TestCase):
                  "output_text": _json.dumps({"results": [
                      {"document_id": self.old.id, "page_number": 1}]}), "image_refs": []}]
         pages = _prior_pages(msgs)
-        self.assertIn(("Barclays", "2025-06-17", 1), pages)
+        self.assertIn((self.old.id, 1), pages)
         self.assertEqual(_prior_pages([{"role": "user", "content": []}]), {})
 
     def test_recency_label_flags_superseded_citation(self):
