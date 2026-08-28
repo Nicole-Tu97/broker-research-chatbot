@@ -264,88 +264,92 @@ earned its shape.
 
 **1. Keyword search demanded every word to match — so real questions matched almost nothing.**
 
-- *What happened:* the full-text leg scored 0.094 recall on 94 items, and its noise
-  votes slightly hurt the fused result.
-- *Why:* the keyword search used AND matching — every word of the question had to
-  appear on the same page 
-- *The fix:* match on *any* word instead (OR), then rank pages by how many of the
-  words they contain and how rare those words are.
-- *Verified:* FTS-only 0.094 → 0.681, hybrid 0.761 → 0.814; the behavior round
-  re-passed at a third of the previous cost ($2.43 vs $7.17) because the agent now
-  lands on the right page in fewer rounds.
+- *What happened:* **Keyword search found almost nothing.** The full-text leg scored
+  0.094 recall on 94 items, and its noise votes slightly hurt the fused result.
+- *Why:* **AND matching required every word to be on the same page.** No page
+  contains every word of a long natural-language question, so long questions matched
+  nothing.
+- *The fix:* **Match on any word, then rank.** OR matching, with pages ranked by how
+  many of the words they contain and how rare those words are.
+- *Verified:* **Keyword recall 0.094 → 0.681; hybrid 0.761 → 0.814.** The behavior
+  round re-passed at a third of the previous cost ($2.43 vs $7.17) because the agent
+  now lands on the right page in fewer rounds.
 
 **2. Every citation used to ship a full-page screenshot.**
 
-- *What happened:* early answers embedded a screenshot of every cited page — the
-  cover page of a text report included.
-- *Why:* "more context cannot hurt" is wrong: irrelevant images dilute the answer
-  and add nothing an analyst can use.
-- *The fix:* the three-way rule in §4.3 — crop the specific chart when one exists;
-  embed the full page only when the page IS the chart; attach nothing when the
-  answer is summarizable from text.
-- *Verified:* the figure-crop metric exists to keep exactly this honest — 0.824 and
-  0.80 across two full runs.
+- *What happened:* **Every cited page came with a screenshot.** Early answers embedded
+  a screenshot of every cited page — the cover page of a text report included.
+- *Why:* **More images is not more context.** Irrelevant images dilute the answer and
+  add nothing an analyst can use.
+- *The fix:* **Attach a figure only when the figure is the evidence.** The three-way
+  rule in §4.3 — crop the specific chart when one exists; embed the full page only
+  when the page IS the chart; attach nothing when the answer is summarizable from text.
+- *Verified:* **Figure-crop accuracy 0.824 and 0.80 across two full runs.** The
+  metric exists to keep exactly this honest.
 
 **3. One question cost $4.85.**
 
-- *What happened:* a single date-filtered question burned 13 futile tool calls.
-- *Why:* NVIDIA's own decks (the keynote, the quarterly presentations) carry no
-  publication date — not in the filename, not on the page — so their `published_date`
-  is empty in the database. A date filter is a SQL range check, and an empty date never
-  falls inside a range, so those documents silently dropped out of every filtered
-  search. The tool just returned "no results"; the agent read that as bad wording and
-  kept re-phrasing — while re-attaching the same page images every round (115
-  attachments for 37 distinct pages).
-- *The fix:* the tool now says explicitly when a date filter excluded undated
-  documents, so the agent drops the filter and retries; images are deduplicated
-  within a turn; the cost footer prices cached tokens correctly.
-- *Verified:* same-shape questions returned to normal cost, and the live footer keeps
+- *What happened:* **One date-filtered question burned 13 futile tool calls.**
+- *Why:* **Undated documents silently vanish behind a date filter.** NVIDIA's own
+  decks (the keynote, the quarterly presentations) carry no publication date — not in
+  the filename, not on the page — so their `published_date` is empty in the database.
+  A date filter is a SQL range check, and an empty date never falls inside a range,
+  so those documents dropped out of every filtered search. The tool just returned "no
+  results"; the agent read that as bad wording and kept re-phrasing — while
+  re-attaching the same page images every round (115 attachments for 37 distinct
+  pages).
+- *The fix:* **The tool now says what it excluded.** It reports when a date filter
+  excluded undated documents, so the agent drops the filter and retries; images are
+  deduplicated within a turn; the cost footer prices cached tokens correctly.
+- *Verified:* **Same-shape questions returned to normal cost.** The live footer keeps
   every answer's spend visible.
 
 **4. Asked about 2023, the bot answered with 2025 data.**
 
-- *What happened:* a real user asked for NVDA's 2023 target trajectory; the bot
-  volunteered the 2025 data it did have.
-- *Why:* "be helpful" beats "stay in scope" unless the boundary is an explicit rule.
-- *The fix:* the overlap-based boundary rule (rule 1 in §4.4) — declare-then-answer
-  on partial overlap, state-and-stop on zero overlap. The first version of the fix
+- *What happened:* **Asked about 2023, the bot served the 2025 data it had.** A real
+  user asked for NVDA's 2023 target trajectory.
+- *Why:* **"Be helpful" beats "stay in scope" unless the boundary is an explicit
+  rule.**
+- *The fix:* **An explicit overlap rule.** Rule 1 in §4.4 — declare-then-answer on
+  partial overlap, state-and-stop on zero overlap. The first version of the fix
   regressed elsewhere; the behavior suite caught that too.
-- *Verified:* 0/15 deliberately unanswerable questions answered; the user's exact
-  question entered the golden set.
+- *Verified:* **0 of 15 unanswerable questions answered.** The user's exact question
+  entered the golden set.
 
 **5. One hard question failed three different ways.**
 
-- *What happened:* the keynote's "$100T market" question, asked in adversarial
-  wording, failed three times — each failure a distinct defect.
+- *What happened:* **The keynote's "$100T market" question failed three times, each
+  a different defect,** when asked in adversarial wording.
 - *Why and the fixes, one per defect:*
-  - On round exhaustion the agent returned "please narrow your question" — $1.25
-    for a give-up message. Now hitting the round cap forces one final, tool-free,
-    best-effort answer: a give-up message is strictly the worse output.
-  - The model searched in analyst vocabulary ("market size", "TAM") while the
-    slide's transcription holds only the page's own words. The tool description now
-    says: search slide-style content with the page's own words, and after a miss
-    re-word drastically instead of tweaking synonyms.
-  - Re-worded, the model found a similar-looking real number (~$100 *billion*, a
-    broker's European-capex figure) in an adjacent source and answered with it.
-    Behavior rule 6 (named-document pinning, §4.4) now forbids substituting a
-    nearby source for the named one.
-- *Verified:* the question now answers $100 trillion citing the keynote page
-  itself, and the whole pure-chart category passes end-to-end.
+  - **Giving up when the rounds ran out.** The agent returned "please narrow your
+    question" — $1.25 for a give-up message. Now hitting the round cap forces one
+    final, tool-free, best-effort answer: a give-up message is strictly the worse
+    output.
+  - **Searching in analyst vocabulary, not the slide's own words.** The model searched
+    for "market size" and "TAM" while the slide's transcription holds only the page's
+    words. The tool description now says: search slide-style content with the page's
+    own words, and after a miss re-word drastically instead of tweaking synonyms.
+  - **Answering from a nearby source.** Re-worded, the model found a similar-looking
+    real number (~$100 *billion*, a broker's European-capex figure) in an adjacent
+    document and answered with it. Behavior rule 6 (named-document pinning, §4.4) now
+    forbids substituting a nearby source for the named one.
+- *Verified:* **The question now answers $100 trillion, citing the keynote page.** The
+  whole pure-chart category passes end-to-end.
 
 **6. The grading script itself judged some correct answers wrong.**
 
-- *What happened:* at 124-item scale, four scorer blind spots surfaced — each had
-  marked a correct answer wrong.
-- *Why:* literal matching is strict by design: locale-specific numeric scale words,
-  the multiplication sign, page numbers inside citation labels counted as numeric
-  claims, and follow-up answers citing pages from conversation memory marked
+- *What happened:* **Four scorer blind spots each marked a correct answer wrong,**
+  surfacing only at 124-item scale.
+- *Why:* **Literal matching is strict by design.** Locale-specific numeric scale
+  words, the multiplication sign, page numbers inside citation labels counted as
+  numeric claims, and follow-up answers citing pages from conversation memory marked
   unverifiable (that last one was also a product defect — follow-ups showed a
   warning badge).
-- *The fix:* each blind spot fixed and pinned with a regression test that replays
+- *The fix:* **Each blind spot fixed and pinned with a regression test** that replays
   the once-misjudged example; the memory case also fixed in the chat loop.
-- *Verified:* stored answers were transparently rescored under the amended rules —
-  the rule change is public in the code, not a quiet grade bump — and the
-  regression tests keep the fixes from silently un-fixing.
+- *Verified:* **Stored answers were transparently rescored.** The rule change is
+  public in the code, not a quiet grade bump, and the regression tests keep the fixes
+  from silently un-fixing.
 
 ## 8. Known limits and future directions
 
