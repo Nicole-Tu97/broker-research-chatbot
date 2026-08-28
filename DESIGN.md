@@ -338,11 +338,12 @@ earned its shape.
 - *The fixes — one per defect, same order:*
   - **Named-document pinning** (behavior rule 6, §4.4). When a question names a
     document, locate it first and take numbers only from it.
-  - **Teach the agent what words to search with.** The search tool's description now
-    tells the agent: search with words likely printed on the page (a slide says
-    "AI factory" and "$100T", never "market size"), and if a search misses, try a
-    different angle rather than a synonym. Only the tool's instructions changed, not
-    the search itself.
+  - **Teach the agent what words to search with.** The note the agent reads before
+    choosing its search words now says two things. Use words likely printed on the
+    page: a slide says "AI factory" and "$100T", never "market size". And if a search
+    misses, search for something *else* from the page — a number, a name, a slogan —
+    instead of rewording the same idea ("market size" → "TAM" is the same idea again).
+    The search engine's code did not change; only this note did.
   - **Forced final answer.** Hitting the round cap now forces one last, tool-free,
     best-effort answer from the evidence already gathered: a give-up message is
     strictly the worse output.
