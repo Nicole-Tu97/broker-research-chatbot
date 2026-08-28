@@ -2,18 +2,48 @@
 
 Scoring is deterministic throughout — no LLM grades another LLM.
 
-## Retrieval quality — golden-set (reference-based) evaluation
-
-**What this is.** A golden-set evaluation: the correct answer pages were marked
-*before* any testing, and the retriever is scored against that fixed answer key.
+## The test set
 
 **One golden set, two tests.** Every test question lives in one file (`eval/golden_set.json`, 124 questions).
 Each question carries its own answer key: the pages that hold the answer, the facts
 the answer must state, a forbidden text pattern for questions that must be declined,
-and — for figure questions — a hand-drawn figure box. The retrieval test in this
-section uses the page keys (94 questions have them); the behavior test further
-down uses the fact, pattern and box keys on every question. Nothing is trained on this
-set — it is a fixed ruler, the same questions measured along different dimensions.
+and — for figure questions — a hand-drawn figure box. The retrieval test uses the
+page keys (94 questions have them); the behavior test uses the fact, pattern
+and box keys on every question. Nothing is trained on this set — it is a fixed ruler,
+the same questions measured along different dimensions.
+
+**Where the answer keys come from.** Each key was written during development by
+reading the source page, then checked by code: the expected page must exist, and the
+expected fact must actually appear in that page's stored text. The chatbot never saw
+the keys and had no part in writing them — the key and the answer under test come from
+different places, which is what makes the comparison a test. One shared dependency
+remains: keys and chatbot both read the same page transcriptions, so a transcription
+error would affect both; transcription accuracy is measured separately (DESIGN.md §3).
+
+## How answers are graded — preset rules, never an LLM judging an LLM
+
+Every golden-set question was written with its grading rule attached, fixed before any
+testing. There are three kinds of rule:
+
+1. **Must contain** — exact facts the answer has to state (e.g. `$240`, `+20%`, a
+   date). Graded by searching the answer text for those strings, with number formats
+   normalized first (thousands separators, scale words, multiplication signs).
+2. **Must NOT contain** — a text pattern that would betray a made-up answer. E.g. a
+   question about a year the library does not cover forbids any 2–3 digit dollar
+   figure: stating one means the system invented a price target instead of declining.
+3. **Box match** — for figure questions, the hand-drawn rectangle on the source page
+   that the returned crop must overlap (IoU ≥ 0.5).
+
+One universal rule applies on top, to every answer: each number a citation carries
+must actually appear on the cited page's text (the ✓/⚠ badge check). The chatbot's
+answers are compared against these preset rules by a plain script — string search,
+number comparison, rectangle overlap. No LLM grades another LLM's output anywhere,
+so every score is exactly reproducible.
+
+## Retrieval quality — golden-set (reference-based) evaluation
+
+**What this is.** A golden-set evaluation: the correct answer pages were marked
+*before* any testing, and the retriever is scored against that fixed answer key.
 
 **How the test runs.** 94 questions, each with 1–10 hand-checked answer
 pages (about 135 in total). Each question is sent to the retriever exactly as written,
@@ -97,25 +127,6 @@ Some questions were deliberately asked more than once (one question three times,
 for reproducibility; the figure questions twice, to measure run-to-run variance) —
 148 live calls in total. The metrics below score each question's most recent
 answer once; per-run raw numbers are archived in `eval/results.json`.
-
-**How answers are graded — preset rules, never an LLM judging an LLM.** Every
-golden-set question was written with its grading rule attached, fixed before any
-testing. There are three kinds of rule:
-
-1. **Must contain** — exact facts the answer has to state (e.g. `$240`, `+20%`, a
-   date). Graded by searching the answer text for those strings, with number formats
-   normalized first (thousands separators, scale words, multiplication signs).
-2. **Must NOT contain** — a text pattern that would betray a made-up answer. E.g. a
-   question about a year the library does not cover forbids any 2–3 digit dollar
-   figure: stating one means the system invented a price target instead of declining.
-3. **Box match** — for figure questions, the hand-drawn rectangle on the source page
-   that the returned crop must overlap (IoU ≥ 0.5).
-
-One universal rule applies on top, to every answer: each number a citation carries
-must actually appear on the cited page's text (the ✓/⚠ badge check). The chatbot's
-answers are compared against these preset rules by a plain script — string search,
-number comparison, rectangle overlap. No LLM grades another LLM's output anywhere,
-so every score is exactly reproducible.
 
 - **Correctness (P7b)** — share of the answer key's expected facts the answer actually
   states, over the 103 questions carrying 189 expected facts: 1.0
