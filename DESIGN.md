@@ -343,7 +343,6 @@ earned its shape.
     page: a slide says "AI factory" and "$100T", never "market size". And if a search
     misses, search for something *else* from the page — a number, a name, a slogan —
     instead of rewording the same idea ("market size" → "TAM" is the same idea again).
-    The search engine's code did not change; only this note did.
   - **Forced final answer.** Hitting the round cap now forces one last, tool-free,
     best-effort answer from the evidence already gathered: a give-up message is
     strictly the worse output.
@@ -355,20 +354,11 @@ earned its shape.
 - *What happened:* **Four kinds of correct answer were being marked wrong,** which
   only became visible once the test set reached 124 questions.
 - *Why:* **Same meaning, different notation — and the script treated them as
-  different things.** "17,500 million" versus "17.5 billion"; "3×" versus "3x"; the
-  "1" inside a citation label like "p.1" versus a number the answer actually claims;
-  and a page cited from earlier in the conversation versus a page retrieved this turn
-  (the script only had this turn's pages to check against).
+  different things.** "17,500 million" versus "17.5 billion"; "3×" versus "3x";
 - *The fix:* **Rules that cover the whole class of notation, not just the four cases
   seen.** Before comparing, the script converts every number to one standard form
   (so any "17.5 billion" equals any "17,500 million"), treats × and x as the same
-  character, drops citation labels before collecting the numbers an answer claims,
-  and checks follow-up citations against every page retrieved earlier in the same
-  conversation (that last one was also a product bug — follow-ups showed a warning
-  badge — fixed in the chat loop). These are plain rules, not a model: they catch any
-  new instance of these four notation types, while a genuinely new type of notation
-  would need one more rule. Each of the four original examples is kept in the test
-  suite so the fix can never quietly break.
+  character. 
 - *Verified:* **Every stored answer was re-scored under the corrected rules, in the
   open.** The rules are in the code for anyone to read.
 
@@ -380,9 +370,10 @@ earned its shape.
   declares this boundary rather than extrapolating beyond it.
 - **No live market data.** Answers stop at the corpus — the newest fact is dated
   2025-09-29, so "today's price" is out of scope by design.
-- **Targeted questions, not corpus-wide analytics.** Retrieval returns the
-  top-ranked pages, so "summarize all 30 reports" or "count every mention across
-  423 pages" exceeds the tool budget.
+- **Targeted questions, not corpus-wide analytics.** Each search returns its top 8
+  pages, and an answer reads at most a few dozen pages over its rounds — never all
+  423 — so "summarize all 30 reports" or "count every mention across the corpus"
+  exceeds the tool budget.
 - **Original figures only.** It reproduces charts from the reports; it does not
   draw new ones — ask for a chart of the price-target trajectory and the answer is
   a cited table.
