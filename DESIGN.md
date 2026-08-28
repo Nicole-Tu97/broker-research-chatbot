@@ -281,9 +281,13 @@ earned its shape.
   a screenshot of every cited page — the cover page of a text report included.
 - *Why:* **More images is not more context.** Irrelevant images dilute the answer and
   add nothing an analyst can use.
-- *The fix:* **Attach a figure only when the figure is the evidence.** The three-way
-  rule in §4.3 — crop the specific chart when one exists; embed the full page only
-  when the page IS the chart; attach nothing when the answer is summarizable from text.
+- *The fix:* **A `has_visual` flag at parsing time, and a figure locator built on it.**
+  At parsing time the model now marks every page with a `has_visual` flag — does this
+  page carry a chart, table or image? — stored on the Page row. On that flag sits the
+  figure locator (§4.3): only cited pages flagged `has_visual` are examined, and for
+  those it crops the specific chart, embeds the whole page when the page *is* the
+  chart, or attaches nothing when the answer is summarizable from text. Pages that
+  should deliver a figure do; pages that should be summarized are.
 - *Verified:* **Figure-crop accuracy 0.824 and 0.80 across two full runs.** The
   metric exists to keep exactly this honest.
 
