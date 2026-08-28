@@ -354,20 +354,23 @@ earned its shape.
 
 - *What happened:* **Four kinds of correct answer were being marked wrong,** which
   only became visible once the test set reached 124 questions.
-- *Why:* **The script compared text literally and did not know that different
-  notations can mean the same thing.** "17,500 million" written as "17.5 billion"
-  was a miss; "3×" versus "3x" was a miss; the page number inside a citation label
-  ("p.1") was counted as a number the answer claimed; and a follow-up answer citing
-  a page read earlier in the conversation had no page text in hand to check against.
-- *The fix:* **Teach the script the equivalences, and lock each one in with a test.**
-  Numbers are normalized to one form before matching; page numbers inside citation
-  labels are ignored; follow-up citations are checked against pages retrieved earlier
-  in the same conversation (this last one was also a product bug — follow-ups showed
-  a warning badge — fixed in the chat loop). Each once-misjudged example became a
-  permanent regression test.
+- *Why:* **Same meaning, different notation — and the script treated them as
+  different things.** "17,500 million" versus "17.5 billion"; "3×" versus "3x"; the
+  "1" inside a citation label like "p.1" versus a number the answer actually claims;
+  and a page cited from earlier in the conversation versus a page retrieved this turn
+  (the script only had this turn's pages to check against).
+- *The fix:* **Rules that cover the whole class of notation, not just the four cases
+  seen.** Before comparing, the script converts every number to one standard form
+  (so any "17.5 billion" equals any "17,500 million"), treats × and x as the same
+  character, drops citation labels before collecting the numbers an answer claims,
+  and checks follow-up citations against every page retrieved earlier in the same
+  conversation (that last one was also a product bug — follow-ups showed a warning
+  badge — fixed in the chat loop). These are plain rules, not a model: they catch any
+  new instance of these four notation types, while a genuinely new type of notation
+  would need one more rule. Each of the four original examples is kept in the test
+  suite so the fix can never quietly break.
 - *Verified:* **Every stored answer was re-scored under the corrected rules, in the
-  open.** The rule changes are in the code for anyone to read, and the regression
-  tests keep them from breaking again.
+  open.** The rules are in the code for anyone to read.
 
 ## 8. Known limits and future directions
 
