@@ -230,9 +230,11 @@ triggers (§8), and two were closed *with data*.
   runs. Here the function-calling loop *is* the planner — the model already picks the
   tool, writes the query, sets filters, and decides when to stop — so a separate
   planner would add latency and a failure mode without adding capability at this scale.
-- **No reranker** — closed with data: every retrieval miss was candidate absence
-  (recall = 0 in *all* configurations), which reranking cannot fix; the real fixes
-  belonged in query formulation and were verified end-to-end.
+- **No reranker.** A reranker helps when the right page *is* retrieved but ranked too
+  low — say #30 of 50, cut off by the top-10. That is not this corpus's failure
+  mode: every miss was the page not being retrieved at all, and production recall is
+  already 0.956, so ranking is not the main error source. It earns a place once the
+  corpus grows and near-identical pages multiply.
 - **No pre-extracted facts table** — exact SQL over metadata plus full first-page
   context answers comparative/temporal questions without a lossy second store.
 - **No sub-page chunking** (§4, Chunking row). **No Celery/Redis queue** at 30 documents. **No
