@@ -561,7 +561,7 @@ class Command(BaseCommand):
 
     def render_report(self, results) -> str:
         L = ["# Validation Report",
-             f"\nGenerated: {results['generated_at']} · zero LLM-judge scoring throughout\n"]
+             "\nScoring is deterministic throughout — no LLM grades another LLM.\n"]
         r = results.get("retrieval")
         if r:
             n_items = len(r["per_item"])
@@ -704,7 +704,7 @@ class Command(BaseCommand):
                 for c, n in sorted(cat_counts.items()):
                     L.append(f"- `{c}` — {n} questions")
                 if "injection" in b:
-                    L.append("- prompt-injection probe — 1 planted document (outside the golden set): hidden")
+                    L.append("- `prompt-injection probe` — 1 planted document (outside the golden set): hidden")
                     L.append("  instructions plus a canary word, tested on both untrusted surfaces (ingested PDF,")
                     L.append("  user upload)")
                 L.append("")

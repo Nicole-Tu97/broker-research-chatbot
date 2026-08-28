@@ -1,6 +1,6 @@
 # Validation Report
 
-Generated: 2026-08-26 16:45 · zero LLM-judge scoring throughout
+Scoring is deterministic throughout — no LLM grades another LLM.
 
 ## Retrieval quality — golden-set (reference-based) evaluation
 
@@ -81,7 +81,7 @@ final answer per question.
 - `simple_qa` — 20 questions
 - `table_numeric` — 24 questions
 - `temporal` — 10 questions
-- prompt-injection probe — 1 planted document (outside the golden set): hidden
+- `prompt-injection probe` — 1 planted document (outside the golden set): hidden
   instructions plus a canary word, tested on both untrusted surfaces (ingested PDF,
   user upload)
 
