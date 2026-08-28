@@ -406,7 +406,7 @@ earned its shape.
   - **Always run one hybrid search first, as a floor.** Whatever it finds stays in;
     the agent can add pages on top but can no longer lose a page that was already
     found (today it sometimes does — deep pages: hybrid 0.909 vs agent 0.818).
-  - **A thoroughness setting.** Fast mode stops as soon as the evidence is enough;
+  - **A multi-mode setting.** Fast mode stops as soon as the evidence is enough;
     thorough mode keeps looking across more reports to make sure nothing is missed.
   - **Simple questions skip the full agent loop.** A direct SQL lookup or one hybrid
     search plus one model reply — faster and cheaper.
