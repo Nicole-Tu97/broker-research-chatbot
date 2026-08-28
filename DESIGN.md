@@ -372,10 +372,12 @@ earned its shape.
   declares this boundary rather than extrapolating beyond it.
 - **No live market data.** Answers stop at the corpus — the newest fact is dated
   2025-09-29, so "today's price" is out of scope by design.
-- **Targeted questions, not corpus-wide analytics.** Each search returns its top 8
+- **Targeted questions, not page-by-page analytics.** Each search returns its top 8
   pages, and an answer reads at most a few dozen pages over its rounds — never all
-  423 — so "summarize all 30 reports" or "count every mention across the corpus"
-  exceeds the tool budget.
+  423. Report-level overviews still work, because `list_reports` can return every
+  report's first page; what exceeds the budget is anything that needs every page read
+  — "count every mention of Blackwell in the corpus", "summarize every page of the
+  keynote".
 - **Original figures only.** It reproduces charts from the reports; it does not
   draw new ones — ask for a chart of the price-target trajectory and the answer is
   a cited table.
