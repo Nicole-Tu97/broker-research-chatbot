@@ -132,18 +132,28 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 
 **4.1 Retrieval mechanics: the loop is the router.**
 
-- **Hybrid search fuses two legs.** `search_pages` combines a vector leg (pgvector
-  cosine) and a full-text leg (`ts_rank_cd`, OR semantics), top-50 each, with RRF
-  (k=10); per-leg ranks are logged into a visible retrieval trace.
-- **`list_reports` returns pages, not extracted rows.** Full first-page transcriptions
-  come back, so the *why* behind each rating change survives — a pre-extracted
-  `pt=240` row would destroy it.
-- **The function-calling loop is the router.** Routing lives in the tool
-  descriptions; the loop is demonstrably capable of multi-step recovery — filtered
-  follow-up searches, page-hint navigation, including the 2/21 reports whose price
-  target hides deeper than page 1.
-- **Non-English questions work end-to-end (measured).** The model writes English
-  search queries and the embedding space is cross-lingual.
+- **Hybrid search runs two searches at once and merges their rankings.** For every
+  query, `search_pages` runs a semantic-similarity search (pgvector cosine over the
+  page embeddings) and a keyword search (Postgres full text, OR semantics, ranked by
+  `ts_rank_cd`) side by side. Each returns its top 50 pages; the two lists are merged
+  with **Reciprocal Rank Fusion (RRF)**, which scores each page by 1/(k + rank) in
+  each list and adds the scores — k=10 is a weighting constant that softens the gap
+  between rank 1 and rank 2, not a cutoff. Both legs' ranks are logged into a visible
+  retrieval trace.
+- **`list_reports` lists every matching report and returns full first pages, not a
+  few extracted fields.** Filtered by broker, ticker, and date, it returns *all*
+  matching reports (SQL, nothing left out), and for each one the complete first-page
+  transcription. That keeps the context — why a target was raised, what changed —
+  which a pre-extracted row like `pt=240` would throw away.
+- **No routing rule is hard-coded; the agent decides.** Which tool to call, how to
+  phrase the search, whether to add filters, and whether to keep digging are all the
+  LLM's decisions, guided only by the tool descriptions. In practice it recovers in
+  several steps when needed — re-worded searches, filtered follow-ups, page hints —
+  including the 2/21 reports whose price target sits deeper than page 1.
+- **Ask in any language; the system searches in English and answers in yours.** For a
+  non-English question the model writes English search queries (the corpus is
+  English), the embedding space is cross-lingual, and the reply comes back in the
+  language of the question. Measured end-to-end, not assumed.
 
 **4.2 Numbers: validated at ingestion, verified at answer time.**
 
