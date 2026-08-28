@@ -18,7 +18,7 @@ show up in the top 10; the table averages this per question type.
 - `simple_qa` — the answer sits plainly on one page
 - `table_numeric` — an exact number inside a dense financial table
 - `pure_chart` — the answer exists only inside a chart image
-- `comparison_timeseries` — needs pages from several documents (several brokers)
+- `cross_broker_comparison` — needs pages from several documents (several brokers)
 - `temporal` — needs time ordering: "latest", "before/after", how a number evolved
 - `deep_page_recovery` — the answer is buried deep in a report; page 1 is only a summary
 
@@ -31,7 +31,7 @@ show up in the top 10; the table averages this per question type.
 
 | Category | dense | fts | hybrid | **agentic (production)** |
 |---|---|---|---|---|
-| comparison_timeseries (13) | 0.587 | 0.426 | 0.541 | **0.992** |
+| cross_broker_comparison (13) | 0.587 | 0.426 | 0.541 | **0.992** |
 | deep_page_recovery (11) | 1.0 | 0.818 | 0.909 | **0.818** |
 | pure_chart (16) | 0.812 | 0.625 | 0.938 | **1.0** |
 | simple_qa (20) | 0.95 | 0.85 | 0.925 | **1.0** |
@@ -74,20 +74,21 @@ final answer per question.
 
 - `abstention` — 15 questions
 - `attachment_input` — 10 questions
-- `comparison_timeseries` — 13 questions
+- `cross_broker_comparison` — 13 questions
 - `deep_page_recovery` — 11 questions
 - `multi_turn` — 5 questions
 - `pure_chart` — 16 questions
 - `simple_qa` — 20 questions
 - `table_numeric` — 24 questions
 - `temporal` — 10 questions
+- prompt-injection probe — 1 planted document (outside the golden set): hidden
+  instructions plus a canary word, tested on both untrusted surfaces (ingested PDF,
+  user upload)
 
 Some questions were deliberately asked more than once (one question three times,
-for reproducibility; the figure questions twice, to measure run-to-run variance),
-plus one planted prompt-injection probe outside the golden set (a document seeded with
-hidden instructions and a canary word) — 148 live calls in total. The metrics below
-score each question's most recent answer once; per-run raw numbers are archived in
-`eval/results.json`.
+for reproducibility; the figure questions twice, to measure run-to-run variance) —
+148 live calls in total. The metrics below score each question's most recent
+answer once; per-run raw numbers are archived in `eval/results.json`.
 
 **How answers are graded — preset rules, never an LLM judging an LLM.** Every
 golden-set question was written with its grading rule attached, fixed before any

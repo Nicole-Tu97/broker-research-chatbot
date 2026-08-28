@@ -4,7 +4,7 @@
     "per_item": [
       {
         "id": "CT1",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 1.0,
@@ -14,7 +14,7 @@
       },
       {
         "id": "CT2",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 1.0,
@@ -24,7 +24,7 @@
       },
       {
         "id": "CT3",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 0.0,
@@ -104,7 +104,7 @@
       },
       {
         "id": "RQ1",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 0.667,
@@ -614,7 +614,7 @@
       },
       {
         "id": "CT4",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 0.1,
@@ -624,7 +624,7 @@
       },
       {
         "id": "CT5",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 0.9,
           "dense": 0.2,
@@ -634,7 +634,7 @@
       },
       {
         "id": "CT6",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 0.0,
@@ -644,7 +644,7 @@
       },
       {
         "id": "CT7",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 0.667,
@@ -654,7 +654,7 @@
       },
       {
         "id": "CT8",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 0.5,
@@ -664,7 +664,7 @@
       },
       {
         "id": "CT9",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 1.0,
@@ -674,7 +674,7 @@
       },
       {
         "id": "CT10",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 1.0,
@@ -684,7 +684,7 @@
       },
       {
         "id": "CT11",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 1.0,
@@ -694,7 +694,7 @@
       },
       {
         "id": "CT12",
-        "cat": "comparison_timeseries",
+        "cat": "cross_broker_comparison",
         "recall": {
           "agentic": 1.0,
           "dense": 0.5,
@@ -962,7 +962,7 @@
         "hybrid": 0.938,
         "agentic": 1.0
       },
-      "comparison_timeseries": {
+      "cross_broker_comparison": {
         "dense": 0.587,
         "fts": 0.426,
         "hybrid": 0.541,

@@ -3,7 +3,7 @@
   "items": [
     {
       "id": "CT1",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "Compare the change in price target for NVDA between UBS's research and Barclays's research over the past two years.",
       "expected_pages": [
         [
@@ -31,7 +31,7 @@
     },
     {
       "id": "CT2",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "How did Barclays' NVDA price target evolve across its 2025 reports?",
       "expected_pages": [
         [
@@ -52,7 +52,7 @@
     },
     {
       "id": "CT3",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "各家券商当前对英伟达的最新目标价分别是多少？",
       "expected_pages": [
         [
@@ -215,7 +215,7 @@
     },
     {
       "id": "RQ1",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "过去两年里，UBS 和巴克莱对英伟达目标价的调整轨迹有什么不同？",
       "expected_pages": [
         [
@@ -1325,7 +1325,7 @@
     },
     {
       "id": "CT4",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "Give me a complete rundown of every broker in the knowledge base and its most recent NVDA price target — all houses, not just the big three.",
       "expected_pages": [
         [
@@ -1385,7 +1385,7 @@
     },
     {
       "id": "CT5",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "请把知识库里每一家券商对英伟达（NVDA）的最新股票评级完整列一遍，一家都不要漏。",
       "expected_pages": [
         [
@@ -1441,7 +1441,7 @@
     },
     {
       "id": "CT6",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "Among all brokers covering NVDA in the corpus, who holds the street-high price target and who has the lowest, and what are the two numbers?",
       "expected_pages": [
         [
@@ -1466,7 +1466,7 @@
     },
     {
       "id": "CT7",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "Barclays, BofA, and Citi all value NVDA off a CY26 earnings multiple — compare the P/E multiples each uses to derive its latest price target.",
       "expected_pages": [
         [
@@ -1492,7 +1492,7 @@
     },
     {
       "id": "CT8",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "How did Citi's and BofA's NVDA price targets move between mid-August and late September 2025?",
       "expected_pages": [
         [
@@ -1523,7 +1523,7 @@
     },
     {
       "id": "CT9",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "英伟达向 OpenAI 投资的规模有多大？美银和法巴 Exane 各自是怎么解读这笔交易的？",
       "expected_pages": [
         [
@@ -1547,7 +1547,7 @@
     },
     {
       "id": "CT10",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "Both Wells Fargo and Citi published notes on NVIDIA's Rubin CPX unveiling on September 9, 2025 — what did each highlight, and where do their price targets stand?",
       "expected_pages": [
         [
@@ -1569,7 +1569,7 @@
     },
     {
       "id": "CT11",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "摩根士丹利和巴克莱给英伟达设定的牛市/熊市（上行/下行）情景价位分别是多少？对比一下两家的区间。",
       "expected_pages": [
         [
@@ -1594,7 +1594,7 @@
     },
     {
       "id": "CT12",
-      "cat": "comparison_timeseries",
+      "cat": "cross_broker_comparison",
       "question": "How do Mizuho and BNP Paribas Exane each size the AI capex wave — what headline figures does each report put on it?",
       "expected_pages": [
         [

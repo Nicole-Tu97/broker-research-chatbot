@@ -430,3 +430,8 @@ earned its shape.
   - **Mostly annotation work from here, not new code.** The evaluation framework is
     built; what remains is writing good questions and marking the correct facts and
     source pages.
+  - **Gaps to close next.** Confidence intervals on every metric (today they are point
+    estimates on 5–24 items per type); agent-efficiency metrics (rounds, tool calls and
+    cost per answer as reported columns); tests where two brokers disagree, to check
+    both sides are shown; and attacks phrased in the question itself, not only hidden
+    inside documents.
