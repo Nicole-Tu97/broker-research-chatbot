@@ -51,17 +51,15 @@ marked post-hoc; from here on it is the bar every future run must clear.)
 
 - Overall mean ≥ 0.90: **PASS** (0.956)
 
-**One weak spot to note.** `deep_page_recovery` is the weakest type on the agentic
-column (0.818) — and there, single-shot hybrid (0.909) beats the agent. The
-reason is a deliberate cost-saving default: the agent starts from each report's first
-page and stops as soon as what it has read looks sufficient. On deep-page questions the
-first page often holds only a summary, so the agent answers from it and never retrieves
-the deeper page that carries the exact figure — while single-shot hybrid, which does
-not stop early, brings that page back in its top 10. (A few of these misses are the
-agent answering correctly from another valid page that the fixed answer key does not
-credit.) The improvement path: keep the single-shot hybrid results as a floor, so the
-agent's early stop can only add pages, never lose them — hybrid alone already scores
-0.909 on this type — and the stopping threshold itself can be tuned.
+**One weak spot to note.** On `deep_page_recovery`, single-shot hybrid (0.909) beats
+the agent (0.818). **The cause is the agent's cost-saving default: it reads each
+report's first page and stops as soon as that looks sufficient.** On deep-page
+questions the first page is only a summary, so the agent never fetches the deeper page
+with the exact figure — while single-shot hybrid, which never stops early, does. (A few
+misses are the agent answering correctly from another valid page the fixed answer key
+does not credit.) **Fix: keep the single-shot hybrid results as a floor** — the agent's
+early stop can then only add pages, never lose them (hybrid alone scores 0.909 here) —
+and the stopping threshold itself can be tuned.
 
 How the retriever's design evolved — including the approaches that failed and
 what fixed them — is told in DESIGN.md §7 (what I tried that didn't work).
