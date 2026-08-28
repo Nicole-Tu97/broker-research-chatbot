@@ -10,7 +10,8 @@ Generated: 2026-08-26 16:45 · zero LLM-judge scoring throughout
 **How the test runs.** 94 questions, each with 1–10 hand-checked answer
 pages (about 135 in total). Each question is sent to the retriever exactly as written,
 once per configuration (94 × 3 = 282 single-shot searches, each returning
-its top 10 pages). The score per question is the share of its answer pages that
+its top 10 pages — a slightly wider window than the live tool's default of 8, which
+the agent can raise). The score per question is the share of its answer pages that
 show up in the top 10; the table averages this per question type.
 
 **The six question types.**
