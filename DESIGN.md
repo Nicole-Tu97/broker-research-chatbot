@@ -322,21 +322,27 @@ earned its shape.
 
 **5. One hard question failed three different ways.**
 
-- *What happened:* **The keynote's "$100T market" question failed three times, each
-  a different defect,** when asked in adversarial wording.
-- *Why and the fixes, one per defect:*
-  - **Giving up when the rounds ran out.** The agent returned "please narrow your
-    question" — $1.25 for a give-up message. Now hitting the round cap forces one
-    final, tool-free, best-effort answer: a give-up message is strictly the worse
-    output.
+- *What happened:* **"According to the GTC Paris keynote, what total market size is
+  associated with AI factories?" failed three times, each a different defect.** The
+  answer ($100 trillion) sits on a keynote slide with no text layer, and the question
+  deliberately uses analyst wording that does not appear on the slide.
+- *Why — three defects:*
+  - **Giving up when the rounds ran out.** After six rounds without a hit the agent
+    returned "please narrow your question" — $1.25 for a give-up message.
   - **Searching in analyst vocabulary, not the slide's own words.** The model searched
-    for "market size" and "TAM" while the slide's transcription holds only the page's
-    words. The tool description now says: search slide-style content with the page's
-    own words, and after a miss re-word drastically instead of tweaking synonyms.
-  - **Answering from a nearby source.** Re-worded, the model found a similar-looking
-    real number (~$100 *billion*, a broker's European-capex figure) in an adjacent
-    document and answered with it. Behavior rule 6 (named-document pinning, §4.4) now
-    forbids substituting a nearby source for the named one.
+    for "market size" and "TAM"; the slide's transcription holds only the page's own
+    words ("AI factory", "$100T").
+  - **Answering from a nearby source.** Once re-worded, the model found a
+    similar-looking real number (~$100 *billion*, a broker's European-capex figure) in
+    a broker report *about* the keynote, and answered with it.
+- *The fixes — one per defect:*
+  - **Forced final answer.** Hitting the round cap now forces one last, tool-free,
+    best-effort answer: a give-up message is strictly the worse output.
+  - **Search guidance in the tool description.** Search slide-style content with the
+    page's own words, and after a miss re-word drastically instead of tweaking
+    synonyms.
+  - **Named-document pinning** (behavior rule 6, §4.4). When a question names a
+    document, locate it first and take numbers only from it.
 - *Verified:* **The question now answers $100 trillion, citing the keynote page.** The
   whole pure-chart category passes end-to-end.
 
