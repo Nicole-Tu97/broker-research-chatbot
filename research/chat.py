@@ -278,6 +278,69 @@ def _valid_crop(box) -> dict | None:
     return {"x0": round(max(0, x0 - _CROP_PAD), 1), "y0": round(max(0, y0 - _CROP_PAD), 1),
             "x1": round(min(100, x1 + _CROP_PAD), 1), "y1": round(min(100, y1 + _CROP_PAD), 1)}
 
+# ---- Crop snapping: align the locator's box to the figure frames actually drawn on
+# the page. The vision model's box tends to straddle two adjacent exhibits or clip a
+# frame edge; the PDF itself knows where each exhibit's frame is. Deterministic.
+_FRAME_MIN_AREA, _FRAME_MAX_AREA = 3.0, 70.0   # % of page: ignore bars/gridlines and near-whole-page rects
+_FRAME_COVER = 0.5                              # the box must cover at least half a frame to claim it
+_TITLE_GAP = 2.5                                # % of page height: a text block this close above the frame is its title
+
+
+def _pick_frame_union(box, frames, titles=()):
+    """Pure geometry, page-percent coordinates (x0, y0, x1, y1).
+
+    frames: candidate figure frames (drawn rectangles / embedded images). Nested frames
+    are dropped (outermost wins). Returns the union of every frame the box covers by at
+    least _FRAME_COVER, extended upward to an adjacent title block; None if the box
+    claims no frame (the caller keeps the model's box)."""
+    def area(r):
+        return max(0.0, r[2] - r[0]) * max(0.0, r[3] - r[1])
+
+    def inter(a, b):
+        return (max(a[0], b[0]), max(a[1], b[1]), min(a[2], b[2]), min(a[3], b[3]))
+
+    outer = [f for f in frames if area(f) > 0 and not any(
+        g is not f and g[0] <= f[0] and g[1] <= f[1] and g[2] >= f[2] and g[3] >= f[3] and area(g) > area(f)
+        for g in frames)]
+    picked = [f for f in outer if area(inter(box, f)) / area(f) >= _FRAME_COVER]
+    if not picked:
+        return None
+    u = (min(f[0] for f in picked), min(f[1] for f in picked),
+         max(f[2] for f in picked), max(f[3] for f in picked))
+    for t in titles:
+        if 0 <= u[1] - t[3] <= _TITLE_GAP and (t[2] - t[0]) > 0:
+            overlap = min(u[2], t[2]) - max(u[0], t[0])
+            if overlap >= 0.5 * (t[2] - t[0]):
+                u = (min(u[0], t[0]), min(u[1], t[1]), max(u[2], t[2]), u[3])
+    return {"x0": round(u[0], 1), "y0": round(u[1], 1), "x1": round(u[2], 1), "y1": round(u[3], 1)}
+
+
+def _snap_to_frames(box, filename: str, page_number: int):
+    """Read the page's drawn rectangles, embedded images and text blocks with PyMuPDF and
+    snap the locator's box to them. Any failure -> None (keep the model's box)."""
+    try:
+        import pymupdf
+        pg = pymupdf.open(str(settings.CORPUS_DIR / filename))[page_number - 1]
+        W, H = pg.rect.width, pg.rect.height
+
+        def pct(r):
+            return (r.x0 / W * 100, r.y0 / H * 100, r.x1 / W * 100, r.y1 / H * 100)
+
+        frames = []
+        for d in pg.get_drawings():
+            r = d["rect"]
+            if _FRAME_MIN_AREA <= r.width * r.height / (W * H) * 100 <= _FRAME_MAX_AREA:
+                frames.append(pct(r))
+        for info in pg.get_image_info():
+            r = pymupdf.Rect(info["bbox"])
+            if _FRAME_MIN_AREA <= r.width * r.height / (W * H) * 100 <= _FRAME_MAX_AREA:
+                frames.append(pct(r))
+        titles = [pct(pymupdf.Rect(b[:4])) for b in pg.get_text("blocks") if b[4].strip()]
+        b = (float(box["x0"]), float(box["y0"]), float(box["x1"]), float(box["y1"]))
+        return _pick_frame_union(b, frames, titles)
+    except Exception:
+        return None
+
 
 def _figure_crops(question: str, badges: list[dict], emit) -> tuple[int, int, int]:
     """Three-way call for cited pages with visuals (deduped, capped at FIGURE_CROP_CAP):
@@ -317,14 +380,15 @@ def _figure_crops(question: str, badges: list[dict], emit) -> tuple[int, int, in
         calls += 1
         if not box or box.get("no_figure"):
             continue
-        page = Page.objects.filter(document_id=key[0], page_number=key[1]).only("raw_text").first()
+        page = Page.objects.filter(document_id=key[0], page_number=key[1]).select_related("document").first()
         pixel_dominant = page is not None and len(page.raw_text or "") <= WHOLE_PAGE_MAX_TEXT_CHARS
         if box.get("whole_page"):
             if not pixel_dominant:
                 continue  # text-dominant page: a full-page card adds nothing the answer lacks
             mark = {"show_page": True}
         else:
-            crop = _valid_crop(box)
+            snapped = _snap_to_frames(box, page.document.filename, key[1]) if page else None
+            crop = _valid_crop(snapped or box)
             if crop:
                 mark = {"crop": crop}
             elif pixel_dominant:

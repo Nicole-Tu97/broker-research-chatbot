@@ -173,10 +173,12 @@ it hold only what a table cannot (mechanics, verification, rules, security):
   outcomes: a relevant chart or table is found and cropped out of the page; the whole
   page *is* the figure (a slide) and is shown in full; or no figure is needed and
   nothing is shown — the citation link is enough.
-- **If a crop box looks wrong, the whole page is shown instead.** Boxes that are out
-  of range, degenerate, or implausibly small or large are rejected, and the fallback
-  is the full page. Either way the citation always opens the original PDF at that
-  page.
+- **The box is snapped to the page's own figure frames, and if it still looks wrong
+  the whole page is shown instead.** The PDF knows where each exhibit's frame is drawn;
+  the locator's box is aligned to the frame(s) it mostly covers, title included, so a
+  box that straddled two charts or clipped an edge becomes a clean crop. Boxes that are
+  out of range, degenerate, or implausibly small or large are rejected, and the fallback
+  is the full page. Either way the citation always opens the original PDF at that page.
 - **The locator only presents figures; it never touches retrieval or the answer.**
   It runs on the interactive path only, never during evaluation, and its output is
   not fed back into later turns.

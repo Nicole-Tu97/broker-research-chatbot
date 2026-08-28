@@ -661,3 +661,26 @@ class ValidationReportTemplateTests(SimpleTestCase):
             report, (EVAL / "validation_report.md").read_text(),
             "eval/validation_report.md is out of sync with the generator — regenerate it "
             "via render_report instead of editing the file by hand")
+
+
+class CropSnapTests(SimpleTestCase):
+    """The locator's box is snapped to the figure frames drawn on the page (pure geometry)."""
+
+    FRAMES = [(11.0, 13.7, 49.5, 45.2), (50.5, 13.7, 89.0, 45.2), (10.9, 52.8, 89.1, 81.4),
+              (17.6, 17.7, 47.7, 38.4), (57.4, 17.7, 87.2, 33.5)]   # two side-by-side exhibits + one below, with nested plot areas
+    TITLES = [(10.9, 9.8, 48.4, 13.1), (50.5, 9.8, 88.4, 13.1), (10.9, 48.9, 87.6, 52.2)]
+
+    def test_straddling_box_snaps_to_the_frame_it_mostly_covers(self):
+        from .chat import _pick_frame_union
+        got = _pick_frame_union((42, 10, 74, 46), self.FRAMES, self.TITLES)
+        self.assertEqual((got["x0"], got["y0"], got["x1"], got["y1"]), (50.5, 9.8, 89.0, 45.2))
+
+    def test_box_covering_two_exhibits_takes_their_union_with_titles(self):
+        from .chat import _pick_frame_union
+        got = _pick_frame_union((10, 12, 90, 46), self.FRAMES, self.TITLES)
+        self.assertEqual((got["x0"], got["y0"], got["x1"], got["y1"]), (10.9, 9.8, 89.0, 45.2))
+
+    def test_box_claiming_no_frame_is_left_alone(self):
+        from .chat import _pick_frame_union
+        self.assertIsNone(_pick_frame_union((2, 2, 8, 8), self.FRAMES, self.TITLES))
+        self.assertIsNone(_pick_frame_union((42, 10, 74, 46), [], []))
