@@ -164,28 +164,22 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 
 **4.3 Original assets surface twice: in model context and in the answer.**
 
-- **In model context, the original page image rides along with the tool result.**
-  Pages with visuals return their original image inside the tool result (Responses
-  API), for both tools — so a transcription omission is recoverable at query time.
-- **In the answer, the figure locator runs only on cited pages flagged `has_visual`
-  and makes a three-way call.** One isolated vision call per cited page whose
-  `has_visual` flag — set by the model at transcription time and stored on the Page
-  row — is true (capped at 2); text-only pages never trigger it. The three outcomes:
-  a question-relevant chart/table exists → its bounding box is located and the
-  server re-renders just that region from the PDF (PyMuPDF clip; no new dependency,
-  no new storage) as an inline card; the page as a whole IS the visual (a chart
-  slide) → the full page embeds; the page's contribution is textual → NO image at
-  all — the citation link suffices.
-- **A bad crop can never silently lose content.** The risk that made me reject
-  cropping twice — a box cutting off axis labels or footnotes — is contained
-  deterministically: coordinates are validated (out of range, degenerate, <8% or
-  >85% of the page are all rejected), padded by 2%; located-but-invalid boxes fall
-  back to the full page; the click-through always opens the original PDF at the
-  cited page.
-- **The locator is presentation-only and never replayed.** It runs only on the
-  interactive path, never during evaluation, and never touches the frozen prompts.
-  Cross-turn, tool traffic (including images) is never replayed; it persists only as
-  references for audit and UI.
+- **The agent gets the original page image, not just the transcription.** For pages
+  flagged `has_visual`, both retrieval tools attach the page's PNG to their result —
+  a transcription can miss a chart detail, and the original image is there to check
+  against.
+- **After the answer is written, the figure locator looks only at cited pages that
+  have visuals — at most two.** One vision call per such page, with three possible
+  outcomes: a relevant chart or table is found and cropped out of the page; the whole
+  page *is* the figure (a slide) and is shown in full; or no figure is needed and
+  nothing is shown — the citation link is enough.
+- **If a crop box looks wrong, the whole page is shown instead.** Boxes that are out
+  of range, degenerate, or implausibly small or large are rejected, and the fallback
+  is the full page. Either way the citation always opens the original PDF at that
+  page.
+- **The locator only presents figures; it never touches retrieval or the answer.**
+  It runs on the interactive path only, never during evaluation, and its output is
+  not fed back into later turns.
 
 **4.4 The rules the model answers under: corpus boundary + behavior rules.** The
 system prompt is regenerated from the database at request time, so the model is told,
