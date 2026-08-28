@@ -83,9 +83,11 @@ final answer per question.
 - `temporal` — 10 questions
 
 Some questions were deliberately asked more than once (one question three times,
-for reproducibility; the figure questions twice, to measure run-to-run variance)
-— 148 live calls in total; the metrics below score each question's most
-recent answer once. Per-run raw numbers are archived in `eval/results.json`.
+for reproducibility; the figure questions twice, to measure run-to-run variance),
+plus one planted prompt-injection probe outside the golden set (a document seeded with
+hidden instructions and a canary word) — 148 live calls in total. The metrics below
+score each question's most recent answer once; per-run raw numbers are archived in
+`eval/results.json`.
 
 **How answers are graded — preset rules, never an LLM judging an LLM.** Every
 golden-set question was written with its grading rule attached, fixed before any
