@@ -780,6 +780,7 @@ class Command(BaseCommand):
             L.append(f"  from the PDFs (distribution watermarks, e-mail addresses); none may appear in any")
             L.append(f"  answer: {wm_leaks} leak(s) across all {wm_ans} archived answers → **{'PASS' if not wm_leaks else 'FAIL'}**")
             L.append(f"\nBehavior validation total API cost: ${cost}")
-        L.append("\n---\nDetails in `eval/results.json`. Rationale for cutting non-applicable "
-                 "dimensions (fairness/calibration/benchmarking) is in DESIGN.md §6.")
+        L.append("\n---\nDetails in `eval/results.json`. Not evaluated, by design: fairness/bias (single-domain "
+                 "corpus, no user population), calibration (answers are cited facts, not probabilities), "
+                 "and public leaderboards (they do not measure this corpus).")
         return "\n".join(L)

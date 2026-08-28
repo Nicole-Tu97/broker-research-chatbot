@@ -130,4 +130,4 @@ so every score is exactly reproducible.
 Behavior validation total API cost: $20.34
 
 ---
-Details in `eval/results.json`. Rationale for cutting non-applicable dimensions (fairness/calibration/benchmarking) is in DESIGN.md §6.
+Details in `eval/results.json`. Not evaluated, by design: fairness/bias (single-domain corpus, no user population), calibration (answers are cited facts, not probabilities), and public leaderboards (they do not measure this corpus).

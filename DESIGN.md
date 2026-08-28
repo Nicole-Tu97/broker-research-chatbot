@@ -252,16 +252,6 @@ triggers (§8), and two were closed *with data*.
 - **No frontend framework.** React and similar frameworks manage complex interactive
   UIs. A single chat page with streaming and citation cards is served fine by one
   Django template and plain JavaScript.
-- **No auth or multi-tenancy.** Login and per-client data isolation are production
-  requirements. This is a single-user demonstration; they are the first thing to add
-  before real deployment (§8).
-- **No LLM-as-judge** in the product or the evaluation — deterministic checks
-  instead; "who validates the validator" terminates.
-- **Evaluation dimensions that do not apply were cut, not faked**: fairness/bias
-  benchmarks (single-domain corpus, no user population), calibration curves (answers
-  are cited facts, not probabilities), public leaderboards (they do not measure this
-  corpus).
-
 Several of these are reversals of my own earlier designs — the details are in §7.
 
 ## 7. What I tried that didn't work — and what fixed it
@@ -410,8 +400,9 @@ earned its shape.
   - Precomputed per-document rollups — one offline summary per report, built at
     ingestion — turn corpus-wide questions ("summarize all 30 reports") back into
     retrieval questions.
-  - Production deployment re-adds the §6 cuts, auth first; operational detail
-    lives in the README under "Adding more documents".
+  - Production deployment adds auth and per-client isolation first, then re-adds the §6
+    cuts as their triggers fire; operational detail lives in the README under "Adding
+    more documents".
 - **Wider verification, richer answers.**
   - Extend the badge to prose: require a short verbatim quote per qualitative
     claim and string-match it against the cited page — still no LLM judging an LLM.
