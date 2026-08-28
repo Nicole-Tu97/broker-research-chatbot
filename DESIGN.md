@@ -161,7 +161,6 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 - **Superseded reports get a recency label.** One SQL check per citation: if the same
   broker has a newer report, the citation says so — the costliest analyst mistake,
   prevented for free.
-- **No LLM judges anything, anywhere.**
 
 **4.3 Original assets surface twice: in model context and in the answer.**
 
