@@ -138,41 +138,20 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 - **Ask in any language.** The model searches in English (the corpus language) and
   answers in the language of the question. Measured, not assumed.
 
-**4.2 Numbers: validated at ingestion, verified at answer time.**
+**4.2 Numbers: checked at ingestion, verified at answer time.**
 
-- **At ingestion, transcribed numbers are checked against the page's own text.** A
-  small deterministic diff (~20 lines, no API call) flags any number in the
-  transcription that the PDF's text layer does not contain. It covers 350 of 423
-  pages; its known blind spots are covered by the original-image feedback in §4.3.
+- **At ingestion, the transcription is compared with the PDF's own text.** After a
+  page image is turned into text, every number in that text is looked up in the PDF's
+  text layer; a number that is not there gets flagged. Pages with no text layer (pure
+  images) cannot be checked this way — for those, the model is given the original page
+  image alongside the transcription.
 - **At answer time, every cited number gets a badge.** Each number in a citation is
   looked up on the cited page: found → ✓, not found → ⚠. A number the model computed
   itself (a percent change, an average) is on no page, so it shows ⚠ on purpose.
-- **Superseded reports get a recency label.** One SQL check per citation: if the same
-  broker has a newer report, the citation says so — the costliest analyst mistake,
-  prevented for free.
+- **Superseded reports get a recency label.** If the same broker has a newer report,
+  the citation says so — the costliest analyst mistake, prevented for free.
 
-**4.3 Charts and figures: the model sees the original page, the user sees the relevant figure.**
-
-- **The agent gets the original page image, not just the transcription.** For pages
-  flagged `has_visual`, both retrieval tools attach the page's PNG to their result —
-  a transcription can miss a chart detail, and the original image is there to check
-  against.
-- **After the answer is written, the figure locator looks only at cited pages that
-  have visuals — at most two.** One vision call per such page, with three possible
-  outcomes: a relevant chart or table is found and cropped out of the page; the whole
-  page *is* the figure (a slide) and is shown in full; or no figure is needed and
-  nothing is shown — the citation link is enough.
-- **The box is snapped to the page's own figure frames, and if it still looks wrong
-  the whole page is shown instead.** The PDF knows where each exhibit's frame is drawn;
-  the locator's box is aligned to the frame(s) it mostly covers, title included, so a
-  box that straddled two charts or clipped an edge becomes a clean crop. Boxes that are
-  out of range, degenerate, or implausibly small or large are rejected, and the fallback
-  is the full page. Either way the citation always opens the original PDF at that page.
-- **The locator only presents figures; it never touches retrieval or the answer.**
-  It runs on the interactive path only, never during evaluation, and its output is
-  not fed back into later turns.
-
-**4.4 The rules the model answers under: corpus boundary + behavior rules.** 
+**4.3 The rules the model answers under: corpus boundary + behavior rules.** 
 
 1. **Corpus boundary** — answer only from the library; never supplement from model
    memory. If the question partly overlaps the covered window, declare the true
@@ -275,7 +254,7 @@ earned its shape.
 - *The fix:* **A `has_visual` flag at parsing time, and a figure locator built on it.**
   At parsing time the model now marks every page with a `has_visual` flag — does this
   page carry a chart, table or image? — stored on the Page row. On that flag sits the
-  figure locator (§4.3): only cited pages flagged `has_visual` are examined, and for
+  figure locator (the diagram in §2): only cited pages flagged `has_visual` are examined, and for
   those it crops the specific chart, embeds the whole page when the page *is* the
   chart, or attaches nothing when the answer is summarizable from text. Pages that
   should deliver a figure do; pages that should be summarized are.
@@ -305,7 +284,7 @@ earned its shape.
   user asked for NVDA's 2023 target trajectory.
 - *Why:* **"Be helpful" beats "stay in scope" unless the boundary is an explicit
   rule.**
-- *The fix:* **An explicit overlap rule.** Rule 1 in §4.4 — declare-then-answer on
+- *The fix:* **An explicit overlap rule.** Rule 1 in §4.3 — declare-then-answer on
   partial overlap, state-and-stop on zero overlap. The first version of the fix
   regressed elsewhere; the behavior suite caught that too.
 - *Verified:* **0 of 15 unanswerable questions answered.** The user's exact question
@@ -327,7 +306,7 @@ earned its shape.
   - **Giving up when the rounds ran out.** After six rounds without a hit the agent
     returned "please narrow your question" — $1.25 for a give-up message.
 - *The fixes — one per defect, same order:*
-  - **Named-document pinning** (behavior rule 6, §4.4). When a question names a
+  - **Named-document pinning** (behavior rule 6, §4.3). When a question names a
     document, locate it first and take numbers only from it.
   - **Teach the agent what words to search with.** The note the agent reads before
     choosing its search words now says two things. Use words likely printed on the
