@@ -266,11 +266,12 @@ earned its shape.
 
 - *What happened:* the full-text leg scored 0.094 recall on 94 items, and its noise
   votes slightly hurt the fused result.
-- *Why:* the leg ran websearch AND-semantics — every word of the question must
-  appear on a page, and no page contains every word of a long natural-language
+- *Why:* the keyword search used AND matching — every word of the question had to
+  appear on the same page — and no page contains every word of a long natural-language
   question. (I had expected this leg to win on exact-number table questions; the
   data said otherwise.)
-- *The fix:* OR semantics, ranked by `ts_rank_cd`.
+- *The fix:* match on *any* word instead (OR), then rank pages by how many of the
+  words they contain and how rare those words are (`ts_rank_cd`).
 - *Verified:* FTS-only 0.094 → 0.681, hybrid 0.761 → 0.814; the behavior round
   re-passed at a third of the previous cost ($2.43 vs $7.17) because the agent now
   lands on the right page in fewer rounds.
