@@ -132,55 +132,59 @@ it hold only what a table cannot (mechanics, verification, rules, security):
 
 **4.1 Retrieval mechanics: the loop is the router.**
 
-- `search_pages` fuses a vector leg (pgvector cosine) and a full-text leg
-  (`ts_rank_cd`, OR semantics), top-50 each, with RRF (k=10); per-leg ranks are
-  logged into a visible retrieval trace.
-- `list_reports` returns full first-page transcriptions, not extracted rows — the
-  *why* behind each rating change survives, which a pre-extracted `pt=240` row
-  would destroy.
-- Routing lives in the tool descriptions; the function-calling loop is the router,
-  demonstrably capable of multi-step recovery — filtered follow-up searches,
-  page-hint navigation, including the 2/21 reports whose price target hides deeper
-  than page 1.
-- Cross-lingual behavior (measured): non-English questions work end-to-end because
-  the model writes English search queries and the embedding space is cross-lingual.
+- **Hybrid search fuses two legs.** `search_pages` combines a vector leg (pgvector
+  cosine) and a full-text leg (`ts_rank_cd`, OR semantics), top-50 each, with RRF
+  (k=10); per-leg ranks are logged into a visible retrieval trace.
+- **`list_reports` returns pages, not extracted rows.** Full first-page transcriptions
+  come back, so the *why* behind each rating change survives — a pre-extracted
+  `pt=240` row would destroy it.
+- **The function-calling loop is the router.** Routing lives in the tool
+  descriptions; the loop is demonstrably capable of multi-step recovery — filtered
+  follow-up searches, page-hint navigation, including the 2/21 reports whose price
+  target hides deeper than page 1.
+- **Non-English questions work end-to-end (measured).** The model writes English
+  search queries and the embedding space is cross-lingual.
 
 **4.2 Numbers: validated at ingestion, verified at answer time.**
 
-- At ingestion, a normalized multiset diff flags transcription numbers absent from
-  the page's own text layer (~20 lines of code, zero API calls, applicable to
-  350/423 pages); its blind spots (same-value collisions, zero-count-neutral shifts)
-  are documented and compensated by the original-image feedback in §4.3.
-- At answer time the same idea returns as the **grounding badge**: every number in
+- **At ingestion, a numeric cross-check flags suspicious transcriptions.** A
+  normalized multiset diff flags transcription numbers absent from the page's own
+  text layer (~20 lines of code, zero API calls, applicable to 350/423 pages); its
+  blind spots (same-value collisions, zero-count-neutral shifts) are documented and
+  compensated by the original-image feedback in §4.3.
+- **At answer time, every cited number gets a grounding badge.** Every number in
   every citation is checked against the cited page (✓/⚠). A number the model computes
   itself (a percent change, an average) appears on no page and therefore shows ⚠ —
   deliberate conservatism, not an error.
-- A **recency label** is added when a cited report is superseded by a newer note from
-  the same broker — one deterministic SQL check per citation; the most expensive
-  mistake an analyst can make, prevented for free.
-- No LLM judges anything, anywhere.
+- **Superseded reports get a recency label.** Added when a cited report is superseded
+  by a newer note from the same broker — one deterministic SQL check per citation;
+  the most expensive mistake an analyst can make, prevented for free.
+- **No LLM judges anything, anywhere.**
 
 **4.3 Original assets surface twice: in model context and in the answer.**
 
-- *In model context:* pages with visuals return their original image inside the tool
-  result (Responses API), for both tools — so a transcription omission is
-  recoverable at query time.
-- *In the answer:* one isolated vision call per cited page whose `has_visual` flag —
-  set by the model at transcription time and stored on the Page row — is true (capped at 2);
-  text-only pages never trigger the locator. The call
-  is a three-way decision — a question-relevant chart/table exists → its bounding box
-  is located and the server re-renders just that region from the PDF (PyMuPDF clip;
-  no new dependency, no new storage) as an inline card; the page as a whole IS the
-  visual (a chart slide) → the full page embeds; the page's contribution is textual
-  → NO image at all — the citation link suffices.
-- The risk that made me reject cropping twice — a bad box silently losing axis
-  labels or footnotes — is contained deterministically: coordinates are validated
-  (out of range, degenerate, <8% or >85% of the page are all rejected), padded by
-  2%; located-but-invalid boxes fall back to the full page; the click-through always
-  opens the original PDF at the cited page.
-- The locator call runs only on the interactive path, never during evaluation, and
-  never touches the frozen prompts. Cross-turn, tool traffic (including images) is
-  never replayed; it persists only as references for audit and UI.
+- **In model context, the original page image rides along with the tool result.**
+  Pages with visuals return their original image inside the tool result (Responses
+  API), for both tools — so a transcription omission is recoverable at query time.
+- **In the answer, the figure locator runs only on cited pages flagged `has_visual`
+  and makes a three-way call.** One isolated vision call per cited page whose
+  `has_visual` flag — set by the model at transcription time and stored on the Page
+  row — is true (capped at 2); text-only pages never trigger it. The three outcomes:
+  a question-relevant chart/table exists → its bounding box is located and the
+  server re-renders just that region from the PDF (PyMuPDF clip; no new dependency,
+  no new storage) as an inline card; the page as a whole IS the visual (a chart
+  slide) → the full page embeds; the page's contribution is textual → NO image at
+  all — the citation link suffices.
+- **A bad crop can never silently lose content.** The risk that made me reject
+  cropping twice — a box cutting off axis labels or footnotes — is contained
+  deterministically: coordinates are validated (out of range, degenerate, <8% or
+  >85% of the page are all rejected), padded by 2%; located-but-invalid boxes fall
+  back to the full page; the click-through always opens the original PDF at the
+  cited page.
+- **The locator is presentation-only and never replayed.** It runs only on the
+  interactive path, never during evaluation, and never touches the frozen prompts.
+  Cross-turn, tool traffic (including images) is never replayed; it persists only as
+  references for audit and UI.
 
 **4.4 The rules the model answers under: corpus boundary + behavior rules.** The
 system prompt is regenerated from the database at request time, so the model is told,
