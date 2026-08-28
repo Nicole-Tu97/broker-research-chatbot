@@ -272,9 +272,10 @@ earned its shape.
   data said otherwise.)
 - *The fix:* match on *any* word instead (OR), then rank pages by how many of the
   words they contain and how rare those words are (`ts_rank_cd`).
-- *Verified:* FTS-only 0.094 → 0.681, hybrid 0.761 → 0.814; the behavior round
-  re-passed at a third of the previous cost ($2.43 vs $7.17) because the agent now
-  lands on the right page in fewer rounds.
+- *Verified:* keyword-only recall 0.094 → 0.681, hybrid 0.761 → 0.814. The agent's
+  `search_pages` tool *is* this hybrid search, so the fix flowed straight into
+  production: the end-to-end behavior round re-passed at a third of the previous
+  cost ($2.43 vs $7.17) because the agent now lands on the right page in fewer rounds.
 
 **2. Every citation used to ship a full-page screenshot.**
 
