@@ -18,19 +18,8 @@ each one defeats naive vector RAG:
 So the goal is not "retrieve relevant passages" — it is *reliably answering this class
 of question, with verifiable provenance*.
 
-## 2. One-sentence architecture
+## 2. architecture
 
-**Every page becomes "text describing everything on that page," stored in one table;
-an LLM loop with two tools queries it; every number in every answer is
-deterministically checked back against its cited page.**
-
-Everything else is implementation detail. Stack: Django (ASGI) + Postgres 17 +
-pgvector, single LLM vendor (OpenAI Responses API — the only API shape whose
-`function_call_output` carries images, verified live). Two Docker services. Three
-tables. Two tools. No queue, no reranker, no fact table, no framework.
-
-The same architecture as one picture (red edges mark the agentic decision
-surface — where the LLM, not fixed code, decides what happens next):
 
 ```mermaid
 flowchart TB
