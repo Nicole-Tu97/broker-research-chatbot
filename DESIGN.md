@@ -18,7 +18,7 @@ each one defeats naive vector RAG:
 So the goal is not "retrieve relevant passages" — it is *reliably answering this class
 of question, with verifiable provenance*.
 
-## 2. architecture
+## 2. Architecture
 
 
 ```mermaid
