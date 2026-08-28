@@ -397,29 +397,36 @@ earned its shape.
 **Future directions — four tracks:**
 
 - **Smarter retrieval, from our own data.**
-  - **Keep a hybrid floor.** Single-shot hybrid beats the agent on deep pages (0.909
-    vs 0.818); keep its results as a floor so the agent can only add pages, never lose
-    them.
-  - **A thoroughness dial.** When accuracy matters more than cost, collect candidates
-    exhaustively and let verification decide what enters the answer.
-  - **Route simple questions past the agent.** Fewer rounds, lower latency.
-  - **Reranker only if misses change shape.** Today every miss is a page not retrieved
-    at all — reranking cannot fix that.
+  - **Always run one hybrid search first, as a floor.** Whatever it finds stays in;
+    the agent can add pages on top but can no longer lose a page that was already
+    found (today it sometimes does — deep pages: hybrid 0.909 vs agent 0.818).
+  - **A thoroughness setting.** Fast mode stops as soon as the evidence is enough;
+    thorough mode keeps looking across more reports to make sure nothing is missed.
+  - **Simple questions skip the full agent loop.** A direct SQL lookup or one hybrid
+    search plus one model reply — faster and cheaper.
+  - **A reranker only when misses become ranking errors.** Today's misses are pages
+    not retrieved at all, not pages ranked too low, so a reranker would not help yet.
 - **Freshness and scale.**
-  - **Scheduled ingestion.** Ingestion is idempotent; a scheduled job keeps the corpus
-    current at ~$0.055/page (live quotes remain a separate data-feed concern).
-  - **Scale in measured steps.** Ingestion queue → object storage for page images →
-    per-language full-text → dedicated lexical engine → facts table once
-    `list_reports` matches exceed ~50 reports.
-  - **Per-report rollups.** One offline summary per report at ingestion, so
-    page-by-page questions become retrieval questions.
-  - **Production hardening.** Auth and per-client isolation first, then the §6 cuts as
-    their triggers fire; operational detail in the README.
+  - **Ingest new reports on a schedule.** For example a nightly job that imports,
+    transcribes and embeds whatever is new. Live share prices are a different matter
+    and would come from a market-data feed.
+  - **Scale step by step, as needed.** When documents multiply, add a job queue,
+    object storage for page images, multilingual indexes, or a stronger search engine
+    — one at a time, not all at once.
+  - **A summary per report, made in advance.** When a user asks about a whole report,
+    answer from its summary instead of reading 70 pages on the spot.
+  - **Production hardening.** User login, security, background jobs — then grow with
+    the corpus.
 - **Wider verification, richer answers.**
-  - **Verify statements too.** Require a short verbatim quote per qualitative claim and
-    string-match it against the cited page — still no LLM judging an LLM.
-  - **Draw derived charts.** A price-target line from numbers already verified.
-  - **A conversation list.** Transcripts are stored; only the UI is missing.
+  - **Verify statements, not only numbers.** Have the model attach a short supporting
+    quote from the source to each claim, then check with code that the quote really
+    exists on the page.
+  - **Draw charts from verified data.** Not only show the charts already in the
+    reports.
+  - **A conversation history.** Resume, rename and delete past chats.
 - **A deeper golden set.**
-  - **More items per category.** Tighter error bars, rarer failures surfaced.
-  - **Data entry, not code.** The grading rules are settled.
+  - **More questions in every category.** Results get more stable and rare errors
+    become easier to spot.
+  - **Mostly annotation work from here, not new code.** The evaluation framework is
+    built; what remains is writing good questions and marking the correct facts and
+    source pages.
