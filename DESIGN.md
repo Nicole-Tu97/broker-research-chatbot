@@ -326,23 +326,24 @@ earned its shape.
   associated with AI factories?" failed three times, each a different defect.** The
   answer ($100 trillion) sits on a keynote slide with no text layer, and the question
   deliberately uses analyst wording that does not appear on the slide.
-- *Why — three defects:*
-  - **Giving up when the rounds ran out.** After six rounds without a hit the agent
-    returned "please narrow your question" — $1.25 for a give-up message.
-  - **Searching in analyst vocabulary, not the slide's own words.** The model searched
-    for "market size" and "TAM"; the slide's transcription holds only the page's own
-    words ("AI factory", "$100T").
+- *Why — three defects, most important first:*
   - **Answering from a nearby source.** Once re-worded, the model found a
     similar-looking real number (~$100 *billion*, a broker's European-capex figure) in
     a broker report *about* the keynote, and answered with it.
-- *The fixes — one per defect:*
-  - **Forced final answer.** Hitting the round cap now forces one last, tool-free,
-    best-effort answer: a give-up message is strictly the worse output.
+  - **Searching in analyst vocabulary, not the slide's own words.** The model searched
+    for "market size" and "TAM"; the slide's transcription holds only the page's own
+    words ("AI factory", "$100T").
+  - **Giving up when the rounds ran out.** After six rounds without a hit the agent
+    returned "please narrow your question" — $1.25 for a give-up message.
+- *The fixes — one per defect, same order:*
+  - **Named-document pinning** (behavior rule 6, §4.4). When a question names a
+    document, locate it first and take numbers only from it.
   - **Search guidance in the tool description.** Search slide-style content with the
     page's own words, and after a miss re-word drastically instead of tweaking
     synonyms.
-  - **Named-document pinning** (behavior rule 6, §4.4). When a question names a
-    document, locate it first and take numbers only from it.
+  - **Forced final answer.** Hitting the round cap now forces one last, tool-free,
+    best-effort answer from the evidence already gathered: a give-up message is
+    strictly the worse output.
 - *Verified:* **The question now answers $100 trillion, citing the keynote page.** The
   whole pure-chart category passes end-to-end.
 
