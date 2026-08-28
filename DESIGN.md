@@ -393,6 +393,9 @@ earned its shape.
   mechanical check and rests on the model's faithfulness alone.
 - **Answers take seconds, not milliseconds.** A question can run up to six tool
   rounds; latency and cost are shown live under every answer rather than hidden.
+- **The evaluation numbers are point estimates on small samples.** Each question type
+  has 5–24 items and no confidence intervals are reported, so a gap of a few points
+  between two types may be noise rather than a real difference.
 
 **Future directions — four tracks:**
 
@@ -430,8 +433,10 @@ earned its shape.
   - **Mostly annotation work from here, not new code.** The evaluation framework is
     built; what remains is writing good questions and marking the correct facts and
     source pages.
-  - **Gaps to close next.** Confidence intervals on every metric (today they are point
-    estimates on 5–24 items per type); agent-efficiency metrics (rounds, tool calls and
-    cost per answer as reported columns); tests where two brokers disagree, to check
-    both sides are shown; and attacks phrased in the question itself, not only hidden
-    inside documents.
+  - **Make the validation itself more complete.** Three additions, in order: confidence
+    intervals, earned by more questions per type and repeated runs, so differences
+    between types can be called real or noise; agent-efficiency metrics — rounds,
+    tool calls and cost per answer — reported as columns, not only shown in the live
+    footer; and conflicting-source tests, where two brokers disagree and the answer
+    must show both sides. A fourth: attacks phrased in the question itself, not only
+    hidden inside documents.
